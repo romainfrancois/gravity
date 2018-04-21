@@ -117,16 +117,16 @@
 #' 
 #' @examples 
 #' \dontrun{
-#' data(Gravity_no_zeros)
+#' data(gravity_no_zeros)
 #' 
-#' Gravity_no_zeros$lgdp_o <- log(Gravity_no_zeros$gdp_o)
-#' Gravity_no_zeros$lgdp_d <- log(Gravity_no_zeros$gdp_d)
+#' gravity_no_zeros$lgdp_o <- log(gravity_no_zeros$gdp_o)
+#' gravity_no_zeros$lgdp_d <- log(gravity_no_zeros$gdp_d)
 #' 
 #' GPML(y="flow", dist="distw", x=c("rta", "lgdp_o", "lgdp_d"), 
-#' vce_robust=TRUE, data=Gravity_no_zeros)
+#' vce_robust=TRUE, data=gravity_no_zeros)
 #' 
 #' GPML(y="flow", dist="distw", x=c("rta", "iso_o", "iso_d"), 
-#' vce_robust=TRUE, data=Gravity_no_zeros)
+#' vce_robust=TRUE, data=gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -134,10 +134,10 @@
 #' # executable in < 5 sec together with the examples above
 #' # not shown to users
 #' 
-#' data(Gravity_no_zeros)
+#' data(gravity_no_zeros)
 #' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen <- names(sort(table(Gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small <- Gravity_no_zeros[Gravity_no_zeros$iso_o %in% countries_chosen,]
+#' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
+#' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
 #' GPML(y="flow", dist="distw", x=c("rta", "iso_o", "iso_d"), vce_robust=TRUE, data=grav_small)
 #' }
 #' 

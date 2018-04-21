@@ -97,13 +97,13 @@ For applying \code{Tetrads} to panel data see Head, Mayer and Ries (2010).
 }
 \examples{
 \dontrun{
-data(Gravity_no_zeros)
+data(gravity_no_zeros)
 
 Tetrads(y="flow", dist="distw", x=c("rta"), k="USA", ell="JPN", 
-multiway_vcov=TRUE, data=Gravity_no_zeros)
+multiway_vcov=TRUE, data=gravity_no_zeros)
 
 Tetrads(y="flow", dist="distw", x=c("rta", "comcur", "contig"), 
-k="USA", ell="JPN", multiway_vcov=FALSE, data=Gravity_no_zeros)
+k="USA", ell="JPN", multiway_vcov=FALSE, data=gravity_no_zeros)
 }
 
 \dontshow{
@@ -111,10 +111,10 @@ k="USA", ell="JPN", multiway_vcov=FALSE, data=Gravity_no_zeros)
 # executable in < 5 sec together with the examples above
 # not shown to users
 
-data(Gravity_no_zeros)
+data(gravity_no_zeros)
 # choose exemplarily 10 biggest countries for check data
-countries_chosen <- names(sort(table(Gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
-grav_small <- Gravity_no_zeros[Gravity_no_zeros$iso_o \%in\% countries_chosen,]
+countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
+grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
 Tetrads(y="flow", dist="distw", x=c("rta"), k=countries_chosen[1], ell=countries_chosen[2], multiway_vcov=FALSE, data=grav_small)
 }
 

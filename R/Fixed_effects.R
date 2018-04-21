@@ -145,13 +145,13 @@
 #' 
 #' @examples 
 #' \dontrun{
-#' data(Gravity_no_zeros)
+#' data(gravity_no_zeros)
 #' 
 #' Fixed_Effects(y="flow", dist="distw", fe=c("iso_o", "iso_d"), 
-#' x=c("rta"), vce_robust=TRUE, data=Gravity_no_zeros)
+#' x=c("rta"), vce_robust=TRUE, data=gravity_no_zeros)
 #' 
 #' Fixed_Effects(y="flow", dist="distw", fe=c("iso_o", "iso_d"), 
-#' x=c("rta", "comcur", "contig"), vce_robust=TRUE, data=Gravity_no_zeros)
+#' x=c("rta", "comcur", "contig"), vce_robust=TRUE, data=gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -159,10 +159,10 @@
 #' # executable in < 5 sec together with the examples above
 #' # not shown to users
 #' 
-#' data(Gravity_no_zeros)
+#' data(gravity_no_zeros)
 #' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen <- names(sort(table(Gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small <- Gravity_no_zeros[Gravity_no_zeros$iso_o %in% countries_chosen,]
+#' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
+#' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
 #' Fixed_Effects(y="flow", dist="distw", fe=c("iso_o", "iso_d"), x=c("rta"), vce_robust=TRUE, data=grav_small)
 #' }
 #' 

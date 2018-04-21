@@ -110,13 +110,13 @@ importing country.
 \examples{
 \dontrun{
 # Example for data with zero trade flows
-data(Gravity_zeros)
+data(gravity_zeros)
 
-Gravity_zeros$lgdp_o <- log(Gravity_zeros$gdp_o)
-Gravity_zeros$lgdp_d <- log(Gravity_zeros$gdp_d)
+gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
+gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
 
 Tobit(y="flow", dist="distw", x=c("rta","lgdp_o","lgdp_d"), 
-added_constant = 1, data=Gravity_zeros)
+added_constant = 1, data=gravity_zeros)
 }
 
 \dontshow{
@@ -124,13 +124,13 @@ added_constant = 1, data=Gravity_zeros)
 # executable in < 5 sec together with the examples above
 # not shown to users
 
-data(Gravity_zeros)
-Gravity_zeros$lgdp_o <- log(Gravity_zeros$gdp_o)
-Gravity_zeros$lgdp_d <- log(Gravity_zeros$gdp_d)
+data(gravity_zeros)
+gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
+gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
 
 # choose exemplarily 10 biggest countries for check data
-countries_chosen_zeros <- names(sort(table(Gravity_zeros$iso_o), decreasing = TRUE)[1:10])
-grav_small_zeros <- Gravity_zeros[Gravity_zeros$iso_o \%in\% countries_chosen_zeros,]
+countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
+grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o \%in\% countries_chosen_zeros,]
 Tobit(y="flow", dist="distw", x=c("rta","lgdp_o","lgdp_d"), added_constant = 1, data=grav_small_zeros)
 }
 

@@ -127,15 +127,15 @@
 #' 
 #' @examples 
 #' \dontrun{ 
-#' data(Gravity_no_zeros)
+#' data(gravity_no_zeros)
 #' 
 #' SILS(y="flow", dist="distw", x=c("rta"), inc_o="gdp_o", inc_d="gdp_d", 
 #' maxloop=50, maxloop2=50, dec_places=4, vce_robust=TRUE, verbose=FALSE, 
-#' data=Gravity_no_zeros)
+#' data=gravity_no_zeros)
 #' 
 #' SILS(y="flow", dist="distw", x=c("rta", "comcur", "contig"), 
 #' inc_o="gdp_o", inc_d="gdp_d", maxloop=50, maxloop2=50, dec_places=4, 
-#' vce_robust=TRUE, verbose=TRUE, data=Gravity_no_zeros)
+#' vce_robust=TRUE, verbose=TRUE, data=gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -143,10 +143,10 @@
 #' # executable in < 5 sec together with the examples above
 #' # not shown to users
 #' 
-#' data(Gravity_no_zeros)
+#' data(gravity_no_zeros)
 #' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen <- names(sort(table(Gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small <- Gravity_no_zeros[Gravity_no_zeros$iso_o %in% countries_chosen,]
+#' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
+#' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
 #' SILS(y="flow", dist="distw", x=c("rta"), inc_o="gdp_o", inc_d="gdp_d", maxloop=50, maxloop2=50, dec_places=4, vce_robust=TRUE, verbose=TRUE, data=grav_small)
 #' }
 #' 
