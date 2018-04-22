@@ -1,4 +1,4 @@
-#' @title Internal_function
+#' @title internal_function
 #' 
 #' @description Internal function for nice summary of estimates 
 #' developed by 
@@ -15,20 +15,16 @@
 #' @keywords internal
 #' 
 #' @noRd
-#' 
-#' 
-#' 
-.robustsummary.lm <- function (object, robust=FALSE, ...) {
-  
-  qr.lm <- function (x, ...) 
-  {
+
+.robustsummary.lm <- function(object, robust = FALSE, ...) {
+  qr.lm <- function(x, ...) {
     if (is.null(r <- x$qr)) 
       stop("lm object does not have a proper 'qr' component.\n Rank zero or should not have used lm(.., qr=FALSE).")
     r
   }
 
   # add extension for robust standard errors
-  if(robust==TRUE){ 
+  if (robust == TRUE) { 
     # save variable that are necessary to calcualte robust sd
     X   <- stats::model.matrix(object)
     u2  <- stats::residuals(object)^2
@@ -36,22 +32,22 @@
     
     ## One needs to calculate X'DX. But due to the fact that
     ## D is huge (NxN), it is better to do it with a cycle.
-    for(i in 1:nrow(X)) {
-      XDX <- XDX + u2[i]*X[i,]%*%t(X[i,])
+    for (i in 1:nrow(X)) {
+      XDX <- XDX + u2[i] * X[i,] %*% t(X[i,])
     }
     
     # inverse(X'X)
-    XX1 <- solve(t(X)%*%X,tol = 1e-100)
+    XX1 <- solve(t(X) %*% X, tol = 1e-100)
     
     # Sandwich Variance calculation (Bread x meat x Bread)
     varcovar <- XX1 %*% XDX %*% XX1
     
     # adjust degrees of freedom 
-    dfc_r <- sqrt(nrow(X))/sqrt(nrow(X)-ncol(X))
+    dfc_r <- sqrt(nrow(X)) / sqrt(nrow(X) - ncol(X))
     
     # Standard errors of the coefficient estimates are the
     # square roots of the diagonal elements
-    rstdh <- dfc_r*sqrt(diag(varcovar))
+    rstdh <- dfc_r * sqrt(diag(varcovar))
   }
   # add extension for clustered standard errors
   
@@ -116,7 +112,7 @@
   R  <- chol2inv(Qr$qr[p1, p1, drop = FALSE])
   se <- sqrt(diag(R) * resvar)
   
-  if(robust==T) se <- rstdh
+  if (robust == TRUE) se <- rstdh
   
   est  <- z$coefficients[Qr$pivot[p1]]
   tval <- est/se
@@ -129,6 +125,7 @@
   ans$aliased <- is.na(stats::coef(object))
   ans$sigma   <- sqrt(resvar)
   ans$df      <- c(p, rdf, NCOL(Qr$qr))
+  
   if (p != attr(z$terms, "intercept")) {
     df.int <- if (attr(z$terms, "intercept")) 
       1L
@@ -138,8 +135,8 @@
                                                        df.int)/rdf)
     ans$fstatistic    <- c(value = (mss/(p - df.int))/resvar, 
                         numdf = p - df.int, dendf = rdf)
-    if(robust==T){
-      if(df.int == 0){
+    if (robust == TRUE) {
+      if (df.int == 0) {
         pos_coef <- 1:length(z$coefficients)
       } else {
         pos_coef <- match(names(z$coefficients)[-match("(Intercept)",
@@ -152,9 +149,9 @@
                   length(pos_coef), 
                   length(pos_coef))
       
-      ans$fstatistic <- c(value = t(R_m%*%P_m)%*%
-                            (solve(varcovar[pos_coef,pos_coef],tol = 1e-100))%*%
-                            (R_m%*%P_m)/(p - df.int), 
+      ans$fstatistic <- c(value = t(R_m %*% P_m) %*%
+                            (solve(varcovar[pos_coef,pos_coef],tol = 1e-100)) %*%
+                            (R_m %*% P_m)/(p - df.int), 
                           numdf = p - df.int, dendf = rdf)
       
     }
@@ -162,8 +159,7 @@
   }
   else ans$r.squared <- ans$adj.r.squared <- 0
   ans$cov.unscaled <- R
-  dimnames(ans$cov.unscaled) <- dimnames(ans$coefficients)[c(1, 
-                                                             1)]
+  dimnames(ans$cov.unscaled) <- dimnames(ans$coefficients)[c(1,1)]
   if (!is.null(z$na.action)) 
     ans$na.action <- z$na.action
   class(ans) <- "summary.lm"

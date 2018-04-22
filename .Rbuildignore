@@ -1,2 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+vignettes/*.zip
+vignettes/*.dta
+vignettes/*.rdata
