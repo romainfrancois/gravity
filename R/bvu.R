@@ -150,7 +150,7 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
   # Transforming data, logging distances ---------------------------------------
   
-  d               <- as.data.frame(data)
+  d               <- data
   d$dist_log      <- (log(d[dist][,1]))
   d$count         <- 1:length(d$iso_o)
   

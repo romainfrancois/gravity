@@ -9,6 +9,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r setup, cache = FALSE, echo = FALSE, message = FALSE, warning = FALSE, tidy = FALSE}
+knitr::opts_chunk$set(eval = F)
+```
+
 # Description
 
 Gravity dataset with zero trade flows is an edited version of the full gravity dataset: The "square" gravity dataset for all possible pairs of Countries worldwide, 1948-2006, which is used in the article: Head, K., T. Mayer and J. Ries, 2010, "The erosion of colonial linkages after independence". Journal of International Economics, 81(1):1-14 (lead article).
@@ -26,12 +30,12 @@ was edited in the following way:
 
 ## Import and read the dataset
 
-```{r read, eval = F}
+```{r read}
 url <- "http://econ.sciences-po.fr/sites/default/files/file/tmayer/data/col_regfile09.zip"
 zip <- "col_regfile09.zip"
 
 if (!file.exists(zip)) { try(download.file(url, zip)) }
-try(system("7z e col_regfile09.zip"))
+try(system("7z e -aos col_regfile09.zip"))
 
 library(haven)
 col_regfile09 <- read_dta("col_regfile09.dta")
@@ -39,7 +43,7 @@ col_regfile09 <- read_dta("col_regfile09.dta")
 
 ## Isolation of one year
 
-```{r isolate, eval = F}
+```{r isolate}
 library(dplyr)
 data06 <- col_regfile09 %>% 
   filter(year == 2006)
@@ -56,7 +60,7 @@ data06 <- data06 %>%
 
 ### Isolation of complete cases
 
-```{r complete-cases, eval = F}
+```{r complete-cases}
 library(tidyr)
 gravity_zeros <- data06 %>% 
   drop_na()
@@ -64,7 +68,7 @@ gravity_zeros <- data06 %>%
 
 ### Divide GDPs by 1,000,000 for scaling purposes
 
-```{r scaling, eval = F}
+```{r scaling}
 gravity_zeros <- gravity_zeros %>% 
   mutate(
     gdp_o = gdp_o / 1000000,
@@ -74,14 +78,17 @@ gravity_zeros <- gravity_zeros %>%
 
 ### Exclusion of trade flows equal to 0
 
-```{r no-zeros, eval = F}
+```{r no-zeros}
 gravity_no_zeros <- gravity_zeros %>% 
   filter(flow > 0)
 ```
 
 ## Export the data
 
-```{r export, eval = F}
+```{r export}
+gravity_zeros <- as.data.frame(gravity_zeros)
+gravity_no_zeros <- as.data.frame(gravity_no_zeros)
+
 save(gravity_zeros, file = "gravity_zeros.rdata", compress = "xz")
 save(gravity_no_zeros, file = "gravity_no_zeros.rdata", compress = "xz")
 ```
