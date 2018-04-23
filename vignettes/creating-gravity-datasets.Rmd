@@ -86,9 +86,6 @@ gravity_no_zeros <- gravity_zeros %>%
 ## Export the data
 
 ```{r export}
-gravity_zeros <- as.data.frame(gravity_zeros)
-gravity_no_zeros <- as.data.frame(gravity_no_zeros)
-
 save(gravity_zeros, file = "gravity_zeros.rdata", compress = "xz")
 save(gravity_no_zeros, file = "gravity_no_zeros.rdata", compress = "xz")
 ```

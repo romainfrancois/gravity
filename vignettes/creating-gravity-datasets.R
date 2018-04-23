@@ -37,9 +37,6 @@ knitr::opts_chunk$set(eval = F)
 #    filter(flow > 0)
 
 ## ----export--------------------------------------------------------------
-#  gravity_zeros <- as.data.frame(gravity_zeros)
-#  gravity_no_zeros <- as.data.frame(gravity_no_zeros)
-#  
 #  save(gravity_zeros, file = "gravity_zeros.rdata", compress = "xz")
 #  save(gravity_no_zeros, file = "gravity_no_zeros.rdata", compress = "xz")
 
