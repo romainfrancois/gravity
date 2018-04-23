@@ -40,13 +40,14 @@ col_regfile09 <- read_dta("col_regfile09.dta")
 ## Isolation of one year
 
 ```{r isolate, eval = F}
-data06 <- col_regfile09[col_regfile09$year == 2006,]
+library(dplyr)
+data06 <- col_regfile09 %>% 
+  filter(year == 2006)
 ```
 
 ## Choosing variables (select columns)
 
 ```{r choose, eval= F}
-library(dplyr)
 data06 <- data06 %>% 
   select(iso_o, iso_d, distw, gdp_o, gdp_d, rta, flow, contig, comlang_off, comcur)
 ```
@@ -56,8 +57,9 @@ data06 <- data06 %>%
 ### Isolation of complete cases
 
 ```{r complete-cases, eval = F}
+library(tidyr)
 gravity_zeros <- data06 %>% 
-  filter(complete.cases(.))
+  drop_na()
 ```
 
 ### Divide GDPs by 1,000,000 for scaling purposes
@@ -74,7 +76,7 @@ gravity_zeros <- gravity_zeros %>%
 
 ```{r no-zeros, eval = F}
 gravity_no_zeros <- gravity_zeros %>% 
-  filter(flow != 0)
+  filter(flow > 0)
 ```
 
 ## Export the data

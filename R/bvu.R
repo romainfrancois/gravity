@@ -144,13 +144,13 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   if (!is.character(y)    | !y %in% colnames(data)    | length(y) != 1)         stop("'y' must be a character of length 1 and a colname of 'data'")
   if (!is.character(dist) | !dist %in% colnames(data) | length(dist) != 1)      stop("'dist' must be a character of length 1 and a colname of 'data'")
   if (!is.character(x)    | !all(x %in% colnames(data)))                        stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
-
+  
   if (!is.character(inc_d) | !inc_d %in% colnames(data) | length(inc_d) != 1)   stop("'inc_d' must be a character of length 1 and a colname of 'data'")
   if (!is.character(inc_o) | !inc_o %in% colnames(data) | length(inc_o) != 1)   stop("'inc_o' must be a character of length 1 and a colname of 'data'")
   
   # Transforming data, logging distances ---------------------------------------
   
-  d               <- data
+  d               <- as.data.frame(data)
   d$dist_log      <- (log(d[dist][,1]))
   d$count         <- 1:length(d$iso_o)
   
@@ -219,8 +219,8 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   for (k in x) {
     l <- which(x == k)
     d_2[k] <- d[k][,1] - (mean.ind.var.1[[l]][d$iso_o] + 
-                          mean.ind.var.2[[l]][d$iso_d] - 
-                          mean.ind.var.3[[l]])
+                            mean.ind.var.2[[l]][d$iso_d] - 
+                            mean.ind.var.3[[l]])
   }
   
   # Model ----------------------------------------------------------------------
@@ -234,7 +234,7 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     d_2[mr] <- NA
     d_2[mr] <- d_2[x[l]]
   }
-
+  
   vars      <- paste(c("dist_log_mr", x_mr), collapse = " + ")
   form      <- paste("y_inc_log","~",vars)
   form2     <- stats::as.formula(form)
