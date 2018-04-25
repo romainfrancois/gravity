@@ -21,7 +21,7 @@ Imports: sandwich,
   magrittr, 
   dplyr, 
   purrr
-Depends: R(>= 3.4.2)
+Depends: R(>= 3.4.0)
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
