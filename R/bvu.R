@@ -1,7 +1,3 @@
-# globalVariables(
-#   c("dist_log_mr", "ends_with", "iso_d", "iso_o", "key", "value", "y_inc_log")
-# )
-    
 #' @title Bonus vetus OLS (BVU)
 #' 
 #' @description \code{bvu} estimates gravity models via Bonus vetus OLS with simple averages.
@@ -198,7 +194,7 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     ) %>% 
     
     ungroup() %>% 
-    mutate(key = paste0(key, "_mr")) %>% 
+    mutate(key = paste0(!!sym("key"), "_mr")) %>% 
     
     select(!!!syms(c("iso_o", "iso_d", "key", "dist_log_mr"))) %>% 
     spread(!!sym("key"), !!sym("dist_log_mr"))
@@ -206,7 +202,7 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
   # Model ----------------------------------------------------------------------
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
-    select(y_inc_log, ends_with("_mr"))
+    select(!!sym("y_inc_log"), ends_with("_mr"))
   
   model.bvu <- stats::lm(y_inc_log ~ ., data = dmodel)
   
