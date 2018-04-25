@@ -52,6 +52,12 @@ NULL
 #' @rdname gravity-exports
 NULL
 
+#' @importFrom dplyr ends_with
+#' @name ends_with
+#' @export
+#' @rdname gravity-exports
+NULL
+
 #' @importFrom tidyr gather
 #' @name gather
 #' @export

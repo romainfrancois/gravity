@@ -1,3 +1,7 @@
+globalVariables(
+  c("dist_log_mr", "ends_with", "iso_d", "iso_o", "key", "value", "y_inc_log")
+)
+    
 #' @title Bonus vetus OLS (BVU)
 #' 
 #' @description \code{bvu} estimates gravity models via Bonus vetus OLS with simple averages.

@@ -10,6 +10,7 @@
 \alias{ungroup}
 \alias{row_number}
 \alias{left_join}
+\alias{ends_with}
 \alias{gather}
 \alias{spread}
 \alias{sym}
