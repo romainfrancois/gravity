@@ -4,74 +4,13 @@
 #' @name gravity-exports
 NULL
 
+#' @importFrom dplyr select mutate group_by ungroup row_number left_join ends_with
+#' @importFrom tidyr gather spread
+#' @importFrom rlang sym syms
 #' @importFrom tibble tibble
-#' @name mutate
-#' @export
-#' @rdname gravity-exports
-NULL
-
 #' @importFrom magrittr %>%
-#' @name %>%
-#' @export
-#' @rdname gravity-exports
-NULL
-
-#' @importFrom dplyr select
-#' @name select
-#' @export
-#' @rdname gravity-exports
-NULL
-
-#' @importFrom dplyr mutate
 #' @name mutate
 #' @export
 #' @rdname gravity-exports
 NULL
 
-#' @importFrom dplyr group_by
-#' @name group_by
-#' @export
-#' @rdname gravity-exports
-NULL
-
-#' @importFrom dplyr ungroup
-#' @name ungroup
-#' @export
-#' @rdname gravity-exports
-NULL
-
-#' @importFrom dplyr row_number
-#' @name row_number
-#' @export
-#' @rdname gravity-exports
-NULL
-
-#' @importFrom dplyr left_join
-#' @name left_join
-#' @export
-#' @rdname gravity-exports
-NULL
-
-#' @importFrom dplyr ends_with
-#' @name ends_with
-#' @export
-#' @rdname gravity-exports
-NULL
-
-#' @importFrom tidyr gather
-#' @name gather
-#' @export
-#' @rdname gravity-exports
-NULL
-
-#' @importFrom tidyr spread
-#' @name spread
-#' @export
-#' @rdname gravity-exports
-NULL
-
-#' @importFrom rlang sym
-#' @name sym
-#' @export
-#' @rdname gravity-exports
-NULL

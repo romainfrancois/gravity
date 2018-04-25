@@ -1,6 +1,6 @@
-globalVariables(
-  c("dist_log_mr", "ends_with", "iso_d", "iso_o", "key", "value", "y_inc_log")
-)
+# globalVariables(
+#   c("dist_log_mr", "ends_with", "iso_d", "iso_o", "key", "value", "y_inc_log")
+# )
     
 #' @title Bonus vetus OLS (BVU)
 #' 
@@ -182,8 +182,8 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
   # Multilateral Resistance (MR) for the other independent variables -----------
   d2 <- d %>% 
-    select(iso_o, iso_d, x) %>% 
-    gather(key, value, -iso_o, -iso_d) %>% 
+    select(!!sym("iso_o"), !!sym("iso_d"), x) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d")) %>% 
     
     group_by(!!sym("iso_o"), !!sym("key")) %>% 
     mutate(mean.dist_log.1 = mean(!!sym("value"))) %>% 
@@ -200,12 +200,12 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     ungroup() %>% 
     mutate(key = paste0(key, "_mr")) %>% 
     
-    select(iso_o, iso_d, key, dist_log_mr) %>% 
-    spread(key, dist_log_mr)
+    select(!!!syms(c("iso_o", "iso_d", "key", "dist_log_mr"))) %>% 
+    spread(!!sym("key"), !!sym("dist_log_mr"))
 
   
   # Model ----------------------------------------------------------------------
-  dmodel <- left_join(d, d2) %>% 
+  dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
     select(y_inc_log, ends_with("_mr"))
   
   model.bvu <- stats::lm(y_inc_log ~ ., data = dmodel)
