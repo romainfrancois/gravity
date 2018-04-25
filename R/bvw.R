@@ -140,34 +140,40 @@
 #' @export 
 
 bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
-  if (!is.data.frame(data))                                                     stop("'data' must be a 'data.frame'")
-  if ((vce_robust %in% c(TRUE, FALSE)) == FALSE)                                stop("'vce_robust' has to be either 'TRUE' or 'FALSE'")
-  if (!is.character(y)    | !y %in% colnames(data)    | length(y) != 1)         stop("'y' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(dist) | !dist %in% colnames(data) | length(dist) != 1)      stop("'dist' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(x)    | !all(x %in% colnames(data)))                        stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
-
-  if (!is.character(inc_d) | !inc_d %in% colnames(data) | length(inc_d) != 1)   stop("'inc_d' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(inc_o) | !inc_o %in% colnames(data) | length(inc_o) != 1)   stop("'inc_o' must be a character of length 1 and a colname of 'data'")
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
+  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
+  stopifnot(is.character(x), all(x %in% colnames(data)))
+  stopifnot(is.character(inc_d) | inc_d %in% colnames(data) | length(inc_d) == 1)
+  stopifnot(is.character(inc_o) | inc_o %in% colnames(data) | length(inc_o) == 1)
   
   # Transforming data, logging distances ---------------------------------------
-  
-  d           <- data
-  d$dist_log  <- log(d[dist][,1])
-  d$count     <- 1:length(d$iso_o)
+  d <- data
+  d <- d %>% 
+    mutate(
+      dist_log = log(!!sym(dist)),
+      count = row_number()
+    )
   
   # Transforming data, logging flows -------------------------------------------
-  
-  d$y_inc     <- d[y][,1] / (d[inc_o][,1] * d[inc_d][,1])
-  d$y_inc_log <- log(d$y_inc)
+  d <- d %>% 
+    mutate(
+      y_inc = !!sym(y) / (!!sym(inc_o) * !!sym(inc_d)),
+      y_inc_log = log(!!sym("y_inc"))
+    )
   
   # GDP weights ----------------------------------------------------------------
+  d <- d %>% 
+    group_by(iso_o) %>% 
+    mutate(inc_world = sum(!!sym(inc_d)))
   
-  inc_world   <- tapply(d[inc_d][,1], d$iso_o, sum)
-  d$inc_world <- as.numeric(inc_world[d$iso_o])
   # same for inc_o or inc_d as we have a squared dataset
-  
-  d$theta_i   <- d[inc_o][,1] / d$inc_world
-  d$theta_j   <- d[inc_d][,1] / d$inc_world
+  d <- d %>% 
+    mutate(
+      theta_i = !!sym(inc_o) / inc_world,
+      theta_j = !!sym(inc_d) / inc_world
+    )
   
   # Multilateral resistance (MR) for distance ----------------------------------
   
