@@ -3,3 +3,4 @@
 vignettes/*.zip
 vignettes/*.dta
 vignettes/*.rdata
+00-check.R

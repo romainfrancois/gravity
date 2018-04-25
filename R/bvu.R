@@ -137,11 +137,9 @@
 #' \code{\link[sandwich]{vcovHC}}
 #' 
 #' @export
+
 bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
-  # data("gravity_no_zeros")
-  # data <- gravity_no_zeros
-  # y <- "flow"; dist <- "distw"; x <- c("rta", "contig", "comcur"); inc_o <- "gdp_o"; inc_d <- "gdp_d"; vce_robust <- TRUE
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
   stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
@@ -150,8 +148,6 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   stopifnot(is.character(inc_d) | inc_d %in% colnames(data) | length(inc_d) == 1)
   stopifnot(is.character(inc_o) | inc_o %in% colnames(data) | length(inc_o) == 1)
   
-  library(rlang)
-  library(tidyverse)
   # Transforming data, logging distances ---------------------------------------
   d <- data
   d <- d %>% 
@@ -176,7 +172,8 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     ungroup() %>% 
     mutate(
       mean.dist_log.3 = mean(!!sym("dist_log")),
-      dist_log_mr = !!sym("dist_log") - (!!sym("mean.dist_log.1") + !!sym("mean.dist_log.2") - !!sym("mean.dist_log.3"))
+      dist_log_mr = !!sym("dist_log") - 
+        (!!sym("mean.dist_log.1") + !!sym("mean.dist_log.2") - !!sym("mean.dist_log.3"))
       )
   
   # Multilateral Resistance (MR) for the other independent variables -----------
