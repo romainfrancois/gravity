@@ -140,6 +140,7 @@
 #' @export 
 
 bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
+  
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
   stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
@@ -165,83 +166,72 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
   # GDP weights ----------------------------------------------------------------
   d <- d %>% 
-    group_by(iso_o) %>% 
-    mutate(inc_world = sum(!!sym(inc_d)))
+    group_by("iso_o", add = FALSE) %>% 
+    mutate(inc_world = sum(!!sym(inc_d))) %>% 
+    ungroup()
   
   # same for inc_o or inc_d as we have a squared dataset
-  d <- d %>% 
+  d <- d %>%
     mutate(
       theta_i = !!sym(inc_o) / inc_world,
       theta_j = !!sym(inc_d) / inc_world
     )
   
   # Multilateral resistance (MR) for distance ----------------------------------
-  
-  d$mr.dist.1 <- NA
-  d$mr.dist.2 <- NA
-  
-  for (i in names(inc_world)) {
-    d[d$iso_o == i,]$mr.dist.1 <- sum(d[d$iso_o == i,]$theta_j * d[d$iso_o == i,]$dist_log)
-    d[d$iso_d == i,]$mr.dist.2 <- sum(d[d$iso_d == i,]$theta_i * d[d$iso_d == i,]$dist_log)
-  }
-  
-  d$mr.dist.3   <- sum(d$theta_i * d$theta_j * d$dist_log)
-  d$dist_log_mr <- d$dist_log - d$mr.dist.1 - d$mr.dist.2 + d$mr.dist.3
+  d <- d %>% 
+    group_by("iso_o", add = FALSE) %>% 
+    mutate(
+      mr.dist.1 = sum(!!sym("theta_j") * !!sym("dist_log")),
+      mr.dist.2 = sum(!!sym("theta_i") * !!sym("dist_log"))
+      ) %>% 
+    
+    ungroup() %>% 
+    mutate(mr.dist.3 = !!sym("theta_i") * !!sym("theta_j") * !!sym("dist_log")) %>% 
+    
+    mutate(dist_log_mr = !!sym("dist_log") - !!sym("mr.dist.1") - !!sym("mr.dist.2") + !!sym("mr.dist.3"))
   
   # Multilateral resistance (MR) for the other independent variables -----------
   
-  num.ind.var   <- length(x) #independent variables apart from distance
-  d_2           <- d
-  
-  for (j in 1:num.ind.var) {
-    
-    mr.1 <- noquote(paste(c(noquote(x[j]),noquote(".mr1")), collapse = "")) 
-    mr.2 <- noquote(paste(c(noquote(x[j]),noquote(".mr2")), collapse = ""))  
-    mr.3 <- noquote(paste(c(noquote(x[j]),noquote(".mr3")), collapse = "")) 
-    mr   <- noquote(paste(c(noquote(x[j]),noquote(".mr")), collapse = "")) 
-    
-    d_2[mr.1] <- NA
-    d_2[mr.2] <- NA
-    d_2[mr.3] <- NA
-    d_2[mr]   <- NA
-    
-    for (i in names(inc_world)) {
-      
-      d_2[d_2$iso_o == i,][mr.1] <- sum(d_2[d_2$iso_o == i,]$theta_j * d_2[d_2$iso_o == i,][x[j]])
-      d_2[d_2$iso_d == i,][mr.2] <- sum(d_2[d_2$iso_d == i,]$theta_i * d_2[d_2$iso_d == i,][x[j]])
-    }
-    
-    d_2[mr.3] <- sum(d_2$theta_i * d_2$theta_j * d_2[x[j]])
-    d_2[x[j]] <- d_2[x[j]] - d_2[mr.1] - d_2[mr.2] + d_2[mr.3]
-    
-  }
+  # NO LO ENTIENDO !!!!!!!
+  # num.ind.var   <- length(x) #independent variables apart from distance
+  # d_2           <- d
+  # 
+  # for (j in 1:num.ind.var) {
+  #   
+  #   mr.1 <- noquote(paste(c(noquote(x[j]),noquote(".mr1")), collapse = "")) 
+  #   mr.2 <- noquote(paste(c(noquote(x[j]),noquote(".mr2")), collapse = ""))  
+  #   mr.3 <- noquote(paste(c(noquote(x[j]),noquote(".mr3")), collapse = "")) 
+  #   mr   <- noquote(paste(c(noquote(x[j]),noquote(".mr")), collapse = "")) 
+  #   
+  #   d_2[mr.1] <- NA
+  #   d_2[mr.2] <- NA
+  #   d_2[mr.3] <- NA
+  #   d_2[mr]   <- NA
+  #   
+  #   for (i in names(inc_world)) {
+  #     
+  #     d_2[d_2$iso_o == i,][mr.1] <- sum(d_2[d_2$iso_o == i,]$theta_j * d_2[d_2$iso_o == i,][x[j]])
+  #     d_2[d_2$iso_d == i,][mr.2] <- sum(d_2[d_2$iso_d == i,]$theta_i * d_2[d_2$iso_d == i,][x[j]])
+  #   }
+  #   
+  #   d_2[mr.3] <- sum(d_2$theta_i * d_2$theta_j * d_2[x[j]])
+  #   d_2[x[j]] <- d_2[x[j]] - d_2[mr.1] - d_2[mr.2] + d_2[mr.3]
+  #}
   
   # Model ----------------------------------------------------------------------
+  dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
+    select(!!sym("y_inc_log"), ends_with("_mr"))
   
-  x_mr <- paste0(x,"_mr")
-  
-  # new row in dataset for independent _mr variable
-  for (j in x) {
-    l       <- which(x == j)
-    mr      <- x_mr[l]
-    d_2[mr] <- NA
-    d_2[mr] <- d_2[x[l]]
-  }
-  
-  vars      <- paste(c("dist_log_mr", x_mr), collapse = " + ")
-  form      <- paste("y_inc_log","~", vars)
-  form2     <- stats::as.formula(form)
-  model.bvw <- stats::lm(form2, data = d_2)
+  model.bvu <- stats::lm(y_inc_log ~ ., data = dmodel)
   
   # Return ---------------------------------------------------------------------
-  
   if (vce_robust == TRUE) {
-    return.object.1      <- .robustsummary.lm(model.bvw, robust = TRUE)
-    return.object.1$call <- form2
+    return.object.1      <- .robustsummary.lm(model.bvu, robust = TRUE)
+    return.object.1$call <- as.formula(model.bvu)
     return(return.object.1)}
   
   if (vce_robust == FALSE) {
-    return.object.1      <- .robustsummary.lm(model.bvw, robust = FALSE)
-    return.object.1$call <- form2
+    return.object.1      <- .robustsummary.lm(model.bvu, robust = FALSE)
+    return.object.1$call <- as.formula(model.bvu)
     return(return.object.1)}
 }

@@ -207,7 +207,6 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   model.bvu <- stats::lm(y_inc_log ~ ., data = dmodel)
   
   # Return ---------------------------------------------------------------------
-  
   if (vce_robust == TRUE) {
     return.object.1      <- .robustsummary.lm(model.bvu, robust = TRUE)
     return.object.1$call <- as.formula(model.bvu)

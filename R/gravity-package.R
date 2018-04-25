@@ -4,13 +4,26 @@
 #' @name gravity-exports
 NULL
 
-#' @importFrom dplyr select mutate group_by ungroup row_number left_join ends_with
-#' @importFrom tidyr gather spread
-#' @importFrom rlang sym syms
 #' @importFrom tibble tibble
-#' @importFrom magrittr %>%
 #' @name mutate
 #' @export
 #' @rdname gravity-exports
 NULL
 
+#' @importFrom magrittr %>%
+#' @name %>%
+#' @export
+#' @rdname gravity-exports
+NULL
+
+#' @importFrom dplyr mutate
+#' @name mutate
+#' @export
+#' @rdname gravity-exports
+NULL
+
+#' @importFrom dplyr row_number
+#' @name row_number
+#' @export
+#' @rdname gravity-exports
+NULL
