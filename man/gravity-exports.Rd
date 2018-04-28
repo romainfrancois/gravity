@@ -2,10 +2,6 @@
 % Please edit documentation in R/gravity-package.R
 \name{gravity-exports}
 \alias{gravity-exports}
-\alias{mutate}
-\alias{\%>\%}
-\alias{mutate}
-\alias{row_number}
 \title{gravity exported operators and S3 methods
 The following functions are imported and then re-exported
 from the gravity package to avoid listing Depends of gravity.}
