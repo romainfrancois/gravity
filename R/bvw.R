@@ -204,23 +204,21 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     select(!!sym("iso_o"), !!sym("iso_d"), !!sym("theta_j"), !!sym("theta_i"), x) %>% 
     gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d"), -!!sym("theta_j"), -!!sym("theta_i")) %>% 
     
-    group_by(!!sym("iso_o"), !!sym("key")) %>% 
-    mutate(mr.dist.1 = sum(!!sym("theta_j") * !!sym("value"))) %>% 
-    
-    group_by(!!sym("iso_d"), !!sym("key")) %>% 
-    mutate(mr.dist.2 = sum(!!sym("theta_i") * !!sym("value"))) %>% 
-    
-    group_by(!!sym("key")) %>% 
-    mutate(
-      mr.dist.3 = !!sym("theta_i") * !!sym("theta_j") * !!sym("value"),
-      dist_log_mr = !!sym("value") - !!sym("mr.dist.1") - !!sym("mr.dist.2") + !!sym("mr.dist.3")
-    ) %>% 
-    
-    ungroup() %>% 
     mutate(key = paste0(!!sym("key"), "_mr")) %>% 
     
-    select(!!!syms(c("iso_o", "iso_d", "key", "dist_log_mr"))) %>% 
-    spread(!!sym("key"), !!sym("dist_log_mr"))
+    group_by(!!sym("iso_o"), !!sym("key")) %>% 
+    mutate(mr1 = sum(!!sym("theta_j") * !!sym("value"))) %>% 
+    
+    group_by(!!sym("iso_d"), !!sym("key")) %>% 
+    mutate(mr2 = sum(!!sym("theta_i") * !!sym("value"))) %>% 
+    
+    ungroup() %>% 
+    mutate(mr3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("value"))) %>% 
+    
+    mutate(value = value - mr1 - mr2 + mr3) %>% 
+    
+    select(!!!syms(c("iso_o", "iso_d", "key", "value"))) %>% 
+    spread(!!sym("key"), !!sym("value"))
   
   # Model ----------------------------------------------------------------------
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
