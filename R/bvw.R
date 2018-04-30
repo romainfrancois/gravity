@@ -170,7 +170,7 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
   # GDP weights ----------------------------------------------------------------
   d <- d %>% 
-    group_by("iso_o", add = FALSE) %>% 
+    group_by(!!sym("iso_o")) %>% 
     mutate(inc_world = sum(!!sym(inc_d))) %>% 
     ungroup()
   
@@ -183,21 +183,23 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
   # Multilateral resistance (MR) for distance ----------------------------------
   d <- d %>% 
-    group_by("iso_o", add = FALSE) %>% 
+    group_by(!!sym("iso_o"), add = FALSE) %>% 
     mutate(
-      mr.dist.1 = sum(!!sym("theta_j") * !!sym("dist_log")),
+      mr.dist.1 = sum(!!sym("theta_j") * !!sym("dist_log"))
+    ) %>% 
+    
+    group_by(!!sym("iso_d"), add = FALSE) %>% 
+    mutate(
       mr.dist.2 = sum(!!sym("theta_i") * !!sym("dist_log"))
-      ) %>% 
+    ) %>% 
     
     ungroup() %>% 
     
-    mutate(mr.dist.3 = !!sym("theta_i") * !!sym("theta_j") * !!sym("dist_log")) %>% 
+    mutate(mr.dist.3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("dist_log"))) %>% 
     
     mutate(dist_log_mr = !!sym("dist_log") - !!sym("mr.dist.1") - !!sym("mr.dist.2") + !!sym("mr.dist.3"))
   
   # Multilateral resistance (MR) for the other independent variables -----------
-  x=c("rta", "comcur", "contig")
-  
   d2 <- d %>% 
     select(!!sym("iso_o"), !!sym("iso_d"), !!sym("theta_j"), !!sym("theta_i"), x) %>% 
     gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d"), -!!sym("theta_j"), -!!sym("theta_i")) %>% 
@@ -220,34 +222,6 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     select(!!!syms(c("iso_o", "iso_d", "key", "dist_log_mr"))) %>% 
     spread(!!sym("key"), !!sym("dist_log_mr"))
   
-  
-  # NO LO ENTIENDO !!!!!!!
-  # YO TAMPOCO !!!!!!!
-  # num.ind.var   <- length(x) #independent variables apart from distance
-  # d_2           <- d
-  # 
-  # for (j in 1:num.ind.var) {
-  # 
-  #   mr.1 <- noquote(paste(c(noquote(x[j]),noquote(".mr1")), collapse = ""))
-  #   mr.2 <- noquote(paste(c(noquote(x[j]),noquote(".mr2")), collapse = ""))
-  #   mr.3 <- noquote(paste(c(noquote(x[j]),noquote(".mr3")), collapse = ""))
-  #   mr   <- noquote(paste(c(noquote(x[j]),noquote(".mr")), collapse = ""))
-  # 
-  #   d_2[mr.1] <- NA
-  #   d_2[mr.2] <- NA
-  #   d_2[mr.3] <- NA
-  #   d_2[mr]   <- NA
-  # 
-  #   for (i in names(inc_world)) {
-  # 
-  #     d_2[d_2$iso_o == i,][mr.1] <- sum(d_2[d_2$iso_o == i,]$theta_j * d_2[d_2$iso_o == i,][x[j]])
-  #     d_2[d_2$iso_d == i,][mr.2] <- sum(d_2[d_2$iso_d == i,]$theta_i * d_2[d_2$iso_d == i,][x[j]])
-  #   }
-  # 
-  #   d_2[mr.3] <- sum(d_2$theta_i * d_2$theta_j * d_2[x[j]])
-  #   d_2[x[j]] <- d_2[x[j]] - d_2[mr.1] - d_2[mr.2] + d_2[mr.3]
-  # }
-  # 
   # Model ----------------------------------------------------------------------
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
     select(!!sym("y_inc_log"), ends_with("_mr"))
