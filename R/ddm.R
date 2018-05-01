@@ -126,54 +126,66 @@
 #' @export 
 
 ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
-  if (!is.data.frame(data))                                                   stop("'data' must be a 'data.frame'")
-  if ((vce_robust %in% c(TRUE, FALSE)) == FALSE)                              stop("'vce_robust' has to be either 'TRUE' or 'FALSE'")
-  if (!is.character(y)    | !y %in% colnames(data)    | length(y) != 1)       stop("'y' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(dist) | !dist %in% colnames(data) | length(dist) != 1)    stop("'dist' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(x)    | !all(x %in% colnames(data)))                      stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
+  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
+  stopifnot(is.character(x), all(x %in% colnames(data)))
 
   # Transforming data, logging distances ---------------------------------------
-  
-  d               <- data
-  d$dist_log      <- (log(d[dist][,1]))
-  d$count         <- 1:length(d$iso_o)
+  d <- data
+  d <- d %>% 
+    mutate(
+      dist_log_dd = log(!!sym(dist))
+    )
   
   # Transforming data, logging flows -------------------------------------------
-  
-  d$y_log         <- log(d[y][,1])
+  d <- d %>% 
+    mutate(
+      y_log_dd = log(!!sym(y))
+    )
   
   # Substracting the means -----------------------------------------------------
-  
-  d$y_log_dd      <- rep(NA, times = length(d$dist_log))
-  d$dist_log_dd   <- rep(NA, times = length(d$dist_log))
-  
-  mean.y_log.1    <- tapply(d$y_log, d$iso_o, mean)
-  mean.y_log.2    <- tapply(d$y_log, d$iso_d, mean)  
-  
-  mean.dist_log.1 <- tapply(d$dist_log, d$iso_o, mean)
-  mean.dist_log.2 <- tapply(d$dist_log, d$iso_d, mean)
-
-  d$y_log_dd      <- d$y_log
-  d$dist_log_dd   <- d$dist_log
-  
-  for (i in unique(d$iso_o)) {
-    d[d$iso_o == i,]$y_log_dd    <- d[d$iso_o == i,]$y_log_dd - mean.y_log.1[i]
-    d[d$iso_o == i,]$dist_log_dd <- d[d$iso_o == i,]$dist_log_dd - mean.dist_log.1[i]
-  }
-  
-  for (i in unique(d$iso_d)) {
-    d[d$iso_d == i,]$y_log_dd    <- d[d$iso_d == i,]$y_log_dd - mean.y_log.2[i]
-    d[d$iso_d == i,]$dist_log_dd <- d[d$iso_d == i,]$dist_log_dd - mean.dist_log.2[i]
-  }
-  
-  d$y_log_dd    <- d$y_log_dd + mean(d$y_log)
-  d$dist_log_dd <-  d$dist_log_dd + mean(d$dist_log)
+  d <- d %>% 
+    group_by(!!sym("iso_o"), add = FALSE) %>% 
+    mutate(
+      y_log_dd = y_log_dd - mean(y_log_dd),
+      dist_log_dd = dist_log_dd - mean(dist_log_dd)
+    ) %>% 
+    
+    group_by(!!sym("iso_d"), add = FALSE) %>% 
+    mutate(
+      y_log_dd = y_log_dd - mean(y_log_dd),
+      dist_log_dd = dist_log_dd - mean(dist_log_dd)
+    ) %>% 
+    
+    ungroup() %>% 
+    mutate(
+      y_log_dd = y_log_dd + mean(y_log_dd),
+      dist_log_dd = dist_log_dd + mean(dist_log_dd)
+    )
   
   # Substracting the means for the other independent variables -----------------
+  d2 <- d %>% 
+    select(!!sym("iso_o"), !!sym("iso_d"), x) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d")) %>% 
+    
+    group_by(!!sym("iso_o"), !!sym("key")) %>% 
+    mutate(mean.ind.var.1 = mean(!!sym("value"))) %>% 
+    
+    group_by(!!sym("iso_d"), !!sym("key"), add = FALSE) %>% 
+    mutate(mean.ind.var.2 = mean(!!sym("value"))) %>% 
+    
+    group_by(!!sym("iso_o"), !!sym("key"), add = FALSE) %>% 
+    mutate(dd1 = !!sym("value") - mean.ind.var.1) %>% 
+    
+    group_by(!!sym("iso_d"), add = FALSE) %>% 
+    mutate(dd1 = dd1 - mean.ind.var.2) %>% 
+    
+    ungroup() %>% 
+    mutate(dd1 = dd1 + mean(dd1))
   
-  ind.var.dd     <- list(length = length(x))
-  mean.ind.var.1 <- list(length = length(x))
-  mean.ind.var.2 <- list(length = length(x))
   
   for (j in 1:length(x)) {
     ind.var.dd[[j]]     <- d[x[j]][,1]
@@ -227,10 +239,12 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
   if (vce_robust == TRUE) {
     return.object.1         <- .robustsummary.lm(model.ddm, robust = TRUE)
     return.object.1$call    <- form2
-    return(return.object.1)}
+    return(return.object.1)
+  }
   
   if (vce_robust == FALSE) {
     return.object.1        <- .robustsummary.lm(model.ddm, robust = FALSE)
     return.object.1$call   <- form2
-    return(return.object.1)}
+    return(return.object.1)
+  }
 }

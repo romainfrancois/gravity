@@ -139,7 +139,7 @@
 #' @export
 
 bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
-  
+  # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
   stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
@@ -152,8 +152,7 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   d <- data
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist)),
-      count = row_number()
+      dist_log = log(!!sym(dist))
     )
   
   # Transforming data, logging flows -------------------------------------------
@@ -210,10 +209,12 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   if (vce_robust == TRUE) {
     return.object.1      <- .robustsummary.lm(model.bvu, robust = TRUE)
     return.object.1$call <- as.formula(model.bvu)
-    return(return.object.1)}
+    return(return.object.1)
+  }
   
   if (vce_robust == FALSE) {
     return.object.1      <- .robustsummary.lm(model.bvu, robust = FALSE)
     return.object.1$call <- as.formula(model.bvu)
-    return(return.object.1)}
+    return(return.object.1)
+  }
 }
