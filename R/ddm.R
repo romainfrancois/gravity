@@ -142,7 +142,6 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
     filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
   
   # Transforming data, logging distances ---------------------------------------
-  d <- data
   d <- d %>% 
     mutate(
       dist_log = log(!!sym(dist))
@@ -218,13 +217,13 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return_object_1         <- robustsummary(model_ddm, robust = TRUE)
+    return_object_1         <- robust_summary(model_ddm, robust = TRUE)
     return_object_1$call    <- as.formula(model_ddm)
     return(return_object_1)
   }
   
   if (vce_robust == FALSE) {
-    return_object_1        <- robustsummary(model_ddm, robust = FALSE)
+    return_object_1        <- robust_summary(model_ddm, robust = FALSE)
     return_object_1$call   <- as.formula(model_ddm)
     return(return_object_1)
   }

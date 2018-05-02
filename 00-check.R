@@ -444,6 +444,15 @@ bvuorig()
 # bvumod ---------------------------------------------------------------------
 
 bvumod <- function() {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
+  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
+  stopifnot(is.character(x), all(x %in% colnames(data)))
+  stopifnot(is.character(inc_d) | inc_d %in% colnames(data) | length(inc_d) == 1)
+  stopifnot(is.character(inc_o) | inc_o %in% colnames(data) | length(inc_o) == 1)
+  
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
     filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
@@ -622,6 +631,15 @@ bvworig()
 # bvwmod ---------------------------------------------------------------------
 
 bvwmod <- function() {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
+  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
+  stopifnot(is.character(x), all(x %in% colnames(data)))
+  stopifnot(is.character(inc_d) | inc_d %in% colnames(data) | length(inc_d) == 1)
+  stopifnot(is.character(inc_o) | inc_o %in% colnames(data) | length(inc_o) == 1)
+  
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
     filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
@@ -631,7 +649,7 @@ bvwmod <- function() {
     filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
   
   # Transforming data, logging distances ---------------------------------------
-  d <- data %>% 
+  d <- d %>% 
     mutate(
       dist_log = log(!!sym(dist))
     )
@@ -834,6 +852,13 @@ ddmorig()
 # ddmmod ------------------------------------------------------------------
 
 ddmmod <- function() {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
+  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
+  stopifnot(is.character(x), all(x %in% colnames(data)))
+  
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
     filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
@@ -843,7 +868,6 @@ ddmmod <- function() {
     filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
   
   # Transforming data, logging distances ---------------------------------------
-  d <- data
   d <- d %>% 
     mutate(
       dist_log = log(!!sym(dist))

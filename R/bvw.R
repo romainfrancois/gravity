@@ -158,7 +158,7 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
   
   # Transforming data, logging distances ---------------------------------------
-  d <- data %>% 
+  d <- d %>% 
     mutate(
       dist_log = log(!!sym(dist))
     )
@@ -231,13 +231,13 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return_object_1      <- robustsummary(model_bvw, robust = TRUE)
+    return_object_1      <- robust_summary(model_bvw, robust = TRUE)
     return_object_1$call <- as.formula(model_bvw)
     return(return_object_1)
   }
   
   if (vce_robust == FALSE) {
-    return_object_1      <- robustsummary(model_bvw, robust = FALSE)
+    return_object_1      <- robust_summary(model_bvw, robust = FALSE)
     return_object_1$call <- as.formula(model_bvw)
     return(return_object_1)
   }
