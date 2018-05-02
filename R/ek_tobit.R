@@ -66,6 +66,14 @@
 #' logged variable can be used in \code{x}.
 #' Interaction terms can be added.
 #' 
+#' @param lab_o variable name (type: character) of the label of the country 
+#' (i.e ISO code) of origin in the dataset \code{data}. The variables 
+#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
+#' 
+#' @param lab_d variable name (type: character) of the label of the country 
+#' (i.e ISO code) of destination in the dataset \code{data}. The variables 
+#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.
+#' 
 #' @param vce_robust robust (type: logic) determines whether a robust 
 #' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
 #' If set \code{TRUE} the estimation results are consistent with the 
@@ -127,14 +135,19 @@
 #' # Example for data with zero trade flows
 #' data(gravity_zeros)
 #' 
-#' gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
-#' gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
+#' gravity_zeros <- gravity_zeros %>%
+#'     mutate(
+#'         lgdp_o = log(gdp_o),
+#'         lgdp_d = log(gdp_d)
+#'     )
 #' 
-#' ek_tobit(y="flow", dist="distw", x=c("rta","lgdp_o","lgdp_d"), 
-#' vce_robust=TRUE, data=gravity_zeros)
+#' ek_tobit(y = "flow", dist = "distw", 
+#' x = c("rta","lgdp_o","lgdp_d"), lab_o = "iso_o", lab_d = "iso_d",
+#' vce_robust = TRUE, data = gravity_zeros)
 #' 
-#' ek_tobit(y="flow", dist="distw", x=c("rta","iso_o","iso_d"), 
-#' vce_robust=TRUE, data=gravity_zeros)
+#' ek_tobit(y = "flow", dist = "distw", 
+#' x = c("rta","iso_o","iso_d"), lab_o = "iso_o", lab_d = "iso_d",
+#' vce_robust = TRUE, data = gravity_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -149,7 +162,9 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' ek_tobit(y="flow", dist="distw", x=c("rta","lgdp_o","lgdp_d"), vce_robust=TRUE, data=grav_small_zeros)
+#' ek_tobit(y = "flow", dist = "distw", 
+#' x = c("rta","lgdp_o","lgdp_d"), lab_o = "iso_o", lab_d = "iso_d",
+#' vce_robust = TRUE, data = grav_small_zeros)
 #' }
 #' 
 #' @return
@@ -160,14 +175,16 @@
 #' 
 #' @export 
 
-ek_tobit <- function(y, dist, x, vce_robust = TRUE, data, ...) {
+ek_tobit <- function(y, dist, x, lab_o, lab_d, vce_robust = TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
   stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
   stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
   stopifnot(is.character(x), all(x %in% colnames(data)))
-
+  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
+  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
     filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
@@ -187,7 +204,7 @@ ek_tobit <- function(y, dist, x, vce_robust = TRUE, data, ...) {
   
   # Minimum flows -----------------------------------------------------------
   d <- d %>% 
-    group_by(!!sym("iso_d")) %>% 
+    group_by(!!sym(lab_d)) %>% 
     mutate(
       exportmin = min(!!sym("y_log_ek"), na.rm = TRUE)
     )
@@ -211,9 +228,9 @@ ek_tobit <- function(y, dist, x, vce_robust = TRUE, data, ...) {
   survival_flows_ek <- survival::Surv(f1, f2, type = "interval2") %>% as_vector()
   
   # Model -------------------------------------------------------------------
-  vars                 <- paste(c("dist_log", x), collapse = " + ")
-  form                 <- stats::as.formula(paste("survival_flows_ek", "~", vars))
-  model_ek_tobit       <- survival::survreg(form, data = d, dist = "gaussian", robust = vce_robust)
+  vars           <- paste(c("dist_log", x), collapse = " + ")
+  form           <- stats::as.formula(paste("survival_flows_ek", "~", vars))
+  model_ek_tobit <- survival::survreg(form, data = d, dist = "gaussian", robust = vce_robust)
   
   # Return ------------------------------------------------------------------
   return_object_1      <- summary(model_ek_tobit)

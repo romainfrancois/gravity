@@ -4,7 +4,7 @@
 \alias{ddm}
 \title{Double Demeaning (DDM)}
 \usage{
-ddm(y, dist, x, vce_robust = TRUE, data, ...)
+ddm(y, dist, x, lab_o, lab_d, vce_robust = TRUE, data, ...)
 }
 \arguments{
 \item{y}{name (type: character) of the dependent variable in the dataset 
@@ -22,6 +22,14 @@ it should be of type numeric (0/1) in the dataset. If an independent variable
 is defined as a ratio, it should be logged. 
 Unilateral effects drop out due to double demeaning and therefore 
 cannot be estimated.}
+
+\item{lab_o}{variable name (type: character) of the label of the country 
+(i.e ISO code) of origin in the dataset \code{data}. The variables 
+are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.}
+
+\item{lab_d}{variable name (type: character) of the label of the country 
+(i.e ISO code) of destination in the dataset \code{data}. The variables 
+are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.}
 
 \item{vce_robust}{robust (type: logic) determines whether a robust 
 variance-covariance matrix should be used. The default is set to \code{TRUE}. 
@@ -83,10 +91,12 @@ we do not recommend to apply this method in this case.
 \dontrun{
 data(gravity_no_zeros)
 
-ddm(y="flow", dist="distw", x=c("rta"), 
-vce_robust=TRUE, data=gravity_no_zeros)
+ddm(y = "flow", dist = "distw", 
+x = c("rta"), lab_o = "iso_o", lab_d = "iso_d", 
+vce_robust = TRUE, data = gravity_no_zeros)
 
-ddm(y="flow", dist="distw", x=c("rta", "comcur", "contig"), 
+ddm(y = "flow", dist = "distw", 
+x = c("rta", "comcur", "contig"), lab_o = "iso_o", lab_d = "iso_d", 
 vce_robust=TRUE, data=gravity_no_zeros)
 }
 
@@ -99,7 +109,9 @@ data(gravity_no_zeros)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-ddm(y="flow", dist="distw", x=c("rta"), vce_robust=TRUE, data=grav_small)
+ddm(y = "flow", dist = "distw", 
+x = c("rta"), lab_o = "iso_o", lab_d = "iso_d", 
+vce_robust = TRUE, data = grav_small)
 }
 
 }

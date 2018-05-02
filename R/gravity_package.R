@@ -2,7 +2,7 @@
 #' The following functions are imported and then re-exported
 #' from the gravity package to avoid listing Depends of gravity.
 #' @importFrom dplyr select mutate group_by ungroup row_number left_join
-#'   ends_with vars filter_at any_vars
+#'   ends_with vars filter_at any_vars rowwise
 #' @importFrom tidyr gather spread
 #' @importFrom purrr as_vector
 #' @importFrom rlang sym syms quo
@@ -10,5 +10,6 @@
 #' @importFrom tibble tibble
 #' @importFrom survival Surv
 #' @importFrom stats lm as.formula
+#' @importFrom censReg censReg
 #' @name gravity-exports
 NULL

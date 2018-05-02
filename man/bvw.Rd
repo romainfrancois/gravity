@@ -4,7 +4,7 @@
 \alias{bvw}
 \title{Bonus vetus OLS (BVW)}
 \usage{
-bvw(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...)
+bvw(y, dist, x, inc_o, inc_d, lab_o, lab_d, vce_robust = TRUE, data, ...)
 }
 \arguments{
 \item{y}{name (type: character) of the dependent variable in the dataset 
@@ -36,6 +36,14 @@ divided by the product of the incomes \code{inc_d} and \code{inc_o}.}
 \item{inc_d}{variable name (type: character) of the income of the country of 
 destination in the dataset \code{data}. The dependent variable \code{y} is
 divided by the product of the incomes \code{inc_d} and \code{inc_o}.}
+
+\item{lab_o}{variable name (type: character) of the label of the country 
+(i.e ISO code) of origin in the dataset \code{data}. The variables 
+are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.}
+
+\item{lab_d}{variable name (type: character) of the label of the country 
+(i.e ISO code) of destination in the dataset \code{data}. The variables 
+are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.}
 
 \item{vce_robust}{robust (type: logic) determines whether a robust 
 variance-covariance matrix should be used. The default is set to \code{TRUE}. 
@@ -98,11 +106,13 @@ we do not recommend to apply this method in this case.
 \dontrun{
 data(gravity_no_zeros)
 
-bvw(y="flow", dist="distw", x=c("rta"), 
-inc_o="gdp_o", inc_d="gdp_d", vce_robust=TRUE, data=gravity_no_zeros)
+bvw(y = "flow", dist = "distw", x = c("rta"), 
+inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+vce_robust = TRUE, data = gravity_no_zeros)
 
-bvw(y="flow", dist="distw", x=c("rta", "comcur", "contig"), 
-inc_o="gdp_o", inc_d="gdp_d", vce_robust=TRUE, data=gravity_no_zeros)
+bvw(y = "flow", dist = "distw", x = c("rta", "comcur", "contig"), 
+inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+vce_robust = TRUE, data = gravity_no_zeros)
 }
 
 \dontshow{
@@ -114,7 +124,9 @@ data(gravity_no_zeros)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-bvw(y="flow", dist="distw", x=c("rta"), inc_o="gdp_o", inc_d="gdp_d", vce_robust=TRUE, data=grav_small)
+bvw(y = "flow", dist = "distw", x = c("rta"), 
+inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+vce_robust = TRUE, data = grav_small)
 }
 
 }

@@ -58,6 +58,14 @@
 #' destination in the dataset \code{data}. The dependent variable \code{y} is
 #' divided by the product of the incomes \code{inc_d} and \code{inc_o}. 
 #' 
+#' @param lab_o variable name (type: character) of the label of the country 
+#' (i.e ISO code) of origin in the dataset \code{data}. The variables 
+#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
+#' 
+#' @param lab_d variable name (type: character) of the label of the country 
+#' (i.e ISO code) of destination in the dataset \code{data}. The variables 
+#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
+#' 
 #' @param vce_robust robust (type: logic) determines whether a robust 
 #' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
 #' If set \code{TRUE} the estimation results are consistent with the 
@@ -111,11 +119,13 @@
 #' \dontrun{
 #' data(gravity_no_zeros)
 #' 
-#' bvw(y="flow", dist="distw", x=c("rta"), 
-#' inc_o="gdp_o", inc_d="gdp_d", vce_robust=TRUE, data=gravity_no_zeros)
+#' bvw(y = "flow", dist = "distw", x = c("rta"), 
+#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+#' vce_robust = TRUE, data = gravity_no_zeros)
 #' 
-#' bvw(y="flow", dist="distw", x=c("rta", "comcur", "contig"), 
-#' inc_o="gdp_o", inc_d="gdp_d", vce_robust=TRUE, data=gravity_no_zeros)
+#' bvw(y = "flow", dist = "distw", x = c("rta", "comcur", "contig"), 
+#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+#' vce_robust = TRUE, data = gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -127,7 +137,9 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' bvw(y="flow", dist="distw", x=c("rta"), inc_o="gdp_o", inc_d="gdp_d", vce_robust=TRUE, data=grav_small)
+#' bvw(y = "flow", dist = "distw", x = c("rta"), 
+#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+#' vce_robust = TRUE, data = grav_small)
 #' }
 #' 
 #' @return
@@ -139,7 +151,7 @@
 #' 
 #' @export 
 
-bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
+bvw <- function(y, dist, x, inc_o, inc_d, lab_o, lab_d, vce_robust = TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
@@ -148,6 +160,8 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   stopifnot(is.character(x), all(x %in% colnames(data)))
   stopifnot(is.character(inc_d) | inc_d %in% colnames(data) | length(inc_d) == 1)
   stopifnot(is.character(inc_o) | inc_o %in% colnames(data) | length(inc_o) == 1)
+  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
+  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
@@ -173,7 +187,7 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
   # GDP weights ----------------------------------------------------------------
   d <- d %>% 
-    group_by(!!sym("iso_o")) %>% 
+    group_by(!!sym(lab_o)) %>% 
     mutate(inc_world = sum(!!sym(inc_d), na.rm = TRUE)) %>% 
     ungroup()
   
@@ -186,12 +200,12 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
   # Multilateral resistance (MR) for distance ----------------------------------
   d <- d %>% 
-    group_by(!!sym("iso_o"), add = FALSE) %>% 
+    group_by(!!sym(lab_o), add = FALSE) %>% 
     mutate(
       mr_dist_1 = sum(!!sym("theta_j") * !!sym("dist_log"), na.rm = TRUE)
     ) %>% 
     
-    group_by(!!sym("iso_d"), add = FALSE) %>% 
+    group_by(!!sym(lab_d), add = FALSE) %>% 
     mutate(
       mr_dist_2 = sum(!!sym("theta_i") * !!sym("dist_log"), na.rm = TRUE)
     ) %>% 
@@ -204,15 +218,15 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
   # Multilateral resistance (MR) for the other independent variables -----------
   d2 <- d %>% 
-    select(!!sym("iso_o"), !!sym("iso_d"), !!sym("theta_j"), !!sym("theta_i"), x) %>% 
-    gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d"), -!!sym("theta_j"), -!!sym("theta_i")) %>% 
+    select(!!sym(lab_o), !!sym(lab_d), !!sym("theta_j"), !!sym("theta_i"), x) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym(lab_o), -!!sym(lab_d), -!!sym("theta_j"), -!!sym("theta_i")) %>% 
     
     mutate(key = paste0(!!sym("key"), "_mr")) %>% 
     
-    group_by(!!sym("iso_o"), !!sym("key")) %>% 
+    group_by(!!sym(lab_o), !!sym("key")) %>% 
     mutate(mr1 = sum(!!sym("theta_j") * !!sym("value"), na.rm = TRUE)) %>% 
     
-    group_by(!!sym("iso_d"), !!sym("key")) %>% 
+    group_by(!!sym(lab_d), !!sym("key")) %>% 
     mutate(mr2 = sum(!!sym("theta_i") * !!sym("value"), na.rm = TRUE)) %>% 
     
     ungroup() %>% 
@@ -220,11 +234,11 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     
     mutate(value = !!sym("value") - !!sym("mr1") - !!sym("mr2") + !!sym("mr3")) %>% 
     
-    select(!!!syms(c("iso_o", "iso_d", "key", "value"))) %>% 
+    select(!!!syms(c(lab_o, lab_d, "key", "value"))) %>% 
     spread(!!sym("key"), !!sym("value"))
   
   # Model ----------------------------------------------------------------------
-  dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
+  dmodel <- left_join(d, d2, by = c(lab_o, lab_d)) %>% 
     select(!!sym("y_log_bvw"), ends_with("_mr"))
   
   model_bvw <- stats::lm(y_log_bvw ~ ., data = dmodel)

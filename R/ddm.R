@@ -43,6 +43,14 @@
 #' Unilateral effects drop out due to double demeaning and therefore 
 #' cannot be estimated.
 #' 
+#' @param lab_o variable name (type: character) of the label of the country 
+#' (i.e ISO code) of origin in the dataset \code{data}. The variables 
+#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
+#' 
+#' @param lab_d variable name (type: character) of the label of the country 
+#' (i.e ISO code) of destination in the dataset \code{data}. The variables 
+#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
+#' 
 #' @param vce_robust robust (type: logic) determines whether a robust 
 #' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
 #' If set \code{TRUE} the estimation results are consistent with the 
@@ -97,10 +105,12 @@
 #' \dontrun{
 #' data(gravity_no_zeros)
 #' 
-#' ddm(y="flow", dist="distw", x=c("rta"), 
-#' vce_robust=TRUE, data=gravity_no_zeros)
+#' ddm(y = "flow", dist = "distw", 
+#' x = c("rta"), lab_o = "iso_o", lab_d = "iso_d", 
+#' vce_robust = TRUE, data = gravity_no_zeros)
 #' 
-#' ddm(y="flow", dist="distw", x=c("rta", "comcur", "contig"), 
+#' ddm(y = "flow", dist = "distw", 
+#' x = c("rta", "comcur", "contig"), lab_o = "iso_o", lab_d = "iso_d", 
 #' vce_robust=TRUE, data=gravity_no_zeros)
 #' }
 #' 
@@ -113,7 +123,9 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' ddm(y="flow", dist="distw", x=c("rta"), vce_robust=TRUE, data=grav_small)
+#' ddm(y = "flow", dist = "distw", 
+#' x = c("rta"), lab_o = "iso_o", lab_d = "iso_d", 
+#' vce_robust = TRUE, data = grav_small)
 #' }
 #' 
 #' @return
@@ -125,14 +137,16 @@
 #' 
 #' @export 
 
-ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
+ddm <- function(y, dist, x, lab_o, lab_d, vce_robust=TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
   stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
   stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
   stopifnot(is.character(x), all(x %in% colnames(data)))
-
+  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
+  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
     filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
@@ -160,25 +174,25 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
       dist_log_ddm = !!sym("dist_log")
     ) %>% 
     
-    group_by(!!sym("iso_o"), add = FALSE) %>% 
+    group_by(!!sym(lab_o), add = FALSE) %>% 
     mutate(
       ym1 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
       dm1 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
     ) %>% 
     
-    group_by(!!sym("iso_d"), add = FALSE) %>% 
+    group_by(!!sym(lab_d), add = FALSE) %>% 
     mutate(
       ym2 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
       dm2 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
     ) %>% 
     
-    group_by(!!sym("iso_o"), add = FALSE) %>% 
+    group_by(!!sym(lab_o), add = FALSE) %>% 
     mutate(
       y_log_ddm = !!sym("y_log_ddm") - !!sym("ym1"),
       dist_log_ddm = !!sym("dist_log_ddm") - !!sym("dm1")
     ) %>% 
     
-    group_by(!!sym("iso_d"), add = FALSE) %>% 
+    group_by(!!sym(lab_d), add = FALSE) %>% 
     mutate(
       y_log_ddm = !!sym("y_log_ddm") - !!sym("ym2"),
       dist_log_ddm = !!sym("dist_log_ddm") - !!sym("dm2")
@@ -192,25 +206,25 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
   
   # Substracting the means for the other independent variables -----------------
   d2 <- d %>% 
-    select(!!sym("iso_o"), !!sym("iso_d"), x) %>% 
-    gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d")) %>% 
+    select(!!sym(lab_o), !!sym(lab_d), x) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym(lab_o), -!!sym(lab_d)) %>% 
     
     mutate(key = paste0(!!sym("key"), "_ddm")) %>% 
     
-    group_by(!!sym("iso_o"), !!sym("key"), add = FALSE) %>% 
+    group_by(!!sym(lab_o), !!sym("key"), add = FALSE) %>% 
     mutate(ddm = !!sym("value") - mean(!!sym("value"), na.rm = TRUE)) %>% 
     
-    group_by(!!sym("iso_d"), !!sym("key"), add = FALSE) %>% 
+    group_by(!!sym(lab_d), !!sym("key"), add = FALSE) %>% 
     mutate(ddm = !!sym("ddm") - mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     ungroup() %>% 
     mutate(value = !!sym("ddm") + mean(!!sym("value"), na.rm = TRUE)) %>% 
     
-    select(!!!syms(c("iso_o", "iso_d", "key", "value"))) %>% 
+    select(!!!syms(c(lab_o, lab_d, "key", "value"))) %>% 
     spread(!!sym("key"), !!sym("value"))
   
   # Model ----------------------------------------------------------------------
-  dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
+  dmodel <- left_join(d, d2, by = c(lab_o, lab_d)) %>% 
     select(!!sym("y_log_ddm"), ends_with("_ddm"))
   
   model_ddm <- stats::lm(y_log_ddm ~ . + 0, data = dmodel)
