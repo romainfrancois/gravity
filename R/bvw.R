@@ -166,14 +166,15 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y = !!sym(y) / (!!sym(inc_o) * !!sym(inc_d)),
-      y_log_bvw = log(!!sym("y"))
+      y_log_bvw = log(
+        !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
+      )
     )
   
   # GDP weights ----------------------------------------------------------------
   d <- d %>% 
     group_by(!!sym("iso_o")) %>% 
-    mutate(inc_world = sum(!!sym(inc_d))) %>% 
+    mutate(inc_world = sum(!!sym(inc_d), na.rm = TRUE)) %>% 
     ungroup()
   
   # same for inc_o or inc_d as we have a squared dataset
@@ -187,17 +188,17 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   d <- d %>% 
     group_by(!!sym("iso_o"), add = FALSE) %>% 
     mutate(
-      mr_dist_1 = sum(!!sym("theta_j") * !!sym("dist_log"))
+      mr_dist_1 = sum(!!sym("theta_j") * !!sym("dist_log"), na.rm = TRUE)
     ) %>% 
     
     group_by(!!sym("iso_d"), add = FALSE) %>% 
     mutate(
-      mr_dist_2 = sum(!!sym("theta_i") * !!sym("dist_log"))
+      mr_dist_2 = sum(!!sym("theta_i") * !!sym("dist_log"), na.rm = TRUE)
     ) %>% 
     
     ungroup() %>% 
     
-    mutate(mr_dist_3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("dist_log"))) %>% 
+    mutate(mr_dist_3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("dist_log"), na.rm = TRUE)) %>% 
     
     mutate(dist_log_mr = !!sym("dist_log") - !!sym("mr_dist_1") - !!sym("mr_dist_2") + !!sym("mr_dist_3"))
   
@@ -209,13 +210,13 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     mutate(key = paste0(!!sym("key"), "_mr")) %>% 
     
     group_by(!!sym("iso_o"), !!sym("key")) %>% 
-    mutate(mr1 = sum(!!sym("theta_j") * !!sym("value"))) %>% 
+    mutate(mr1 = sum(!!sym("theta_j") * !!sym("value"), na.rm = TRUE)) %>% 
     
     group_by(!!sym("iso_d"), !!sym("key")) %>% 
-    mutate(mr2 = sum(!!sym("theta_i") * !!sym("value"))) %>% 
+    mutate(mr2 = sum(!!sym("theta_i") * !!sym("value"), na.rm = TRUE)) %>% 
     
     ungroup() %>% 
-    mutate(mr3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("value"))) %>% 
+    mutate(mr3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("value"), na.rm = TRUE)) %>% 
     
     mutate(value = !!sym("value") - !!sym("mr1") - !!sym("mr2") + !!sym("mr3")) %>% 
     

@@ -163,14 +163,14 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
     
     group_by(!!sym("iso_o"), add = FALSE) %>% 
     mutate(
-      ym1 = mean(!!sym("y_log_ddm")),
-      dm1 = mean(!!sym("dist_log_ddm"))
+      ym1 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
+      dm1 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
     ) %>% 
     
     group_by(!!sym("iso_d"), add = FALSE) %>% 
     mutate(
-      ym2 = mean(!!sym("y_log_ddm")),
-      dm2 = mean(!!sym("dist_log_ddm"))
+      ym2 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
+      dm2 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
     ) %>% 
     
     group_by(!!sym("iso_o"), add = FALSE) %>% 
@@ -187,8 +187,8 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
     
     ungroup() %>% 
     mutate(
-      y_log_ddm = !!sym("y_log_ddm") + mean(!!sym("y_log")),
-      dist_log_ddm = !!sym("dist_log_ddm") + mean(!!sym("dist_log"))
+      y_log_ddm = !!sym("y_log_ddm") + mean(!!sym("y_log"), na.rm = TRUE),
+      dist_log_ddm = !!sym("dist_log_ddm") + mean(!!sym("dist_log"), na.rm = TRUE)
     )
   
   # Substracting the means for the other independent variables -----------------
@@ -199,13 +199,13 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
     mutate(key = paste0(!!sym("key"), "_ddm")) %>% 
     
     group_by(!!sym("iso_o"), !!sym("key"), add = FALSE) %>% 
-    mutate(ddm = !!sym("value") - mean(!!sym("value"))) %>% 
+    mutate(ddm = !!sym("value") - mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     group_by(!!sym("iso_d"), !!sym("key"), add = FALSE) %>% 
-    mutate(ddm = !!sym("ddm") - mean(!!sym("value"))) %>% 
+    mutate(ddm = !!sym("ddm") - mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     ungroup() %>% 
-    mutate(value = !!sym("ddm") + mean(!!sym("value"))) %>% 
+    mutate(value = !!sym("ddm") + mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     select(!!!syms(c("iso_o", "iso_d", "key", "value"))) %>% 
     spread(!!sym("key"), !!sym("value"))

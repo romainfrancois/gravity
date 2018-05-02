@@ -169,19 +169,19 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
         !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
       )
     )
-
+  
   # Multilateral Resistance (MR) for distance ----------------------------------
   d <- d %>% 
     group_by(!!sym("iso_o")) %>% 
-    mutate(mean_dist_log_1 = mean(!!sym("dist_log"))) %>% 
+    mutate(mean_dist_log_1 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
     group_by(!!sym("iso_d"), add = FALSE) %>% 
-    mutate(mean_dist_log_2 = mean(!!sym("dist_log"))) %>% 
+    mutate(mean_dist_log_2 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
     ungroup() %>% 
     mutate(
-      mean_dist_log_3 = mean(!!sym("dist_log")),
+      mean_dist_log_3 = mean(!!sym("dist_log"), na.rm = TRUE),
       dist_log_mr = !!sym("dist_log") - 
         (!!sym("mean_dist_log_1") + !!sym("mean_dist_log_2") - !!sym("mean_dist_log_3"))
-      )
+    )
   
   # Multilateral Resistance (MR) for the other independent variables -----------
   d2 <- d %>% 
@@ -190,7 +190,7 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     
     group_by(!!sym("iso_o"), !!sym("key")) %>% 
     mutate(mean_dist_log_1 = mean(!!sym("value"), na.rm = TRUE)) %>% 
-  
+    
     group_by(!!sym("iso_d"), !!sym("key")) %>% 
     mutate(mean_dist_log_2 = mean(!!sym("value"), na.rm = TRUE)) %>% 
     
@@ -205,7 +205,6 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     
     select(!!!syms(c("iso_o", "iso_d", "key", "dist_log_mr"))) %>% 
     spread(!!sym("key"), !!sym("dist_log_mr"))
-
   
   # Model ----------------------------------------------------------------------
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 

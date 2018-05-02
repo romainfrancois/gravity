@@ -182,19 +182,20 @@ bvumod <- function() {
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y = !!sym(y) / (!!sym(inc_o) * !!sym(inc_d)),
-      y_log_bvu = log(!!sym(y))
+      y_log_bvu = log(
+        !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
+      )
     )
   
   # Multilateral Resistance (MR) for distance ----------------------------------
   d <- d %>% 
     group_by(!!sym("iso_o")) %>% 
-    mutate(mean_dist_log_1 = mean(!!sym("dist_log"))) %>% 
+    mutate(mean_dist_log_1 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
     group_by(!!sym("iso_d"), add = FALSE) %>% 
-    mutate(mean_dist_log_2 = mean(!!sym("dist_log"))) %>% 
+    mutate(mean_dist_log_2 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
     ungroup() %>% 
     mutate(
-      mean_dist_log_3 = mean(!!sym("dist_log")),
+      mean_dist_log_3 = mean(!!sym("dist_log"), na.rm = TRUE),
       dist_log_mr = !!sym("dist_log") - 
         (!!sym("mean_dist_log_1") + !!sym("mean_dist_log_2") - !!sym("mean_dist_log_3"))
     )
@@ -221,7 +222,6 @@ bvumod <- function() {
     
     select(!!!syms(c("iso_o", "iso_d", "key", "dist_log_mr"))) %>% 
     spread(!!sym("key"), !!sym("dist_log_mr"))
-  
   
   # Model ----------------------------------------------------------------------
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
@@ -383,14 +383,15 @@ bvwmod <- function() {
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y = !!sym(y) / (!!sym(inc_o) * !!sym(inc_d)),
-      y_log_bvw = log(!!sym("y"))
+      y_log_bvw = log(
+        !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
+      )
     )
   
   # GDP weights ----------------------------------------------------------------
   d <- d %>% 
     group_by(!!sym("iso_o")) %>% 
-    mutate(inc_world = sum(!!sym(inc_d))) %>% 
+    mutate(inc_world = sum(!!sym(inc_d), na.rm = TRUE)) %>% 
     ungroup()
   
   # same for inc_o or inc_d as we have a squared dataset
@@ -404,17 +405,17 @@ bvwmod <- function() {
   d <- d %>% 
     group_by(!!sym("iso_o"), add = FALSE) %>% 
     mutate(
-      mr_dist_1 = sum(!!sym("theta_j") * !!sym("dist_log"))
+      mr_dist_1 = sum(!!sym("theta_j") * !!sym("dist_log"), na.rm = TRUE)
     ) %>% 
     
     group_by(!!sym("iso_d"), add = FALSE) %>% 
     mutate(
-      mr_dist_2 = sum(!!sym("theta_i") * !!sym("dist_log"))
+      mr_dist_2 = sum(!!sym("theta_i") * !!sym("dist_log"), na.rm = TRUE)
     ) %>% 
     
     ungroup() %>% 
     
-    mutate(mr_dist_3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("dist_log"))) %>% 
+    mutate(mr_dist_3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("dist_log"), na.rm = TRUE)) %>% 
     
     mutate(dist_log_mr = !!sym("dist_log") - !!sym("mr_dist_1") - !!sym("mr_dist_2") + !!sym("mr_dist_3"))
   
@@ -426,13 +427,13 @@ bvwmod <- function() {
     mutate(key = paste0(!!sym("key"), "_mr")) %>% 
     
     group_by(!!sym("iso_o"), !!sym("key")) %>% 
-    mutate(mr1 = sum(!!sym("theta_j") * !!sym("value"))) %>% 
+    mutate(mr1 = sum(!!sym("theta_j") * !!sym("value"), na.rm = TRUE)) %>% 
     
     group_by(!!sym("iso_d"), !!sym("key")) %>% 
-    mutate(mr2 = sum(!!sym("theta_i") * !!sym("value"))) %>% 
+    mutate(mr2 = sum(!!sym("theta_i") * !!sym("value"), na.rm = TRUE)) %>% 
     
     ungroup() %>% 
-    mutate(mr3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("value"))) %>% 
+    mutate(mr3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("value"), na.rm = TRUE)) %>% 
     
     mutate(value = !!sym("value") - !!sym("mr1") - !!sym("mr2") + !!sym("mr3")) %>% 
     
@@ -559,6 +560,14 @@ bvworig()
 # ddmmod ------------------------------------------------------------------
 
 ddmmod <- function() {
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
+    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    
+    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
+    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+  
   # Transforming data, logging distances ---------------------------------------
   d <- data
   d <- d %>% 
@@ -581,14 +590,14 @@ ddmmod <- function() {
     
     group_by(!!sym("iso_o"), add = FALSE) %>% 
     mutate(
-      ym1 = mean(!!sym("y_log_ddm")),
-      dm1 = mean(!!sym("dist_log_ddm"))
+      ym1 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
+      dm1 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
     ) %>% 
     
     group_by(!!sym("iso_d"), add = FALSE) %>% 
     mutate(
-      ym2 = mean(!!sym("y_log_ddm")),
-      dm2 = mean(!!sym("dist_log_ddm"))
+      ym2 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
+      dm2 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
     ) %>% 
     
     group_by(!!sym("iso_o"), add = FALSE) %>% 
@@ -605,8 +614,8 @@ ddmmod <- function() {
     
     ungroup() %>% 
     mutate(
-      y_log_ddm = !!sym("y_log_ddm") + mean(!!sym("y_log")),
-      dist_log_ddm = !!sym("dist_log_ddm") + mean(!!sym("dist_log"))
+      y_log_ddm = !!sym("y_log_ddm") + mean(!!sym("y_log"), na.rm = TRUE),
+      dist_log_ddm = !!sym("dist_log_ddm") + mean(!!sym("dist_log"), na.rm = TRUE)
     )
   
   # Substracting the means for the other independent variables -----------------
@@ -617,13 +626,13 @@ ddmmod <- function() {
     mutate(key = paste0(!!sym("key"), "_ddm")) %>% 
     
     group_by(!!sym("iso_o"), !!sym("key"), add = FALSE) %>% 
-    mutate(ddm = !!sym("value") - mean(!!sym("value"))) %>% 
+    mutate(ddm = !!sym("value") - mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     group_by(!!sym("iso_d"), !!sym("key"), add = FALSE) %>% 
-    mutate(ddm = !!sym("ddm") - mean(!!sym("value"))) %>% 
+    mutate(ddm = !!sym("ddm") - mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     ungroup() %>% 
-    mutate(value = !!sym("ddm") + mean(!!sym("value"))) %>% 
+    mutate(value = !!sym("ddm") + mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     select(!!!syms(c("iso_o", "iso_d", "key", "value"))) %>% 
     spread(!!sym("key"), !!sym("value"))
@@ -632,20 +641,19 @@ ddmmod <- function() {
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
     select(!!sym("y_log_ddm"), ends_with("_ddm"))
   
-  model.ddm <- stats::lm(y_log_ddm ~ . + 0, data = dmodel)
+  model_ddm <- stats::lm(y_log_ddm ~ . + 0, data = dmodel)
   
   # Return ---------------------------------------------------------------------
-  
   if (vce_robust == TRUE) {
-    return.object.1         <- .robustsummary.lm(model.ddm, robust = TRUE)
-    return.object.1$call    <- as.formula(model.ddm)
-    return(return.object.1)
+    return_object_1         <- .robustsummary.lm(model_ddm, robust = TRUE)
+    return_object_1$call    <- as.formula(model_ddm)
+    return(return_object_1)
   }
   
   if (vce_robust == FALSE) {
-    return.object.1        <- .robustsummary.lm(model.ddm, robust = FALSE)
-    return.object.1$call   <- as.formula(model.ddm)
-    return(return.object.1)
+    return_object_1        <- .robustsummary.lm(model_ddm, robust = FALSE)
+    return_object_1$call   <- as.formula(model_ddm)
+    return(return_object_1)
   }
 }
 ddmmod()
