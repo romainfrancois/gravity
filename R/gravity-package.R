@@ -7,5 +7,6 @@
 #' @importFrom rlang sym syms quo
 #' @importFrom magrittr %>%
 #' @importFrom tibble tibble
+#' @import stats
 #' @name gravity-exports
 NULL

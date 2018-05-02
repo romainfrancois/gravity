@@ -161,88 +161,166 @@ vce_robust = TRUE
   class(ans) <- "summary.lm"
   ans
 }
-
-# bvumod ---------------------------------------------------------------------
-
-bvumod <- function() {
-  # Discarding unusable observations ----------------------------------------
-  d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
-    
-    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
-    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
-  
-  # Transforming data, logging distances ---------------------------------------
-  d <- d %>% 
-    mutate(
-      dist_log = log(!!sym(dist))
-    )
-  
-  # Transforming data, logging flows -------------------------------------------
-  d <- d %>% 
-    mutate(
-      y_log_bvu = log(
-        !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
-      )
-    )
-  
-  # Multilateral Resistance (MR) for distance ----------------------------------
-  d <- d %>% 
-    group_by(!!sym("iso_o")) %>% 
-    mutate(mean_dist_log_1 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
-    group_by(!!sym("iso_d"), add = FALSE) %>% 
-    mutate(mean_dist_log_2 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
-    ungroup() %>% 
-    mutate(
-      mean_dist_log_3 = mean(!!sym("dist_log"), na.rm = TRUE),
-      dist_log_mr = !!sym("dist_log") - 
-        (!!sym("mean_dist_log_1") + !!sym("mean_dist_log_2") - !!sym("mean_dist_log_3"))
-    )
-  
-  # Multilateral Resistance (MR) for the other independent variables -----------
-  d2 <- d %>% 
-    select(!!sym("iso_o"), !!sym("iso_d"), x) %>% 
-    gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d")) %>% 
-    
-    group_by(!!sym("iso_o"), !!sym("key")) %>% 
-    mutate(mean_dist_log_1 = mean(!!sym("value"), na.rm = TRUE)) %>% 
-    
-    group_by(!!sym("iso_d"), !!sym("key")) %>% 
-    mutate(mean_dist_log_2 = mean(!!sym("value"), na.rm = TRUE)) %>% 
-    
-    group_by(!!sym("key")) %>% 
-    mutate(
-      mean_dist_log_3 = mean(!!sym("value"), na.rm = TRUE),
-      dist_log_mr = !!sym("value") - (!!sym("mean_dist_log_1") + !!sym("mean_dist_log_2") - !!sym("mean_dist_log_3"))
-    ) %>% 
-    
-    ungroup() %>% 
-    mutate(key = paste0(!!sym("key"), "_mr")) %>% 
-    
-    select(!!!syms(c("iso_o", "iso_d", "key", "dist_log_mr"))) %>% 
-    spread(!!sym("key"), !!sym("dist_log_mr"))
-  
-  # Model ----------------------------------------------------------------------
-  dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
-    select(!!sym("y_log_bvu"), ends_with("_mr"))
-  
-  model_bvu <- stats::lm(y_log_bvu ~ ., data = dmodel)
-  
-  # Return ---------------------------------------------------------------------
-  if (vce_robust == TRUE) {
-    return_object_1      <- .robustsummary.lm(model_bvu, robust = TRUE)
-    return_object_1$call <- as.formula(model_bvu)
-    return(return_object_1)
+robust_summary <- function(object, robust = FALSE, ...) {
+  # Check -------------------------------------------------------------------
+  qr_lm <- function(x, ...) {
+    if (is.null(r <- x$qr))
+      stop("lm object does not have a proper 'qr' component.\n 
+           Rank zero or should not have used lm(.., qr=FALSE).")
+    r
   }
   
-  if (vce_robust == FALSE) {
-    return_object_1      <- .robustsummary.lm(model_bvu, robust = FALSE)
-    return_object_1$call <- as.formula(model_bvu)
-    return(return_object_1)
+  # Robust standard errors --------------------------------------------------
+  if (robust == TRUE) {
+    # Save variables that are necessary to calculate robust sd
+    X   <- stats::model.matrix(object)
+    u2  <- stats::residuals(object)^2
+    XDX <- t(X) %*% (X * u2)
+    
+    # Inverse(X'X)
+    XX1 <- solve(t(X) %*% X, tol = 1e-100)
+    
+    # Sandwich Variance calculation (Bread x meat x Bread)
+    varcovar <- XX1 %*% XDX %*% XX1
+    
+    # Adjust degrees of freedom 
+    dfc_r <- sqrt(nrow(X)) / sqrt(nrow(X) - ncol(X))
+    
+    # Standard errors of the coefficient estimates are the
+    # square roots of the diagonal elements
+    rstdh <- dfc_r * sqrt(diag(varcovar))
   }
+  
+  # Clustered standard errors -----------------------------------------------
+  z   <- object
+  p   <- z$rank
+  rdf <- z$df.residual
+  
+  if (p == 0) {
+    r <- z$residuals
+    n <- length(r)
+    w <- z$weights
+    if (is.null(w)) {
+      rss <- sum(r^2)
+    }
+    else {
+      rss <- sum(w * r^2)
+      r   <- sqrt(w) * r
+    }
+    resvar           <- rss / rdf
+    ans              <- z[c("call", "terms", 
+                            if (!is.null(z$weights)) "weights")]
+    class(ans)       <- "summary.lm"
+    ans$aliased      <- is.na(stats::coef(object))
+    ans$residuals    <- r
+    ans$df           <- c(0L, n, length(ans$aliased))
+    ans$coefficients <- matrix(NA, 0L, 4L)
+    dimnames(ans$coefficients) <- list(
+      NULL, c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
+    ans$sigma <- sqrt(resvar)
+    ans$r.squared <- ans$adj.r.squared <- 0
+    return(ans)
+  }
+  
+  if (is.null(z$terms)) 
+    stop("invalid 'lm' object:  no 'terms' component")
+  
+  if (!inherits(object, "lm")) 
+    warning("calling summary.lm(<fake-lm-object>) ...")
+  
+  Qr <- qr_lm(object)
+  n  <- NROW(Qr$qr)
+  
+  if (is.na(z$df.residual) || n - p != z$df.residual) 
+    warning("residual degrees of freedom in object suggest this is not an \"lm\" fit")
+  
+  r <- z$residuals
+  f <- z$fitted.values
+  w <- z$weights
+  
+  if (is.null(w)) {
+    mss <- if (attr(z$terms, "intercept")) 
+      sum((f - mean(f))^2)
+    else sum(f^2)
+    rss <- sum(r^2)
+  }
+  else {
+    mss <- if (attr(z$terms, "intercept")) {
+      m <- sum(w * f/sum(w))
+      sum(w * (f - m)^2)
+    }
+    else sum(w * f^2)
+    rss <- sum(w * r^2)
+    r   <- sqrt(w) * r
+  }
+  
+  resvar <- rss / rdf
+  
+  if (is.finite(resvar) && resvar < (mean(f)^2 + stats::var(f)) * 1e-30)
+    warning("essentially perfect fit: summary may be unreliable")
+  
+  p1 <- 1L:p
+  R  <- chol2inv(Qr$qr[p1, p1, drop = FALSE])
+  se <- sqrt(diag(R) * resvar)
+  
+  if (robust == TRUE) se <- rstdh
+  
+  est  <- z$coefficients[Qr$pivot[p1]]
+  tval <- est / se
+  ans  <- z[c("call", "terms", if (!is.null(z$weights)) "weights")]
+  ans$residuals <- r
+  pval <- 2 * stats::pt(abs(tval), rdf, lower.tail = FALSE)
+  ans$coefficients <- cbind(est, se, tval, pval)
+  dimnames(ans$coefficients) <- list(names(z$coefficients)[Qr$pivot[p1]], 
+                                     c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
+  ans$aliased <- is.na(stats::coef(object))
+  ans$sigma   <- sqrt(resvar)
+  ans$df      <- c(p, rdf, NCOL(Qr$qr))
+  
+  if (p != attr(z$terms, "intercept")) {
+    df.int <- if (attr(z$terms, "intercept")) 
+      1L
+    else 0L
+    ans$r.squared     <- mss / (mss + rss)
+    ans$adj.r.squared <- 1 - (1 - ans$r.squared) * ((n - df.int) / rdf)
+    ans$fstatistic    <- c(value = (mss/(p - df.int)) / resvar, 
+                           numdf = p - df.int, dendf = rdf)
+    if (robust == TRUE) {
+      if (df.int == 0) {
+        pos_coef <- 1:length(z$coefficients)
+      } else {
+        pos_coef <- match(names(z$coefficients)[-match("(Intercept)", 
+                                                       names(z$coefficients))],
+                          names(z$coefficients))
+      }
+      P_m <- matrix(z$coefficients[pos_coef])
+      
+      R_m <- diag(1, 
+                  length(pos_coef), 
+                  length(pos_coef))
+      
+      ans$fstatistic <- c(value = t(R_m %*% P_m) %*%
+                            (solve(varcovar[pos_coef,pos_coef], tol = 1e-100)) %*%
+                            (R_m %*% P_m) / (p - df.int), 
+                          numdf = p - df.int, dendf = rdf)
+      
+    }
+  }
+  else {
+    ans$r.squared <- 0
+    ans$adj.r.squared <- 0
+  }
+  
+  ans$cov.unscaled <- R
+  dimnames(ans$cov.unscaled) <- dimnames(ans$coefficients)[c(1,1)]
+  
+  if (!is.null(z$na.action)) 
+    ans$na.action <- z$na.action
+  
+  # Output ------------------------------------------------------------------
+  class(ans) <- "summary.lm"
+  ans
 }
-bvumod()
 
 # bvuorig -----------------------------------------------------------------
 
@@ -363,9 +441,9 @@ bvuorig <- function(){
 }
 bvuorig()
 
-# bvwmod ---------------------------------------------------------------------
+# bvumod ---------------------------------------------------------------------
 
-bvwmod <- function() {
+bvumod <- function() {
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
     filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
@@ -375,7 +453,7 @@ bvwmod <- function() {
     filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
   
   # Transforming data, logging distances ---------------------------------------
-  d <- data %>% 
+  d <- d %>% 
     mutate(
       dist_log = log(!!sym(dist))
     )
@@ -383,83 +461,67 @@ bvwmod <- function() {
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y_log_bvw = log(
+      y_log_bvu = log(
         !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
       )
     )
   
-  # GDP weights ----------------------------------------------------------------
+  # Multilateral Resistance (MR) for distance ----------------------------------
   d <- d %>% 
     group_by(!!sym("iso_o")) %>% 
-    mutate(inc_world = sum(!!sym(inc_d), na.rm = TRUE)) %>% 
-    ungroup()
-  
-  # same for inc_o or inc_d as we have a squared dataset
-  d <- d %>%
+    mutate(mean_dist_log_1 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
+    group_by(!!sym("iso_d"), add = FALSE) %>% 
+    mutate(mean_dist_log_2 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
+    ungroup() %>% 
     mutate(
-      theta_i = !!sym(inc_o) / !!sym("inc_world"),
-      theta_j = !!sym(inc_d) / !!sym("inc_world")
+      mean_dist_log_3 = mean(!!sym("dist_log"), na.rm = TRUE),
+      dist_log_mr = !!sym("dist_log") - 
+        (!!sym("mean_dist_log_1") + !!sym("mean_dist_log_2") - !!sym("mean_dist_log_3"))
     )
   
-  # Multilateral resistance (MR) for distance ----------------------------------
-  d <- d %>% 
-    group_by(!!sym("iso_o"), add = FALSE) %>% 
-    mutate(
-      mr_dist_1 = sum(!!sym("theta_j") * !!sym("dist_log"), na.rm = TRUE)
-    ) %>% 
-    
-    group_by(!!sym("iso_d"), add = FALSE) %>% 
-    mutate(
-      mr_dist_2 = sum(!!sym("theta_i") * !!sym("dist_log"), na.rm = TRUE)
-    ) %>% 
-    
-    ungroup() %>% 
-    
-    mutate(mr_dist_3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("dist_log"), na.rm = TRUE)) %>% 
-    
-    mutate(dist_log_mr = !!sym("dist_log") - !!sym("mr_dist_1") - !!sym("mr_dist_2") + !!sym("mr_dist_3"))
-  
-  # Multilateral resistance (MR) for the other independent variables -----------
+  # Multilateral Resistance (MR) for the other independent variables -----------
   d2 <- d %>% 
-    select(!!sym("iso_o"), !!sym("iso_d"), !!sym("theta_j"), !!sym("theta_i"), x) %>% 
-    gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d"), -!!sym("theta_j"), -!!sym("theta_i")) %>% 
-    
-    mutate(key = paste0(!!sym("key"), "_mr")) %>% 
+    select(!!sym("iso_o"), !!sym("iso_d"), x) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d")) %>% 
     
     group_by(!!sym("iso_o"), !!sym("key")) %>% 
-    mutate(mr1 = sum(!!sym("theta_j") * !!sym("value"), na.rm = TRUE)) %>% 
+    mutate(mean_dist_log_1 = mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     group_by(!!sym("iso_d"), !!sym("key")) %>% 
-    mutate(mr2 = sum(!!sym("theta_i") * !!sym("value"), na.rm = TRUE)) %>% 
+    mutate(mean_dist_log_2 = mean(!!sym("value"), na.rm = TRUE)) %>% 
+    
+    group_by(!!sym("key")) %>% 
+    mutate(
+      mean_dist_log_3 = mean(!!sym("value"), na.rm = TRUE),
+      dist_log_mr = !!sym("value") - (!!sym("mean_dist_log_1") + !!sym("mean_dist_log_2") - !!sym("mean_dist_log_3"))
+    ) %>% 
     
     ungroup() %>% 
-    mutate(mr3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("value"), na.rm = TRUE)) %>% 
+    mutate(key = paste0(!!sym("key"), "_mr")) %>% 
     
-    mutate(value = !!sym("value") - !!sym("mr1") - !!sym("mr2") + !!sym("mr3")) %>% 
-    
-    select(!!!syms(c("iso_o", "iso_d", "key", "value"))) %>% 
-    spread(!!sym("key"), !!sym("value"))
+    select(!!!syms(c("iso_o", "iso_d", "key", "dist_log_mr"))) %>% 
+    spread(!!sym("key"), !!sym("dist_log_mr"))
   
   # Model ----------------------------------------------------------------------
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
-    select(!!sym("y_log_bvw"), ends_with("_mr"))
+    select(!!sym("y_log_bvu"), ends_with("_mr"))
   
-  model_bvw <- stats::lm(y_log_bvw ~ ., data = dmodel)
+  model_bvu <- stats::lm(y_log_bvu ~ ., data = dmodel)
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return_object_1      <- .robustsummary.lm(model_bvw, robust = TRUE)
-    return_object_1$call <- as.formula(model_bvw)
+    return_object_1      <- robust_summary(model_bvu, robust = TRUE)
+    return_object_1$call <- as.formula(model_bvu)
     return(return_object_1)
   }
   
   if (vce_robust == FALSE) {
-    return_object_1      <- .robustsummary.lm(model_bvw, robust = FALSE)
-    return_object_1$call <- as.formula(model_bvw)
+    return_object_1      <- robust_summary(model_bvu, robust = FALSE)
+    return_object_1$call <- as.formula(model_bvu)
     return(return_object_1)
   }
 }
-bvwmod()
+bvumod()
 
 # bvworig ---------------------------------------------------------------------
 
@@ -557,9 +619,9 @@ bvworig <- function() {
 }
 bvworig()
 
-# ddmmod ------------------------------------------------------------------
+# bvwmod ---------------------------------------------------------------------
 
-ddmmod <- function() {
+bvwmod <- function() {
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
     filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
@@ -569,8 +631,7 @@ ddmmod <- function() {
     filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
   
   # Transforming data, logging distances ---------------------------------------
-  d <- data
-  d <- d %>% 
+  d <- data %>% 
     mutate(
       dist_log = log(!!sym(dist))
     )
@@ -578,85 +639,83 @@ ddmmod <- function() {
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y_log = log(!!sym(y))
+      y_log_bvw = log(
+        !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
+      )
     )
   
-  # Substracting the means -----------------------------------------------------
+  # GDP weights ----------------------------------------------------------------
   d <- d %>% 
+    group_by(!!sym("iso_o")) %>% 
+    mutate(inc_world = sum(!!sym(inc_d), na.rm = TRUE)) %>% 
+    ungroup()
+  
+  # same for inc_o or inc_d as we have a squared dataset
+  d <- d %>%
     mutate(
-      y_log_ddm = !!sym("y_log"),
-      dist_log_ddm = !!sym("dist_log")
-    ) %>% 
-    
-    group_by(!!sym("iso_o"), add = FALSE) %>% 
-    mutate(
-      ym1 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
-      dm1 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
-    ) %>% 
-    
-    group_by(!!sym("iso_d"), add = FALSE) %>% 
-    mutate(
-      ym2 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
-      dm2 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
-    ) %>% 
-    
-    group_by(!!sym("iso_o"), add = FALSE) %>% 
-    mutate(
-      y_log_ddm = !!sym("y_log_ddm") - !!sym("ym1"),
-      dist_log_ddm = !!sym("dist_log_ddm") - !!sym("dm1")
-    ) %>% 
-    
-    group_by(!!sym("iso_d"), add = FALSE) %>% 
-    mutate(
-      y_log_ddm = !!sym("y_log_ddm") - !!sym("ym2"),
-      dist_log_ddm = !!sym("dist_log_ddm") - !!sym("dm2")
-    ) %>% 
-    
-    ungroup() %>% 
-    mutate(
-      y_log_ddm = !!sym("y_log_ddm") + mean(!!sym("y_log"), na.rm = TRUE),
-      dist_log_ddm = !!sym("dist_log_ddm") + mean(!!sym("dist_log"), na.rm = TRUE)
+      theta_i = !!sym(inc_o) / !!sym("inc_world"),
+      theta_j = !!sym(inc_d) / !!sym("inc_world")
     )
   
-  # Substracting the means for the other independent variables -----------------
-  d2 <- d %>% 
-    select(!!sym("iso_o"), !!sym("iso_d"), x) %>% 
-    gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d")) %>% 
+  # Multilateral resistance (MR) for distance ----------------------------------
+  d <- d %>% 
+    group_by(!!sym("iso_o"), add = FALSE) %>% 
+    mutate(
+      mr_dist_1 = sum(!!sym("theta_j") * !!sym("dist_log"), na.rm = TRUE)
+    ) %>% 
     
-    mutate(key = paste0(!!sym("key"), "_ddm")) %>% 
-    
-    group_by(!!sym("iso_o"), !!sym("key"), add = FALSE) %>% 
-    mutate(ddm = !!sym("value") - mean(!!sym("value"), na.rm = TRUE)) %>% 
-    
-    group_by(!!sym("iso_d"), !!sym("key"), add = FALSE) %>% 
-    mutate(ddm = !!sym("ddm") - mean(!!sym("value"), na.rm = TRUE)) %>% 
+    group_by(!!sym("iso_d"), add = FALSE) %>% 
+    mutate(
+      mr_dist_2 = sum(!!sym("theta_i") * !!sym("dist_log"), na.rm = TRUE)
+    ) %>% 
     
     ungroup() %>% 
-    mutate(value = !!sym("ddm") + mean(!!sym("value"), na.rm = TRUE)) %>% 
+    
+    mutate(mr_dist_3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("dist_log"), na.rm = TRUE)) %>% 
+    
+    mutate(dist_log_mr = !!sym("dist_log") - !!sym("mr_dist_1") - !!sym("mr_dist_2") + !!sym("mr_dist_3"))
+  
+  # Multilateral resistance (MR) for the other independent variables -----------
+  d2 <- d %>% 
+    select(!!sym("iso_o"), !!sym("iso_d"), !!sym("theta_j"), !!sym("theta_i"), x) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d"), -!!sym("theta_j"), -!!sym("theta_i")) %>% 
+    
+    mutate(key = paste0(!!sym("key"), "_mr")) %>% 
+    
+    group_by(!!sym("iso_o"), !!sym("key")) %>% 
+    mutate(mr1 = sum(!!sym("theta_j") * !!sym("value"), na.rm = TRUE)) %>% 
+    
+    group_by(!!sym("iso_d"), !!sym("key")) %>% 
+    mutate(mr2 = sum(!!sym("theta_i") * !!sym("value"), na.rm = TRUE)) %>% 
+    
+    ungroup() %>% 
+    mutate(mr3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("value"), na.rm = TRUE)) %>% 
+    
+    mutate(value = !!sym("value") - !!sym("mr1") - !!sym("mr2") + !!sym("mr3")) %>% 
     
     select(!!!syms(c("iso_o", "iso_d", "key", "value"))) %>% 
     spread(!!sym("key"), !!sym("value"))
   
   # Model ----------------------------------------------------------------------
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
-    select(!!sym("y_log_ddm"), ends_with("_ddm"))
+    select(!!sym("y_log_bvw"), ends_with("_mr"))
   
-  model_ddm <- stats::lm(y_log_ddm ~ . + 0, data = dmodel)
+  model_bvw <- stats::lm(y_log_bvw ~ ., data = dmodel)
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return_object_1         <- .robustsummary.lm(model_ddm, robust = TRUE)
-    return_object_1$call    <- as.formula(model_ddm)
+    return_object_1      <- robust_summary(model_bvw, robust = TRUE)
+    return_object_1$call <- as.formula(model_bvw)
     return(return_object_1)
   }
   
   if (vce_robust == FALSE) {
-    return_object_1        <- .robustsummary.lm(model_ddm, robust = FALSE)
-    return_object_1$call   <- as.formula(model_ddm)
+    return_object_1      <- robust_summary(model_bvw, robust = FALSE)
+    return_object_1$call <- as.formula(model_bvw)
     return(return_object_1)
   }
 }
-ddmmod()
+bvwmod()
 
 # ddmorig -----------------------------------------------------------------
 
@@ -771,3 +830,104 @@ ddmorig <- function(){
     return(return.object.1)}
 }
 ddmorig()
+
+# ddmmod ------------------------------------------------------------------
+
+ddmmod <- function() {
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
+    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    
+    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
+    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+  
+  # Transforming data, logging distances ---------------------------------------
+  d <- data
+  d <- d %>% 
+    mutate(
+      dist_log = log(!!sym(dist))
+    )
+  
+  # Transforming data, logging flows -------------------------------------------
+  d <- d %>% 
+    mutate(
+      y_log = log(!!sym(y))
+    )
+  
+  # Substracting the means -----------------------------------------------------
+  d <- d %>% 
+    mutate(
+      y_log_ddm = !!sym("y_log"),
+      dist_log_ddm = !!sym("dist_log")
+    ) %>% 
+    
+    group_by(!!sym("iso_o"), add = FALSE) %>% 
+    mutate(
+      ym1 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
+      dm1 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
+    ) %>% 
+    
+    group_by(!!sym("iso_d"), add = FALSE) %>% 
+    mutate(
+      ym2 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
+      dm2 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
+    ) %>% 
+    
+    group_by(!!sym("iso_o"), add = FALSE) %>% 
+    mutate(
+      y_log_ddm = !!sym("y_log_ddm") - !!sym("ym1"),
+      dist_log_ddm = !!sym("dist_log_ddm") - !!sym("dm1")
+    ) %>% 
+    
+    group_by(!!sym("iso_d"), add = FALSE) %>% 
+    mutate(
+      y_log_ddm = !!sym("y_log_ddm") - !!sym("ym2"),
+      dist_log_ddm = !!sym("dist_log_ddm") - !!sym("dm2")
+    ) %>% 
+    
+    ungroup() %>% 
+    mutate(
+      y_log_ddm = !!sym("y_log_ddm") + mean(!!sym("y_log"), na.rm = TRUE),
+      dist_log_ddm = !!sym("dist_log_ddm") + mean(!!sym("dist_log"), na.rm = TRUE)
+    )
+  
+  # Substracting the means for the other independent variables -----------------
+  d2 <- d %>% 
+    select(!!sym("iso_o"), !!sym("iso_d"), x) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d")) %>% 
+    
+    mutate(key = paste0(!!sym("key"), "_ddm")) %>% 
+    
+    group_by(!!sym("iso_o"), !!sym("key"), add = FALSE) %>% 
+    mutate(ddm = !!sym("value") - mean(!!sym("value"), na.rm = TRUE)) %>% 
+    
+    group_by(!!sym("iso_d"), !!sym("key"), add = FALSE) %>% 
+    mutate(ddm = !!sym("ddm") - mean(!!sym("value"), na.rm = TRUE)) %>% 
+    
+    ungroup() %>% 
+    mutate(value = !!sym("ddm") + mean(!!sym("value"), na.rm = TRUE)) %>% 
+    
+    select(!!!syms(c("iso_o", "iso_d", "key", "value"))) %>% 
+    spread(!!sym("key"), !!sym("value"))
+  
+  # Model ----------------------------------------------------------------------
+  dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
+    select(!!sym("y_log_ddm"), ends_with("_ddm"))
+  
+  model_ddm <- stats::lm(y_log_ddm ~ . + 0, data = dmodel)
+  
+  # Return ---------------------------------------------------------------------
+  if (vce_robust == TRUE) {
+    return_object_1         <- robust_summary(model_ddm, robust = TRUE)
+    return_object_1$call    <- as.formula(model_ddm)
+    return(return_object_1)
+  }
+  
+  if (vce_robust == FALSE) {
+    return_object_1        <- robust_summary(model_ddm, robust = FALSE)
+    return_object_1$call   <- as.formula(model_ddm)
+    return(return_object_1)
+  }
+}
+ddmmod()

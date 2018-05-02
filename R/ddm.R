@@ -218,13 +218,13 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return_object_1         <- .robustsummary.lm(model_ddm, robust = TRUE)
+    return_object_1         <- robustsummary(model_ddm, robust = TRUE)
     return_object_1$call    <- as.formula(model_ddm)
     return(return_object_1)
   }
   
   if (vce_robust == FALSE) {
-    return_object_1        <- .robustsummary.lm(model_ddm, robust = FALSE)
+    return_object_1        <- robustsummary(model_ddm, robust = FALSE)
     return_object_1$call   <- as.formula(model_ddm)
     return(return_object_1)
   }

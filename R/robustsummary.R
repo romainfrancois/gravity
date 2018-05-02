@@ -1,7 +1,7 @@
-#' @title internal_function
+#' @title Robust summary statistics
 #' 
 #' @description Internal function for nice summary of estimates 
-#' developed by 
+#' adapted after a function written by Isidore Beautrelet
 #' \url{https://raw.githubusercontent.com/IsidoreBeautrelet/economictheoryblog/master/robust_summary.R}
 #' 
 #' @param object \code{lm} object
@@ -16,44 +16,41 @@
 #' 
 #' @noRd
 
-.robustsummary.lm <- function(object, robust = FALSE, ...) {
-  qr.lm <- function(x, ...) {
-    if (is.null(r <- x$qr)) 
-      stop("lm object does not have a proper 'qr' component.\n Rank zero or should not have used lm(.., qr=FALSE).")
+robust_summary <- function(object, robust = FALSE, ...) {
+  # Check -------------------------------------------------------------------
+  qr_lm <- function(x, ...) {
+    if (is.null(r <- x$qr))
+      stop("lm object does not have a proper 'qr' component.\n 
+           Rank zero or should not have used lm(.., qr=FALSE).")
     r
   }
   
-  # add extension for robust standard errors
-  if (robust == TRUE) { 
-    # save variable that are necessary to calcualte robust sd
+  # Robust standard errors --------------------------------------------------
+  if (robust == TRUE) {
+    # Save variables that are necessary to calculate robust sd
     X   <- stats::model.matrix(object)
     u2  <- stats::residuals(object)^2
-    XDX <- 0
+    XDX <- t(X) %*% (X * u2)
     
-    ## One needs to calculate X'DX. But due to the fact that
-    ## D is huge (NxN), it is better to do it with a cycle.
-    for (i in 1:nrow(X)) {
-      XDX <- XDX + u2[i] * X[i,] %*% t(X[i,])
-    }
-    
-    # inverse(X'X)
+    # Inverse(X'X)
     XX1 <- solve(t(X) %*% X, tol = 1e-100)
     
     # Sandwich Variance calculation (Bread x meat x Bread)
     varcovar <- XX1 %*% XDX %*% XX1
     
-    # adjust degrees of freedom 
+    # Adjust degrees of freedom 
     dfc_r <- sqrt(nrow(X)) / sqrt(nrow(X) - ncol(X))
     
     # Standard errors of the coefficient estimates are the
     # square roots of the diagonal elements
     rstdh <- dfc_r * sqrt(diag(varcovar))
   }
-  # add extension for clustered standard errors
   
+  # Clustered standard errors -----------------------------------------------
   z   <- object
   p   <- z$rank
   rdf <- z$df.residual
+  
   if (p == 0) {
     r <- z$residuals
     n <- length(r)
@@ -65,8 +62,9 @@
       rss <- sum(w * r^2)
       r   <- sqrt(w) * r
     }
-    resvar           <- rss/rdf
-    ans              <- z[c("call", "terms", if (!is.null(z$weights)) "weights")]
+    resvar           <- rss / rdf
+    ans              <- z[c("call", "terms", 
+                            if (!is.null(z$weights)) "weights")]
     class(ans)       <- "summary.lm"
     ans$aliased      <- is.na(stats::coef(object))
     ans$residuals    <- r
@@ -78,17 +76,23 @@
     ans$r.squared <- ans$adj.r.squared <- 0
     return(ans)
   }
+  
   if (is.null(z$terms)) 
     stop("invalid 'lm' object:  no 'terms' component")
+  
   if (!inherits(object, "lm")) 
     warning("calling summary.lm(<fake-lm-object>) ...")
-  Qr <- qr.lm(object)
+  
+  Qr <- qr_lm(object)
   n  <- NROW(Qr$qr)
+  
   if (is.na(z$df.residual) || n - p != z$df.residual) 
     warning("residual degrees of freedom in object suggest this is not an \"lm\" fit")
+  
   r <- z$residuals
   f <- z$fitted.values
   w <- z$weights
+  
   if (is.null(w)) {
     mss <- if (attr(z$terms, "intercept")) 
       sum((f - mean(f))^2)
@@ -104,10 +108,12 @@
     rss <- sum(w * r^2)
     r   <- sqrt(w) * r
   }
-  resvar <- rss/rdf
-  if (is.finite(resvar) && resvar < (mean(f)^2 + stats::var(f)) * 
-      1e-30) 
+  
+  resvar <- rss / rdf
+  
+  if (is.finite(resvar) && resvar < (mean(f)^2 + stats::var(f)) * 1e-30)
     warning("essentially perfect fit: summary may be unreliable")
+  
   p1 <- 1L:p
   R  <- chol2inv(Qr$qr[p1, p1, drop = FALSE])
   se <- sqrt(diag(R) * resvar)
@@ -115,7 +121,7 @@
   if (robust == TRUE) se <- rstdh
   
   est  <- z$coefficients[Qr$pivot[p1]]
-  tval <- est/se
+  tval <- est / se
   ans  <- z[c("call", "terms", if (!is.null(z$weights)) "weights")]
   ans$residuals <- r
   pval <- 2 * stats::pt(abs(tval), rdf, lower.tail = FALSE)
@@ -130,16 +136,15 @@
     df.int <- if (attr(z$terms, "intercept")) 
       1L
     else 0L
-    ans$r.squared     <- mss/(mss + rss)
-    ans$adj.r.squared <- 1 - (1 - ans$r.squared) * ((n - 
-                                                       df.int)/rdf)
-    ans$fstatistic    <- c(value = (mss/(p - df.int))/resvar, 
+    ans$r.squared     <- mss / (mss + rss)
+    ans$adj.r.squared <- 1 - (1 - ans$r.squared) * ((n - df.int) / rdf)
+    ans$fstatistic    <- c(value = (mss/(p - df.int)) / resvar, 
                            numdf = p - df.int, dendf = rdf)
     if (robust == TRUE) {
       if (df.int == 0) {
         pos_coef <- 1:length(z$coefficients)
       } else {
-        pos_coef <- match(names(z$coefficients)[-match("(Intercept)",
+        pos_coef <- match(names(z$coefficients)[-match("(Intercept)", 
                                                        names(z$coefficients))],
                           names(z$coefficients))
       }
@@ -150,18 +155,24 @@
                   length(pos_coef))
       
       ans$fstatistic <- c(value = t(R_m %*% P_m) %*%
-                            (solve(varcovar[pos_coef,pos_coef],tol = 1e-100)) %*%
-                            (R_m %*% P_m)/(p - df.int), 
+                            (solve(varcovar[pos_coef,pos_coef], tol = 1e-100)) %*%
+                            (R_m %*% P_m) / (p - df.int), 
                           numdf = p - df.int, dendf = rdf)
       
     }
-    
   }
-  else ans$r.squared <- ans$adj.r.squared <- 0
+  else {
+    ans$r.squared <- 0
+    ans$adj.r.squared <- 0
+  }
+  
   ans$cov.unscaled <- R
   dimnames(ans$cov.unscaled) <- dimnames(ans$coefficients)[c(1,1)]
+  
   if (!is.null(z$na.action)) 
     ans$na.action <- z$na.action
+  
+  # Output ------------------------------------------------------------------
   class(ans) <- "summary.lm"
   ans
 }
