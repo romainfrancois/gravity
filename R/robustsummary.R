@@ -10,8 +10,6 @@
 #' 
 #' @return summary \code{lm} object
 #' 
-#' @import stats
-#' 
 #' @keywords internal
 #' 
 #' @noRd
