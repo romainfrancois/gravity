@@ -4,9 +4,11 @@
 #' @importFrom dplyr select mutate group_by ungroup row_number left_join
 #'   ends_with vars filter_at any_vars
 #' @importFrom tidyr gather spread
+#' @importFrom purrr as_vector
 #' @importFrom rlang sym syms quo
 #' @importFrom magrittr %>%
 #' @importFrom tibble tibble
-#' @import stats
+#' @importFrom survival Surv
+#' @importFrom stats lm as.formula
 #' @name gravity-exports
 NULL

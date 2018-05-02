@@ -168,52 +168,55 @@ ek_tobit <- function(y, dist, x, vce_robust = TRUE, data, ...) {
   stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
   stopifnot(is.character(x), all(x %in% colnames(data)))
 
-  # Transforming data, logging flows, distances --------------------------------
-
-  d                           <- data
-  d$dist_log                  <- (log(d[dist][,1]))
-  d$y_log                     <- log(d[y][,1]) 
-  d[d[y][,1] == 0,]$y_log     <- NA
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
+    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist))))
   
-  # Setting the lower and upper bounds -----------------------------------------
+  # Transforming data, logging distances ---------------------------------------
+  d <- d %>% 
+    mutate(
+      dist_log = log(!!sym(dist))
+    )
   
-  # lower bound
-  d$l_flows_EK1               <- NA
+  # Transforming data, logging flows -------------------------------------------
+  d <- d %>% 
+    mutate(
+      y_log_ek = ifelse(!!sym(y) > 0, log(!!sym(y)), NA)
+    )
   
-  # upper bound
-  d$l_flows_EK2               <- NA
+  # Minimum flows -----------------------------------------------------------
+  d <- d %>% 
+    group_by(!!sym("iso_d")) %>% 
+    mutate(
+      exportmin = min(!!sym("y_log_ek"), na.rm = TRUE)
+    )
   
-  # if trade flows > 0: lower bound = upper bound = logged flows
-  d[d$flow > 0,]$l_flows_EK1  <- d[d[y][,1] > 0,]$l_flows_EK2 <- d[d[y][,1] > 0,]$y_log
+  # Transforming censored variables -----------------------------------------
+  d <- d %>% 
+    mutate(
+      flows_ek1 = ifelse(!!sym(y) > 0, !!sym("y_log_ek"), -Inf)
+    ) %>% 
+    
+    mutate(
+      flows_ek2 = ifelse(!!sym(y) > 0, !!sym("flows_ek1"), !!sym("exportmin"))
+    ) %>% 
+    
+    ungroup()
   
-  # if trade flows == 0
-  d[d$flow == 0,]$l_flows_EK1 <- -Inf 
+  # Response variable -------------------------------------------------------
+  f1 <- d %>% select(!!sym("flows_ek1")) %>% as_vector()
+  f2 <- d %>% select(!!sym("flows_ek2")) %>% as_vector()
   
-  # we need ido_o and iso_d
-  exportmin                   <- sapply(unique(d["iso_d"][,1]), 
-                                        function(iso) 
-                                          min(d[d["iso_d"][,1] == iso,]$y_log, 
-                                              na.rm = TRUE))
+  survival_flows_ek <- survival::Surv(f1, f2, type = "interval2") %>% as_vector()
   
-  for (iso in unique(d["iso_d"][,1])) {
-    if (nrow(d[d$flow == 0 & d["iso_d"][,1] == iso,]) > 0) {
-      d[d$flow == 0 & d["iso_d"][,1] == iso,]$l_flows_EK2 <- exportmin[iso]
-    }
-  }
-  
-  # Create Survival Object
-  dta_int              <- survival::Surv(d$l_flows_EK1, d$l_flows_EK2, type = "interval2")
-  
-  # Model ----------------------------------------------------------------------
-  
+  # Model -------------------------------------------------------------------
   vars                 <- paste(c("dist_log", x), collapse = " + ")
-  form                 <- paste("dta_int", "~", vars)
-  form2                <- stats::as.formula(form)
-  model.ek_tobit       <- survival::survreg(form2, data = d, dist = "gaussian", robust = vce_robust)
+  form                 <- stats::as.formula(paste("survival_flows_ek", "~", vars))
+  model_ek_tobit       <- survival::survreg(form, data = d, dist = "gaussian", robust = vce_robust)
   
-  # Return --------------------------------------------------------------------- 
-  
-  return.object.1      <- summary(model.ek_tobit)
-  return.object.1$call <- form2
-  return(return.object.1)
+  # Return ------------------------------------------------------------------
+  return_object_1      <- summary(model_ek_tobit)
+  return_object_1$call <- form
+  return(return_object_1)
 }
