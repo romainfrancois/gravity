@@ -137,33 +137,50 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
   d <- data
   d <- d %>% 
     mutate(
-      dist_log_dd = log(!!sym(dist))
+      dist_log = log(!!sym(dist))
     )
   
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y_log_dd = log(!!sym(y))
+      y_log = log(!!sym(y))
     )
   
   # Substracting the means -----------------------------------------------------
   d <- d %>% 
+    mutate(
+      y_log_ddm = !!sym("y_log"),
+      dist_log_ddm = !!sym("dist_log")
+    ) %>% 
+    
     group_by(!!sym("iso_o"), add = FALSE) %>% 
     mutate(
-      y_log_dd = y_log_dd - mean(y_log_dd),
-      dist_log_dd = dist_log_dd - mean(dist_log_dd)
+      ym1 = mean(!!sym("y_log_ddm")),
+      dm1 = mean(!!sym("dist_log_ddm"))
     ) %>% 
     
     group_by(!!sym("iso_d"), add = FALSE) %>% 
     mutate(
-      y_log_dd = y_log_dd - mean(y_log_dd),
-      dist_log_dd = dist_log_dd - mean(dist_log_dd)
+      ym2 = mean(!!sym("y_log_ddm")),
+      dm2 = mean(!!sym("dist_log_ddm"))
+    ) %>% 
+    
+    group_by(!!sym("iso_o"), add = FALSE) %>% 
+    mutate(
+      y_log_ddm = !!sym("y_log_ddm") - !!sym("ym1"),
+      dist_log_ddm = !!sym("dist_log_ddm") - !!sym("dm1")
+    ) %>% 
+    
+    group_by(!!sym("iso_d"), add = FALSE) %>% 
+    mutate(
+      y_log_ddm = !!sym("y_log_ddm") - !!sym("ym2"),
+      dist_log_ddm = !!sym("dist_log_ddm") - !!sym("dm2")
     ) %>% 
     
     ungroup() %>% 
     mutate(
-      y_log_dd = y_log_dd + mean(y_log_dd),
-      dist_log_dd = dist_log_dd + mean(dist_log_dd)
+      y_log_ddm = !!sym("y_log_ddm") + mean(!!sym("y_log")),
+      dist_log_ddm = !!sym("dist_log_ddm") + mean(!!sym("dist_log"))
     )
   
   # Substracting the means for the other independent variables -----------------
@@ -171,80 +188,36 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
     select(!!sym("iso_o"), !!sym("iso_d"), x) %>% 
     gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d")) %>% 
     
-    group_by(!!sym("iso_o"), !!sym("key")) %>% 
-    mutate(mean.ind.var.1 = mean(!!sym("value"))) %>% 
-    
-    group_by(!!sym("iso_d"), !!sym("key"), add = FALSE) %>% 
-    mutate(mean.ind.var.2 = mean(!!sym("value"))) %>% 
+    mutate(key = paste0(!!sym("key"), "_ddm")) %>% 
     
     group_by(!!sym("iso_o"), !!sym("key"), add = FALSE) %>% 
-    mutate(dd1 = !!sym("value") - mean.ind.var.1) %>% 
+    mutate(ddm = !!sym("value") - mean(!!sym("value"))) %>% 
     
-    group_by(!!sym("iso_d"), add = FALSE) %>% 
-    mutate(dd1 = dd1 - mean.ind.var.2) %>% 
+    group_by(!!sym("iso_d"), !!sym("key"), add = FALSE) %>% 
+    mutate(ddm = !!sym("ddm") - mean(!!sym("value"))) %>% 
     
     ungroup() %>% 
-    mutate(dd1 = dd1 + mean(dd1))
-  
-  
-  for (j in 1:length(x)) {
-    ind.var.dd[[j]]     <- d[x[j]][,1]
-    mean.ind.var.1[[j]] <- tapply(d[x[j]][,1], d$iso_o, mean)
-    mean.ind.var.2[[j]] <- tapply(d[x[j]][,1], d$iso_d, mean)
-  }
-  
-  w   <- letters[1:length(x)]
-  
-  d_2 <- d
-  for (j in 1:length(x)) {
-    d_2[w[j]] <- ind.var.dd[[j]]
-  }
-
-  d_3 <- d_2
-  
-  for (j in 1:length(x)) {
+    mutate(value = !!sym("ddm") + mean(!!sym("value"))) %>% 
     
-    for (i in unique(d_2$iso_o)) {
-      d_2[d_2$iso_o == i,][w[j]] <- d_2[d_2$iso_o == i,][w[j]] - mean.ind.var.1[[j]][i]
-    }
-    
-    for (i in unique(d_2$iso_d)) {
-      d_2[d_2$iso_d == i,][w[j]] <- d_2[d_2$iso_d == i,][w[j]] - mean.ind.var.2[[j]][i]
-    }
-    
-    d_2[w[j]] <- d_2[w[j]] + mean(d_2[x[j]][,1])
-    d_3[x[j]] <- d_2[w[j]]
-  }
+    select(!!!syms(c("iso_o", "iso_d", "key", "value"))) %>% 
+    spread(!!sym("key"), !!sym("value"))
   
   # Model ----------------------------------------------------------------------
+  dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
+    select(!!sym("y_log_ddm"), ends_with("_ddm"))
   
-  x_dd <- paste0(x,"_dd")
+  model.ddm <- stats::lm(y_log_ddm ~ . + 0, data = dmodel)
   
-  # new row in dataset for independent _dd variable
-  for (j in x) {
-    l       <- which(x == j)
-    dd      <- x_dd[l]
-    d_3[dd] <- NA
-    d_3[dd] <- d_3[x[l]]
-  }
-  
-  vars      <- paste(c("dist_log_dd", x_dd), collapse = " + ")
-  form      <- paste("y_log_dd", "~", vars, "- 1")
-  form2     <- stats::as.formula(form)
-  
-  model.ddm <- stats::lm(form2, data = d_3)   
-
   # Return ---------------------------------------------------------------------
-  
   if (vce_robust == TRUE) {
     return.object.1         <- .robustsummary.lm(model.ddm, robust = TRUE)
-    return.object.1$call    <- form2
+    return.object.1$call    <- as.formula(model.ddm)
     return(return.object.1)
   }
   
   if (vce_robust == FALSE) {
     return.object.1        <- .robustsummary.lm(model.ddm, robust = FALSE)
-    return.object.1$call   <- form2
+    return.object.1$call   <- as.formula(model.ddm)
     return(return.object.1)
   }
 }

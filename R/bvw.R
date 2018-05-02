@@ -159,8 +159,8 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y_inc = !!sym(y) / (!!sym(inc_o) * !!sym(inc_d)),
-      y_inc_log = log(!!sym("y_inc"))
+      y = !!sym(y) / (!!sym(inc_o) * !!sym(inc_d)),
+      y_log_bvw = log(!!sym("y"))
     )
   
   # GDP weights ----------------------------------------------------------------
@@ -210,27 +210,27 @@ bvw <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
     ungroup() %>% 
     mutate(mr3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("value"))) %>% 
     
-    mutate(value = value - mr1 - mr2 + mr3) %>% 
+    mutate(value = !!sym("value") - !!sym("mr1") - !!sym("mr2") + !!sym("mr3")) %>% 
     
     select(!!!syms(c("iso_o", "iso_d", "key", "value"))) %>% 
     spread(!!sym("key"), !!sym("value"))
   
   # Model ----------------------------------------------------------------------
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
-    select(!!sym("y_inc_log"), ends_with("_mr"))
+    select(!!sym("y_log_bvw"), ends_with("_mr"))
   
-  model.bvu <- stats::lm(y_inc_log ~ ., data = dmodel)
+  model.bvw <- stats::lm(y_log_bvw ~ ., data = dmodel)
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return.object.1      <- .robustsummary.lm(model.bvu, robust = TRUE)
-    return.object.1$call <- as.formula(model.bvu)
+    return.object.1      <- .robustsummary.lm(model.bvw, robust = TRUE)
+    return.object.1$call <- as.formula(model.bvw)
     return(return.object.1)
   }
   
   if (vce_robust == FALSE) {
-    return.object.1      <- .robustsummary.lm(model.bvu, robust = FALSE)
-    return.object.1$call <- as.formula(model.bvu)
+    return.object.1      <- .robustsummary.lm(model.bvw, robust = FALSE)
+    return.object.1$call <- as.formula(model.bvw)
     return(return.object.1)
   }
 }

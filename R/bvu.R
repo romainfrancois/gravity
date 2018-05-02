@@ -158,8 +158,8 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y_inc = !!sym(y) / (!!sym(inc_o) * !!sym(inc_d)),
-      y_inc_log = log(!!sym("y_inc"))
+      y = !!sym(y) / (!!sym(inc_o) * !!sym(inc_d)),
+      y_log_bvu = log(!!sym("y"))
     )
 
   # Multilateral Resistance (MR) for distance ----------------------------------
@@ -201,9 +201,9 @@ bvu <- function(y, dist, x, inc_o, inc_d, vce_robust = TRUE, data, ...) {
   
   # Model ----------------------------------------------------------------------
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
-    select(!!sym("y_inc_log"), ends_with("_mr"))
+    select(!!sym("y_log_bvu"), ends_with("_mr"))
   
-  model.bvu <- stats::lm(y_inc_log ~ ., data = dmodel)
+  model.bvu <- stats::lm(y_log_bvu ~ ., data = dmodel)
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
