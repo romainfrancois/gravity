@@ -22,7 +22,7 @@
       stop("lm object does not have a proper 'qr' component.\n Rank zero or should not have used lm(.., qr=FALSE).")
     r
   }
-
+  
   # add extension for robust standard errors
   if (robust == TRUE) { 
     # save variable that are necessary to calcualte robust sd
@@ -134,7 +134,7 @@
     ans$adj.r.squared <- 1 - (1 - ans$r.squared) * ((n - 
                                                        df.int)/rdf)
     ans$fstatistic    <- c(value = (mss/(p - df.int))/resvar, 
-                        numdf = p - df.int, dendf = rdf)
+                           numdf = p - df.int, dendf = rdf)
     if (robust == TRUE) {
       if (df.int == 0) {
         pos_coef <- 1:length(z$coefficients)

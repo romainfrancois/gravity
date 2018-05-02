@@ -161,12 +161,13 @@
 #' @export 
 
 ek_tobit <- function(y, dist, x, vce_robust = TRUE, data, ...) {
-  if (!is.data.frame(data))                                                   stop("'data' must be a 'data.frame'")
-  if ((vce_robust %in% c(TRUE, FALSE)) == FALSE)                              stop("'vce_robust' has to be either 'TRUE' or 'FALSE'")
-  if (!is.character(y)    | !y %in% colnames(data)    | length(y) != 1)       stop("'y' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(dist) | !dist %in% colnames(data) | length(dist) != 1)    stop("'dist' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(x)    | !all(x %in% colnames(data)))                      stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
-  
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
+  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
+  stopifnot(is.character(x), all(x %in% colnames(data)))
+
   # Transforming data, logging flows, distances --------------------------------
 
   d                           <- data

@@ -10,7 +10,6 @@ inc_o="gdp_o"
 inc_d="gdp_d"
 vce_robust = TRUE
 
-
 # summary -----------------------------------------------------------------
 
 .robustsummary.lm <- function(object, robust = FALSE, ...) {
@@ -166,8 +165,15 @@ vce_robust = TRUE
 # bvumod ---------------------------------------------------------------------
 
 bvumod <- function() {
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
+    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    
+    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
+    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+  
   # Transforming data, logging distances ---------------------------------------
-  d <- data
   d <- d %>% 
     mutate(
       dist_log = log(!!sym(dist))
@@ -177,20 +183,20 @@ bvumod <- function() {
   d <- d %>% 
     mutate(
       y = !!sym(y) / (!!sym(inc_o) * !!sym(inc_d)),
-      y_log_bvu = log(!!sym("y"))
+      y_log_bvu = log(!!sym(y))
     )
   
   # Multilateral Resistance (MR) for distance ----------------------------------
   d <- d %>% 
     group_by(!!sym("iso_o")) %>% 
-    mutate(mean.dist_log.1 = mean(!!sym("dist_log"))) %>% 
+    mutate(mean_dist_log_1 = mean(!!sym("dist_log"))) %>% 
     group_by(!!sym("iso_d"), add = FALSE) %>% 
-    mutate(mean.dist_log.2 = mean(!!sym("dist_log"))) %>% 
+    mutate(mean_dist_log_2 = mean(!!sym("dist_log"))) %>% 
     ungroup() %>% 
     mutate(
-      mean.dist_log.3 = mean(!!sym("dist_log")),
+      mean_dist_log_3 = mean(!!sym("dist_log")),
       dist_log_mr = !!sym("dist_log") - 
-        (!!sym("mean.dist_log.1") + !!sym("mean.dist_log.2") - !!sym("mean.dist_log.3"))
+        (!!sym("mean_dist_log_1") + !!sym("mean_dist_log_2") - !!sym("mean_dist_log_3"))
     )
   
   # Multilateral Resistance (MR) for the other independent variables -----------
@@ -199,15 +205,15 @@ bvumod <- function() {
     gather(!!sym("key"), !!sym("value"), -!!sym("iso_o"), -!!sym("iso_d")) %>% 
     
     group_by(!!sym("iso_o"), !!sym("key")) %>% 
-    mutate(mean.dist_log.1 = mean(!!sym("value"))) %>% 
+    mutate(mean_dist_log_1 = mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     group_by(!!sym("iso_d"), !!sym("key")) %>% 
-    mutate(mean.dist_log.2 = mean(!!sym("value"))) %>% 
+    mutate(mean_dist_log_2 = mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     group_by(!!sym("key")) %>% 
     mutate(
-      mean.dist_log.3 = mean(!!sym("value")),
-      dist_log_mr = !!sym("value") - (!!sym("mean.dist_log.1") + !!sym("mean.dist_log.2") - !!sym("mean.dist_log.3"))
+      mean_dist_log_3 = mean(!!sym("value"), na.rm = TRUE),
+      dist_log_mr = !!sym("value") - (!!sym("mean_dist_log_1") + !!sym("mean_dist_log_2") - !!sym("mean_dist_log_3"))
     ) %>% 
     
     ungroup() %>% 
@@ -221,19 +227,19 @@ bvumod <- function() {
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
     select(!!sym("y_log_bvu"), ends_with("_mr"))
   
-  model.bvu <- stats::lm(y_log_bvu ~ ., data = dmodel)
+  model_bvu <- stats::lm(y_log_bvu ~ ., data = dmodel)
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return.object.1      <- .robustsummary.lm(model.bvu, robust = TRUE)
-    return.object.1$call <- as.formula(model.bvu)
-    return(return.object.1)
+    return_object_1      <- .robustsummary.lm(model_bvu, robust = TRUE)
+    return_object_1$call <- as.formula(model_bvu)
+    return(return_object_1)
   }
   
   if (vce_robust == FALSE) {
-    return.object.1      <- .robustsummary.lm(model.bvu, robust = FALSE)
-    return.object.1$call <- as.formula(model.bvu)
-    return(return.object.1)
+    return_object_1      <- .robustsummary.lm(model_bvu, robust = FALSE)
+    return_object_1$call <- as.formula(model_bvu)
+    return(return_object_1)
   }
 }
 bvumod()
@@ -360,9 +366,16 @@ bvuorig()
 # bvwmod ---------------------------------------------------------------------
 
 bvwmod <- function() {
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
+    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    
+    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
+    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+  
   # Transforming data, logging distances ---------------------------------------
-  d <- data
-  d <- d %>% 
+  d <- data %>% 
     mutate(
       dist_log = log(!!sym(dist))
     )
@@ -391,19 +404,19 @@ bvwmod <- function() {
   d <- d %>% 
     group_by(!!sym("iso_o"), add = FALSE) %>% 
     mutate(
-      mr.dist.1 = sum(!!sym("theta_j") * !!sym("dist_log"))
+      mr_dist_1 = sum(!!sym("theta_j") * !!sym("dist_log"))
     ) %>% 
     
     group_by(!!sym("iso_d"), add = FALSE) %>% 
     mutate(
-      mr.dist.2 = sum(!!sym("theta_i") * !!sym("dist_log"))
+      mr_dist_2 = sum(!!sym("theta_i") * !!sym("dist_log"))
     ) %>% 
     
     ungroup() %>% 
     
-    mutate(mr.dist.3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("dist_log"))) %>% 
+    mutate(mr_dist_3 = sum(!!sym("theta_i") * !!sym("theta_j") * !!sym("dist_log"))) %>% 
     
-    mutate(dist_log_mr = !!sym("dist_log") - !!sym("mr.dist.1") - !!sym("mr.dist.2") + !!sym("mr.dist.3"))
+    mutate(dist_log_mr = !!sym("dist_log") - !!sym("mr_dist_1") - !!sym("mr_dist_2") + !!sym("mr_dist_3"))
   
   # Multilateral resistance (MR) for the other independent variables -----------
   d2 <- d %>% 
@@ -430,19 +443,19 @@ bvwmod <- function() {
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
     select(!!sym("y_log_bvw"), ends_with("_mr"))
   
-  model.bvw <- stats::lm(y_log_bvw ~ ., data = dmodel)
+  model_bvw <- stats::lm(y_log_bvw ~ ., data = dmodel)
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return.object.1      <- .robustsummary.lm(model.bvw, robust = TRUE)
-    return.object.1$call <- as.formula(model.bvw)
-    return(return.object.1)
+    return_object_1      <- .robustsummary.lm(model_bvw, robust = TRUE)
+    return_object_1$call <- as.formula(model_bvw)
+    return(return_object_1)
   }
   
   if (vce_robust == FALSE) {
-    return.object.1      <- .robustsummary.lm(model.bvw, robust = FALSE)
-    return.object.1$call <- as.formula(model.bvw)
-    return(return.object.1)
+    return_object_1      <- .robustsummary.lm(model_bvw, robust = FALSE)
+    return_object_1$call <- as.formula(model_bvw)
+    return(return_object_1)
   }
 }
 bvwmod()

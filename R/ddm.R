@@ -133,6 +133,14 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
   stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
   stopifnot(is.character(x), all(x %in% colnames(data)))
 
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
+    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    
+    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
+    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+  
   # Transforming data, logging distances ---------------------------------------
   d <- data
   d <- d %>% 
@@ -206,18 +214,18 @@ ddm <- function(y, dist, x, vce_robust=TRUE, data, ...) {
   dmodel <- left_join(d, d2, by = c("iso_o", "iso_d")) %>% 
     select(!!sym("y_log_ddm"), ends_with("_ddm"))
   
-  model.ddm <- stats::lm(y_log_ddm ~ . + 0, data = dmodel)
+  model_ddm <- stats::lm(y_log_ddm ~ . + 0, data = dmodel)
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return.object.1         <- .robustsummary.lm(model.ddm, robust = TRUE)
-    return.object.1$call    <- as.formula(model.ddm)
-    return(return.object.1)
+    return_object_1         <- .robustsummary.lm(model_ddm, robust = TRUE)
+    return_object_1$call    <- as.formula(model_ddm)
+    return(return_object_1)
   }
   
   if (vce_robust == FALSE) {
-    return.object.1        <- .robustsummary.lm(model.ddm, robust = FALSE)
-    return.object.1$call   <- as.formula(model.ddm)
-    return(return.object.1)
+    return_object_1        <- .robustsummary.lm(model_ddm, robust = FALSE)
+    return_object_1$call   <- as.formula(model_ddm)
+    return(return_object_1)
   }
 }
