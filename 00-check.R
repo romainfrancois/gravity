@@ -1182,3 +1182,81 @@ etmod <- function() {
   return(return_object_1)
 }
 etmod()
+
+
+# tobit -------------------------------------------------------------------
+
+added_constant = 1
+
+tobitorig <- function() {
+  if(!is.data.frame(data))                                                stop("'data' must be a 'data.frame'")
+  if(!is.character(y)     | !y%in%colnames(data)     | length(y)!=1)      stop("'y' must be a character of length 1 and a colname of 'data'")
+  if(!is.character(dist)  | !dist%in%colnames(data)  | length(dist)!=1)   stop("'dist' must be a character of length 1 and a colname of 'data'")
+  if(!is.character(x)     | !all(x%in%colnames(data)))                    stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
+  
+  if (!is.numeric(added_constant))                                        stop("argument 'added_constant' must be a number")
+  if (length(added_constant) != 1)                                        stop("argument 'added_constant' must be a scalar (single number)")
+  
+  # Transforming data, logging flows, distances --------------------------------
+  
+  d                           <- data
+  d$dist_log                  <- (log(d[dist][,1]))
+  d$y_plus1                   <- d[y][,1] + added_constant
+  d$y_plus1_log               <- log(d$y_plus1)
+  
+  # Model ----------------------------------------------------------------------
+  
+  vars                        <- paste(c("dist_log", x), collapse = " + ")
+  form                        <- paste("y_plus1_log", "~", vars)
+  form2                       <- stats::as.formula(form)
+  model.Tobit                 <- censReg::censReg(formula = form2, left = min(d$y_plus1_log), right = Inf, data = d, start = NULL)
+  
+  # Return --------------------------------------------------------------------- 
+  
+  return.object.1           <- summary(model.Tobit)
+  return.object.1$call      <- form2
+  return(return.object.1)
+}
+tobitorig()
+
+tobitmod <- function() {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
+  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
+  stopifnot(is.character(x), all(x %in% colnames(data)))
+  stopifnot(is.numeric(added_constant))
+  stopifnot(length(added_constant) == 1)
+  
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
+    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist))))
+  
+  # Transforming data, logging distances ---------------------------------------
+  d <- d %>% 
+    mutate(
+      dist_log = log(!!sym(dist))
+    )
+  
+  # Transforming data, logging flows -------------------------------------------
+  d <- d %>% 
+    rowwise() %>% 
+    mutate(y_cens_log_tobit = log(sum(!!sym(y), added_constant, na.rm = TRUE))) %>% 
+    ungroup()
+  
+  ypc_log_min <- min(d %>% select(!!sym("y_cens_log_tobit")), na.rm = TRUE)
+  
+  # Model ----------------------------------------------------------------------
+  vars        <- paste(c("dist_log", x), collapse = " + ")
+  form        <- stats::as.formula(paste("y_cens_log_tobit", "~", vars))
+  model_tobit <- censReg::censReg(formula = form, 
+                                  left = ypc_log_min, right = Inf, 
+                                  data = d, start = NULL)
+  
+  # Return --------------------------------------------------------------------- 
+  return_object      <- summary(model_tobit)
+  return_object$call <- form
+  return(return_object)
+}
+tobitmod()

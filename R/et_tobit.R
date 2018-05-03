@@ -84,14 +84,6 @@
 #' logged variable can be used in \code{x}.
 #' Interaction terms can be added.
 #' 
-#' @param lab_o variable name (type: character) of the label of the country 
-#' (i.e ISO code) of origin in the dataset \code{data}. The variables 
-#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
-#' 
-#' @param lab_d variable name (type: character) of the label of the country 
-#' (i.e ISO code) of destination in the dataset \code{data}. The variables 
-#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.
-#' 
 #' @param data name of the dataset to be used (type: character). 
 #' To estimate gravity equations, a square gravity dataset including bilateral 
 #' flows defined by the argument \code{y}, ISO-codes of type character 
@@ -153,7 +145,7 @@
 #'     )
 #' 
 #' et_tobit(y = "flow", dist = "distw", 
-#' x = c("rta","lgdp_o","lgdp_d"), lab_o = "iso_o", lab_d = "iso_d",
+#' x = c("rta","lgdp_o","lgdp_d"),
 #' data = gravity_zeros)
 #' }
 #' 
@@ -170,7 +162,7 @@
 #' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
 #' et_tobit(y = "flow", dist = "distw", 
-#' x = c("rta","lgdp_o","lgdp_d"), lab_o = "iso_o", lab_d = "iso_d",
+#' x = c("rta","lgdp_o","lgdp_d"),
 #' data = grav_small_zeros)
 #' }
 #' 
@@ -182,14 +174,12 @@
 #' 
 #' @export 
 
-et_tobit <- function(y, dist, x, lab_o, lab_d, data, ...) {
+et_tobit <- function(y, dist, x, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
   stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
   stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
-  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
@@ -222,18 +212,18 @@ et_tobit <- function(y, dist, x, lab_o, lab_d, data, ...) {
 
   d <- d %>% 
     rowwise() %>% 
-    mutate(y_plus_min_flow_log = log(sum(!!sym(y), y2min, na.rm = TRUE))) %>% 
+    mutate(y_cens_log_et = log(sum(!!sym(y), y2min, na.rm = TRUE))) %>% 
     ungroup()
   
   # Model -------------------------------------------------------------------
   vars           <- paste(c("dist_log", x), collapse = " + ")
-  form           <- stats::as.formula(paste("y_plus_min_flow_log", "~", vars))
+  form           <- stats::as.formula(paste("y_cens_log_et", "~", vars))
   model_et_tobit <- censReg::censReg(formula = form, 
                                      left = y2min_log, right = Inf, 
                                      data = d, start = NULL)
   
   # Return ------------------------------------------------------------------
-  return_object_1      <- summary(model_et_tobit)
-  return_object_1$call <- form
-  return(return_object_1)
+  return_object      <- summary(model_et_tobit)
+  return_object$call <- form
+  return(return_object)
 }

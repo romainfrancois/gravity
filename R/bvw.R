@@ -245,14 +245,14 @@ bvw <- function(y, dist, x, inc_o, inc_d, lab_o, lab_d, vce_robust = TRUE, data,
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return_object_1      <- robust_summary(model_bvw, robust = TRUE)
-    return_object_1$call <- as.formula(model_bvw)
-    return(return_object_1)
+    return_object      <- robust_summary(model_bvw, robust = TRUE)
+    return_object$call <- as.formula(model_bvw)
+    return(return_object)
   }
   
   if (vce_robust == FALSE) {
-    return_object_1      <- robust_summary(model_bvw, robust = FALSE)
-    return_object_1$call <- as.formula(model_bvw)
-    return(return_object_1)
+    return_object      <- robust_summary(model_bvw, robust = FALSE)
+    return_object$call <- as.formula(model_bvw)
+    return(return_object)
   }
 }
