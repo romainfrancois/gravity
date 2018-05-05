@@ -27,45 +27,35 @@
 #' the estimation of a gravity equation by \code{bvu} using panel data, 
 #' we do not recommend to apply this method in this case.
 #' 
-#' @param y name (type: character) of the dependent variable in the dataset 
+#' @param dependent_variable name (type: character) of the dependent variable in the dataset 
 #' \code{data}, e.g. trade flows. This dependent variable is divided by the 
 #' product of unilateral incomes (named \code{inc_o} and \code{inc_d}, e.g. 
 #' GDPs or GNPs of the countries of interest) and logged afterwards.
 #' The transformed variable is then used as the dependent variable in the 
 #' estimation.
 #' 
-#' @param dist name (type: character) of the distance variable in the dataset 
+#' @param regressors name (type: character) of the distance variable () in the dataset 
 #' \code{data} containing a measure of distance between all pairs of bilateral
-#' partners. It is logged automatically when the function is executed. 
+#' partners and bilateral variables that should be taken as the independent variables 
+#' in the estimation. The distance is logged automatically when the function is executed. 
+#' If an independent variable is a dummy variable, it should be of type numeric (0/1) in the dataset. 
+#' If an independent variable is defined as a ratio, it should be logged. 
+#' Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes} 
+#' As country specific effects are subdued due to demeaning, no further unilateral variables 
+#' equivalent to \code{c(gdp origin, gdp destination)} can be added.
+#' Write this argument as \code{c(distance, other variables)}. 
 #' 
-#' @param x vector of names (type: character) of those bilateral variables in 
-#' the dataset \code{data} that should be taken as the independent variables 
-#' in the estimation. If an independent variable is a dummy variable,
-#' it should be of type numeric (0/1) in the dataset. If an independent variable 
-#' is defined as a ratio, it should be logged. Unilateral metric variables 
-#' such as GDPs should be inserted via the arguments \code{inc_o} 
-#' for the country of origin and \code{inc_d} for the country of destination.
-#' As country specific effects are subdued due to demeaning, no further
-#' unilateral variables apart from \code{inc_o} and \code{inc_d} can be 
-#' added.
+#' @param incomes variable name (type: character) of the income of the country of 
+#' origin (i.e \code{gdp_o}) and destination (i.e \code{gdp_d}) in the dataset \code{data}. 
+#' The dependent variable \code{dependent_variable} is divided by the product of the incomes.
+#' Write this argument as \code{c(origin, destination)}. 
 #' 
-#' @param inc_o variable name (type: character) of the income of the country of 
-#' origin in the dataset \code{data}. The dependent variable \code{y} is
-#' divided by the product of the incomes \code{inc_d} and \code{inc_o}. 
+#' @param codes variable name (type: character) of the code of the country 
+#' (i.e ISO-3 code) of origin (i.e \code{iso_o}) and destination (i.e \code{iso_d}) in the dataset \code{data}. 
+#' The variables are grouped by using \code{code_o} and \code{code_d} to obtain estimates.
+#' Write this argument as \code{c(origin, destination)}.
 #' 
-#' @param inc_d variable name (type: character) of the income of the country of 
-#' destination in the dataset \code{data}. The dependent variable \code{y} is
-#' divided by the product of the incomes \code{inc_d} and \code{inc_o}. 
-#' 
-#' @param lab_o variable name (type: character) of the label of the country 
-#' (i.e ISO code) of origin in the dataset \code{data}. The variables 
-#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
-#' 
-#' @param lab_d variable name (type: character) of the label of the country 
-#' (i.e ISO code) of destination in the dataset \code{data}. The variables 
-#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
-#' 
-#' @param vce_robust robust (type: logic) determines whether a robust 
+#' @param vce_robust robust (type: logical) determines whether a robust 
 #' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
 #' If set \code{TRUE} the estimation results are consistent with the 
 #' Stata code provided at the website
@@ -73,18 +63,18 @@
 #' when choosing robust estimation.
 #' 
 #' @param data name of the dataset to be used (type: character). 
-#' To estimate gravity equations, a square gravity dataset including bilateral 
-#' flows defined by the argument \code{y}, ISO-codes of type character 
-#' (called \code{iso_o} for the country of origin and \code{iso_d} for the 
-#' destination country), a distance measure defined by the argument \code{dist} 
-#' and other potential influences given as a vector in \code{x} are required. 
-#' All dummy variables should be of type numeric (0/1). Missing trade flows as 
-#' well as incomplete rows should be excluded from the dataset. 
-#' Furthermore, flows equal to zero should be excluded as the gravity equation 
-#' is estimated in its additive form.
-#' As, to our knowledge at the moment, there is no explicit literature covering 
-#' the estimation of a gravity equation by \code{bvu} 
-#' using panel data, cross-sectional data should be used. 
+#' As an example, to estimate gravity equations you need a square dataset including bilateral 
+#' flows defined by the argument \code{dependent_variable}, ISO-codes of type character 
+#' (i.e. \code{iso_o} for the country of origin and \code{iso_d} for the 
+#' destination country), a distance measure defined by the argument \code{distance} 
+#' and other potential influences (i.e. contiguity or common currency) given as a vector in 
+#' \code{regressors} are required. 
+#' All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
+#' null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates. 
+#' The user should perform some data cleaning beforehand to remove observations that contain entries that 
+#' can distort estimates.
+#' As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
+#' equation by \code{bvu} using panel data, cross-sectional data should be used. 
 #' 
 #' @param ... additional arguments to be passed to \code{bvu}.
 #' 
@@ -118,12 +108,12 @@
 #' \dontrun{
 #' data(gravity_no_zeros)
 #' 
-#' bvu(y = "flow", dist = "distw", x = c("rta"), 
-#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+#' bvu(dependent_variable = "flow", regressors = c("distw", "rta"), 
+#' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
 #' vce_robust = TRUE, data = gravity_no_zeros)
 #' 
-#' bvu(y = "flow", dist = "distw", x = c("rta", "contig", "comcur"), 
-#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+#' bvu(dependent_variable = "flow", regressors = c("distw", "rta", "contig", "comcur"), 
+#' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
 #' vce_robust = TRUE, data = gravity_no_zeros)
 #' }
 #' 
@@ -136,8 +126,8 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' bvu(y = "flow", dist = "distw", x = c("rta"), 
-#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+#' bvu(dependent_variable = "flow", regressors = c("distw", "rta"), 
+#' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
 #' vce_robust = TRUE, data = grav_small)
 #' }
 #' 
@@ -150,45 +140,52 @@
 #' 
 #' @export
 
-bvu <- function(y, dist, x, inc_o, inc_d, lab_o, lab_d, vce_robust = TRUE, data, ...) {
+bvu <- function(dependent_variable, regressors, incomes, codes, vce_robust = TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.character(inc_o) | inc_o %in% colnames(data) | length(inc_o) == 1)
-  stopifnot(is.character(inc_d) | inc_d %in% colnames(data) | length(inc_d) == 1)
-  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
-  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)))
+  stopifnot(is.character(incomes) | all(incomes %in% colnames(data)) | length(incomes) == 2)
+  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
+
+  # Split input vectors -----------------------------------------------------
+  inc_o <- incomes[[1]]
+  inc_d <- incomes[[2]]
+  
+  code_o <- codes[[1]]
+  code_d <- codes[[2]]
+  
+  distance <- regressors[[1]]
+  additional_regressors <- regressors[[-1]]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance)))) %>% 
     
-    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
-    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+    filter_at(vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0)) %>% 
+    filter_at(vars(!!sym(dependent_variable)), any_vars(is.finite(!!sym(dependent_variable))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
       y_log_bvu = log(
-        !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
+        !!sym(dependent_variable) / (!!sym(inc_o) * !!sym(inc_d))
       )
     )
   
   # Multilateral Resistance (MR) for distance ----------------------------------
   d <- d %>% 
-    group_by(!!sym(lab_o)) %>% 
+    group_by(!!sym(code_o)) %>% 
     mutate(mean_dist_log_1 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
-    group_by(!!sym(lab_d), add = FALSE) %>% 
+    group_by(!!sym(code_d), add = FALSE) %>% 
     mutate(mean_dist_log_2 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
     ungroup() %>% 
     mutate(
@@ -199,13 +196,13 @@ bvu <- function(y, dist, x, inc_o, inc_d, lab_o, lab_d, vce_robust = TRUE, data,
   
   # Multilateral Resistance (MR) for the other independent variables -----------
   d2 <- d %>% 
-    select(!!sym(lab_o), !!sym(lab_d), x) %>% 
-    gather(!!sym("key"), !!sym("value"), -!!sym(lab_o), -!!sym(lab_d)) %>% 
+    select(!!sym(code_o), !!sym(code_d), additional_regressors) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym(code_o), -!!sym(code_d)) %>% 
     
-    group_by(!!sym(lab_o), !!sym("key")) %>% 
+    group_by(!!sym(code_o), !!sym("key")) %>% 
     mutate(mean_dist_log_1 = mean(!!sym("value"), na.rm = TRUE)) %>% 
     
-    group_by(!!sym(lab_d), !!sym("key")) %>% 
+    group_by(!!sym(code_d), !!sym("key")) %>% 
     mutate(mean_dist_log_2 = mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     group_by(!!sym("key")) %>% 
@@ -217,11 +214,11 @@ bvu <- function(y, dist, x, inc_o, inc_d, lab_o, lab_d, vce_robust = TRUE, data,
     ungroup() %>% 
     mutate(key = paste0(!!sym("key"), "_mr")) %>% 
     
-    select(!!!syms(c(lab_o, lab_d, "key", "dist_log_mr"))) %>% 
+    select(!!!syms(c(code_o, code_d, "key", "dist_log_mr"))) %>% 
     spread(!!sym("key"), !!sym("dist_log_mr"))
   
   # Model ----------------------------------------------------------------------
-  dmodel <- left_join(d, d2, by = c(lab_o, lab_d)) %>% 
+  dmodel <- left_join(d, d2, by = c(code_o, code_d)) %>% 
     select(!!sym("y_log_bvu"), ends_with("_mr"))
   
   model_bvu <- stats::lm(y_log_bvu ~ ., data = dmodel)

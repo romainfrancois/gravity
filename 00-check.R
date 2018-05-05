@@ -1,9 +1,12 @@
 library(tidyverse)
 library(rlang)
 
+load("~/GitHub/gravity/data/gravity_no_zeros.rdata")
 data=as.data.frame(gravity_no_zeros)
 y="flow"
+dependent_variable = y
 dist="distw"
+distance=dist
 x=c("rta")
 #x=c("rta", "comcur", "contig")
 inc_o="gdp_o"
@@ -11,6 +14,10 @@ inc_d="gdp_d"
 lab_o = "iso_o"
 lab_d = "iso_d"
 vce_robust = TRUE
+
+incomes <- c("gdp_o", "gdp_d")
+codes <- c("iso_o", "iso_d")
+regressors = c("distw", "rta")
 
 # summary -----------------------------------------------------------------
 
@@ -449,41 +456,48 @@ bvumod <- function() {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.character(inc_o) | inc_o %in% colnames(data) | length(inc_o) == 1)
-  stopifnot(is.character(inc_d) | inc_d %in% colnames(data) | length(inc_d) == 1)
-  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
-  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)))
+  stopifnot(is.character(incomes) | all(incomes %in% colnames(data)) | length(incomes) == 2)
+  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
+  
+  # Split input vectors -----------------------------------------------------
+  inc_o <- incomes[[1]]
+  inc_d <- incomes[[2]]
+  
+  code_o <- codes[[1]]
+  code_d <- codes[[2]]
+  
+  distance <- regressors[[1]]
+  x <- regressors[[-1]]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance)))) %>% 
     
-    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
-    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+    filter_at(vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0)) %>% 
+    filter_at(vars(!!sym(dependent_variable)), any_vars(is.finite(!!sym(dependent_variable))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
       y_log_bvu = log(
-        !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
+        !!sym(dependent_variable) / (!!sym(inc_o) * !!sym(inc_d))
       )
     )
   
   # Multilateral Resistance (MR) for distance ----------------------------------
   d <- d %>% 
-    group_by(!!sym(lab_o)) %>% 
+    group_by(!!sym(code_o)) %>% 
     mutate(mean_dist_log_1 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
-    group_by(!!sym(lab_d), add = FALSE) %>% 
+    group_by(!!sym(code_d), add = FALSE) %>% 
     mutate(mean_dist_log_2 = mean(!!sym("dist_log"), na.rm = TRUE)) %>% 
     ungroup() %>% 
     mutate(
@@ -494,13 +508,13 @@ bvumod <- function() {
   
   # Multilateral Resistance (MR) for the other independent variables -----------
   d2 <- d %>% 
-    select(!!sym(lab_o), !!sym(lab_d), x) %>% 
-    gather(!!sym("key"), !!sym("value"), -!!sym(lab_o), -!!sym(lab_d)) %>% 
+    select(!!sym(code_o), !!sym(code_d), x) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym(code_o), -!!sym(code_d)) %>% 
     
-    group_by(!!sym(lab_o), !!sym("key")) %>% 
+    group_by(!!sym(code_o), !!sym("key")) %>% 
     mutate(mean_dist_log_1 = mean(!!sym("value"), na.rm = TRUE)) %>% 
     
-    group_by(!!sym(lab_d), !!sym("key")) %>% 
+    group_by(!!sym(code_d), !!sym("key")) %>% 
     mutate(mean_dist_log_2 = mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     group_by(!!sym("key")) %>% 
@@ -512,26 +526,26 @@ bvumod <- function() {
     ungroup() %>% 
     mutate(key = paste0(!!sym("key"), "_mr")) %>% 
     
-    select(!!!syms(c(lab_o, lab_d, "key", "dist_log_mr"))) %>% 
+    select(!!!syms(c(code_o, code_d, "key", "dist_log_mr"))) %>% 
     spread(!!sym("key"), !!sym("dist_log_mr"))
   
   # Model ----------------------------------------------------------------------
-  dmodel <- left_join(d, d2, by = c(lab_o, lab_d)) %>% 
+  dmodel <- left_join(d, d2, by = c(code_o, code_d)) %>% 
     select(!!sym("y_log_bvu"), ends_with("_mr"))
   
   model_bvu <- stats::lm(y_log_bvu ~ ., data = dmodel)
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return_object_1      <- robust_summary(model_bvu, robust = TRUE)
-    return_object_1$call <- as.formula(model_bvu)
-    return(return_object_1)
+    return_object      <- robust_summary(model_bvu, robust = TRUE)
+    return_object$call <- as.formula(model_bvu)
+    return(return_object)
   }
   
   if (vce_robust == FALSE) {
-    return_object_1      <- robust_summary(model_bvu, robust = FALSE)
-    return_object_1$call <- as.formula(model_bvu)
-    return(return_object_1)
+    return_object      <- robust_summary(model_bvu, robust = FALSE)
+    return_object$call <- as.formula(model_bvu)
+    return(return_object)
   }
 }
 bvumod()

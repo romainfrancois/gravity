@@ -4,48 +4,39 @@
 \alias{bvu}
 \title{Bonus vetus OLS (BVU)}
 \usage{
-bvu(y, dist, x, inc_o, inc_d, lab_o, lab_d, vce_robust = TRUE, data, ...)
+bvu(dependent_variable, regressors, incomes, codes, vce_robust = TRUE, data,
+  ...)
 }
 \arguments{
-\item{y}{name (type: character) of the dependent variable in the dataset 
+\item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
 \code{data}, e.g. trade flows. This dependent variable is divided by the 
 product of unilateral incomes (named \code{inc_o} and \code{inc_d}, e.g. 
 GDPs or GNPs of the countries of interest) and logged afterwards.
 The transformed variable is then used as the dependent variable in the 
 estimation.}
 
-\item{dist}{name (type: character) of the distance variable in the dataset 
+\item{regressors}{name (type: character) of the distance variable () in the dataset 
 \code{data} containing a measure of distance between all pairs of bilateral
-partners. It is logged automatically when the function is executed.}
+partners and bilateral variables that should be taken as the independent variables 
+in the estimation. The distance is logged automatically when the function is executed. 
+If an independent variable is a dummy variable, it should be of type numeric (0/1) in the dataset. 
+If an independent variable is defined as a ratio, it should be logged. 
+Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes} 
+As country specific effects are subdued due to demeaning, no further unilateral variables 
+equivalent to \code{c(gdp origin, gdp destination)} can be added.
+Write this argument as \code{c(distance, other variables)}.}
 
-\item{x}{vector of names (type: character) of those bilateral variables in 
-the dataset \code{data} that should be taken as the independent variables 
-in the estimation. If an independent variable is a dummy variable,
-it should be of type numeric (0/1) in the dataset. If an independent variable 
-is defined as a ratio, it should be logged. Unilateral metric variables 
-such as GDPs should be inserted via the arguments \code{inc_o} 
-for the country of origin and \code{inc_d} for the country of destination.
-As country specific effects are subdued due to demeaning, no further
-unilateral variables apart from \code{inc_o} and \code{inc_d} can be 
-added.}
+\item{incomes}{variable name (type: character) of the income of the country of 
+origin (i.e \code{gdp_o}) and destination (i.e \code{gdp_d}) in the dataset \code{data}. 
+The dependent variable \code{dependent_variable} is divided by the product of the incomes.
+Write this argument as \code{c(origin, destination)}.}
 
-\item{inc_o}{variable name (type: character) of the income of the country of 
-origin in the dataset \code{data}. The dependent variable \code{y} is
-divided by the product of the incomes \code{inc_d} and \code{inc_o}.}
+\item{codes}{variable name (type: character) of the code of the country 
+(i.e ISO-3 code) of origin (i.e \code{iso_o}) and destination (i.e \code{iso_d}) in the dataset \code{data}. 
+The variables are grouped by using \code{code_o} and \code{code_d} to obtain estimates.
+Write this argument as \code{c(origin, destination)}.}
 
-\item{inc_d}{variable name (type: character) of the income of the country of 
-destination in the dataset \code{data}. The dependent variable \code{y} is
-divided by the product of the incomes \code{inc_d} and \code{inc_o}.}
-
-\item{lab_o}{variable name (type: character) of the label of the country 
-(i.e ISO code) of origin in the dataset \code{data}. The variables 
-are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.}
-
-\item{lab_d}{variable name (type: character) of the label of the country 
-(i.e ISO code) of destination in the dataset \code{data}. The variables 
-are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.}
-
-\item{vce_robust}{robust (type: logic) determines whether a robust 
+\item{vce_robust}{robust (type: logical) determines whether a robust 
 variance-covariance matrix should be used. The default is set to \code{TRUE}. 
 If set \code{TRUE} the estimation results are consistent with the 
 Stata code provided at the website
@@ -53,18 +44,18 @@ Stata code provided at the website
 when choosing robust estimation.}
 
 \item{data}{name of the dataset to be used (type: character). 
-To estimate gravity equations, a square gravity dataset including bilateral 
-flows defined by the argument \code{y}, ISO-codes of type character 
-(called \code{iso_o} for the country of origin and \code{iso_d} for the 
-destination country), a distance measure defined by the argument \code{dist} 
-and other potential influences given as a vector in \code{x} are required. 
-All dummy variables should be of type numeric (0/1). Missing trade flows as 
-well as incomplete rows should be excluded from the dataset. 
-Furthermore, flows equal to zero should be excluded as the gravity equation 
-is estimated in its additive form.
-As, to our knowledge at the moment, there is no explicit literature covering 
-the estimation of a gravity equation by \code{bvu} 
-using panel data, cross-sectional data should be used.}
+As an example, to estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument \code{dependent_variable}, ISO-codes of type character 
+(i.e. \code{iso_o} for the country of origin and \code{iso_d} for the 
+destination country), a distance measure defined by the argument \code{distance} 
+and other potential influences (i.e. contiguity or common currency) given as a vector in 
+\code{regressors} are required. 
+All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
+null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates. 
+The user should perform some data cleaning beforehand to remove observations that contain entries that 
+can distort estimates.
+As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
+equation by \code{bvu} using panel data, cross-sectional data should be used.}
 
 \item{...}{additional arguments to be passed to \code{bvu}.}
 }
@@ -105,12 +96,12 @@ we do not recommend to apply this method in this case.
 \dontrun{
 data(gravity_no_zeros)
 
-bvu(y = "flow", dist = "distw", x = c("rta"), 
-inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+bvu(dependent_variable = "flow", regressors = c("distw", "rta"), 
+incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
 vce_robust = TRUE, data = gravity_no_zeros)
 
-bvu(y = "flow", dist = "distw", x = c("rta", "contig", "comcur"), 
-inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+bvu(dependent_variable = "flow", regressors = c("distw", "rta", "contig", "comcur"), 
+incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
 vce_robust = TRUE, data = gravity_no_zeros)
 }
 
@@ -123,8 +114,8 @@ data(gravity_no_zeros)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-bvu(y = "flow", dist = "distw", x = c("rta"), 
-inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+bvu(dependent_variable = "flow", regressors = c("distw", "rta"), 
+incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
 vce_robust = TRUE, data = grav_small)
 }
 
