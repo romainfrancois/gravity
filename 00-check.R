@@ -1260,3 +1260,158 @@ tobitmod <- function() {
   return(return_object)
 }
 tobitmod()
+
+
+# olsoirg -----------------------------------------------------------------
+
+uie = TRUE
+
+olsorig <- function() {
+  if(!is.data.frame(data))                                                stop("'data' must be a 'data.frame'")
+  if((vce_robust %in% c(TRUE, FALSE)) == FALSE)                           stop("'vce_robust' has to be either 'TRUE' or 'FALSE'")
+  if(!is.character(y)     | !y%in%colnames(data)     | length(y)!=1)      stop("'y' must be a character of length 1 and a colname of 'data'")
+  if(!is.character(dist)  | !dist%in%colnames(data)  | length(dist)!=1)   stop("'dist' must be a character of length 1 and a colname of 'data'")
+  if(!is.character(x)     | !all(x%in%colnames(data)))                    stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
+  
+  if(!is.character(inc_d) | !inc_d%in%colnames(data) | length(inc_d)!=1)  stop("'inc_d' must be a character of length 1 and a colname of 'data'")
+  if(!is.character(inc_o) | !inc_o%in%colnames(data) | length(inc_o)!=1)  stop("'inc_o' must be a character of length 1 and a colname of 'data'")
+  if((uie %in% c(TRUE, FALSE)) == FALSE)                                  stop("'uie' has to be either 'TRUE' or 'FALSE'")
+  
+  # Transforming data, logging distances ---------------------------------------
+  
+  d                  <- data
+  d$dist_log         <- (log(d[dist][,1]))
+  
+  # uie == TRUE ----------------------------------------------------------------
+  
+  if(uie==TRUE){
+    
+    # Transforming data --------------------------------------------------------
+    
+    d$y_inc          <- d[y][,1] / (d[inc_o][,1] * d[inc_d][,1])
+    d$y_inc_log      <- log(d$y_inc)
+    
+    # Model --------------------------------------------------------------------
+    
+    vars             <- paste(c("dist_log", x), collapse = " + ")
+    form             <- paste("y_inc_log", "~", vars)
+    form2            <- stats::as.formula(form)
+    
+    model.OLS        <- stats::lm(form2, data = d)
+    model.OLS.robust <- lmtest::coeftest(model.OLS, vcov=sandwich::vcovHC(model.OLS, "HC1"))
+  }
+  
+  # uie == FALSE ---------------------------------------------------------------
+  
+  if(uie==FALSE){
+    
+    # Transforming data
+    d$y_log         <- log(d[y][,1])
+    d$inc_o_log     <- log(d[inc_o][,1])
+    d$inc_d_log     <- log(d[inc_d][,1])
+    
+    # Model --------------------------------------------------------------------
+    vars            <- paste(c("dist_log", x), collapse = " + ")
+    form            <- paste("y_log", "~", vars, "+ inc_o_log + inc_d_log")
+    form2           <- stats::as.formula(form)
+    
+    model.OLS       <- stats::lm(form2, data = d)
+  }
+  
+  # Else -----------------------------------------------------------------------
+  
+  if((uie %in% c(TRUE, FALSE))==FALSE){
+    stop("uie has to be either TRUE or FALSE")}
+  
+  # Return ---------------------------------------------------------------------
+  
+  if(vce_robust == TRUE){
+    return.object.1      <- .robustsummary.lm(model.OLS, robust=TRUE)
+    return.object.1$call <- form2
+    return(return.object.1)}
+  
+  if(vce_robust == FALSE){
+    return.object.1      <- .robustsummary.lm(model.OLS, robust=FALSE)
+    return.object.1$call <- form2
+    return(return.object.1)}
+}
+olsorig()
+
+# olsmod ------------------------------------------------------------------
+
+olsmod <- function() {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(uie))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
+  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
+  stopifnot(is.character(x), all(x %in% colnames(data)))
+  stopifnot(is.character(inc_o) | inc_o %in% colnames(data) | length(inc_o) == 1)
+  stopifnot(is.character(inc_d) | inc_d %in% colnames(data) | length(inc_d) == 1)
+  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
+  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
+    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    
+    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
+    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+  
+  # Transforming data, logging distances ---------------------------------------
+  d <- d %>% 
+    mutate(
+      dist_log = log(!!sym(dist))
+    )
+  
+  # Income elasticities --------------------------------------------------------
+  if (uie == TRUE) {
+    # Transforming data, logging flows -----------------------------------------
+    d <- d %>% 
+      mutate(
+        y_log_ols = log(
+          !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
+        )
+      ) %>% 
+      
+      select(
+        !!sym("y_log_ols"), !!sym("dist_log"), !!sym("x")
+      )
+    
+    # Model --------------------------------------------------------------------
+    model_ols <- stats::lm(y_log_ols ~ ., data = d)
+  }
+  
+  if (uie == FALSE) {
+    # Transforming data, logging flows -----------------------------------------
+    d <- d %>% 
+      mutate(
+        y_log_ols = log(!!sym(y)),
+        inc_o_log = log(!!sym(inc_o)),
+        inc_d_log = log(!!sym(inc_d))
+      ) %>%
+      
+      select(
+        !!sym("y_log_ols"), !!sym("inc_o_log"), !!sym("inc_d_log"), !!sym("dist_log"), !!sym("x")
+      )
+    
+    # Model --------------------------------------------------------------------
+    model_ols <- stats::lm(y_log_ols ~ ., data = d)
+  }
+  
+  # Return ---------------------------------------------------------------------
+  if (vce_robust == TRUE) {
+    return_object_1      <- robust_summary(model_ols, robust = TRUE)
+    return_object_1$call <- as.formula(model_ols)
+    return(return_object_1)
+  }
+  
+  if (vce_robust == FALSE) {
+    return_object_1      <- robust_summary(model_ols, robust = FALSE)
+    return_object_1$call <- as.formula(model_ols)
+    return(return_object_1)
+  }
+}
+olsmod()

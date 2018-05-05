@@ -93,6 +93,14 @@
 #' e.g. GDP and population, those variables have to be merged into one 
 #' variable, e.g. GDP per capita, which can be inserted into \code{inc_d}.
 #' 
+#' @param lab_o variable name (type: character) of the label of the country 
+#' (i.e ISO code) of origin in the dataset \code{data}. The variables 
+#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
+#' 
+#' @param lab_d variable name (type: character) of the label of the country 
+#' (i.e ISO code) of destination in the dataset \code{data}. The variables 
+#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
+#' 
 #' @param uie Unitary Income Elasticities (type: logic) determines whether the 
 #' parameters are to be estimated assuming unitary income elasticities. 
 #' The default value is set to \code{FALSE}. If \code{uie} is set \code{TRUE}, 
@@ -164,13 +172,13 @@
 #' \dontrun{
 #' data(gravity_no_zeros)
 #' 
-#' ols(y="flow", dist="distw", x=c("rta", "contig", "comcur"), 
-#' inc_o="gdp_o", inc_d="gdp_d", uie=FALSE, 
-#' vce_robust=TRUE, data=gravity_no_zeros)
+#' ols(y = "flow", dist = "distw", x = c("rta", "contig", "comcur"), 
+#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+#' uie = FALSE, vce_robust = TRUE, data = gravity_no_zeros)
 #' 
-#' ols(y="flow", dist="distw", x=c("rta", "comcur", "contig"), 
-#' inc_o="gdp_o", inc_d="gdp_d", uie=TRUE, 
-#' vce_robust=TRUE, data=gravity_no_zeros)
+#' ols(y = "flow", dist = "distw", x = c("rta", "contig", "comcur"), 
+#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+#' uie = TRUE, vce_robust = TRUE, data = gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -182,7 +190,9 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' ols(y="flow", dist="distw", x=c("rta"), inc_o="gdp_o", inc_d="gdp_d", uie=FALSE, vce_robust=TRUE, data=grav_small)
+#' ols(y = "flow", dist = "distw", x = c("rta"), 
+#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+#' uie = FALSE, vce_robust = TRUE, data = grav_small)
 #' }
 #' 
 #' @return
@@ -192,75 +202,80 @@
 #' @seealso \code{\link[stats]{lm}}, \code{\link[lmtest]{coeftest}}, 
 #' \code{\link[sandwich]{vcovHC}}
 #' 
-#'
 #' @export
 
-ols <- function(y, dist, x, inc_d, inc_o, uie = FALSE, vce_robust = TRUE, data, ...) {
-  if (!is.data.frame(data))                                                     stop("'data' must be a 'data.frame'")
-  if ((vce_robust %in% c(TRUE, FALSE)) == FALSE)                                           stop("'vce_robust' has to be either 'TRUE' or 'FALSE'")
-  if (!is.character(y)     | !y %in% colnames(data)     | length(y) != 1)       stop("'y' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(dist)  | !dist %in% colnames(data)  | length(dist) != 1)    stop("'dist' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(x)     | !all(x %in% colnames(data)))                       stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
-
-  if (!is.character(inc_d) | !inc_d %in% colnames(data) | length(inc_d) != 1)   stop("'inc_d' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(inc_o) | !inc_o %in% colnames(data) | length(inc_o) != 1)   stop("'inc_o' must be a character of length 1 and a colname of 'data'")
-  if ((uie %in% c(TRUE, FALSE)) == FALSE)                                                  stop("'uie' has to be either 'TRUE' or 'FALSE'")
+ols <- function(y, dist, x, inc_d, inc_o, lab_o, lab_d, uie = FALSE, vce_robust = TRUE, data, ...) {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(uie))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
+  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
+  stopifnot(is.character(x), all(x %in% colnames(data)))
+  stopifnot(is.character(inc_o) | inc_o %in% colnames(data) | length(inc_o) == 1)
+  stopifnot(is.character(inc_d) | inc_d %in% colnames(data) | length(inc_d) == 1)
+  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
+  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
+    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    
+    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
+    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
   
   # Transforming data, logging distances ---------------------------------------
+  d <- d %>% 
+    mutate(
+      dist_log = log(!!sym(dist))
+    )
   
-  d                  <- data
-  d$dist_log         <- (log(d[dist][,1]))
-  
-  # uie == TRUE ----------------------------------------------------------------
-  
+  # Income elasticities --------------------------------------------------------
   if (uie == TRUE) {
-    
-    # Transforming data --------------------------------------------------------
-    
-    d$y_inc          <- d[y][,1] / (d[inc_o][,1] * d[inc_d][,1])
-    d$y_inc_log      <- log(d$y_inc)
+    # Transforming data, logging flows -----------------------------------------
+    d <- d %>% 
+      mutate(
+        y_log_ols = log(
+          !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
+        )
+      ) %>% 
+      
+      select(
+        !!sym("y_log_ols"), !!sym("dist_log"), !!sym("x")
+      )
     
     # Model --------------------------------------------------------------------
-    
-    vars             <- paste(c("dist_log", x), collapse = " + ")
-    form             <- paste("y_inc_log", "~", vars)
-    form2            <- stats::as.formula(form)
-    
-    model.ols        <- stats::lm(form2, data = d)
-    model.ols.robust <- lmtest::coeftest(model.ols, vcov = sandwich::vcovHC(model.ols, "HC1"))
+    model_ols <- stats::lm(y_log_ols ~ ., data = d)
   }
-  
-  # uie == FALSE ---------------------------------------------------------------
   
   if (uie == FALSE) {
-    
-    # Transforming data
-    d$y_log         <- log(d[y][,1])
-    d$inc_o_log     <- log(d[inc_o][,1])
-    d$inc_d_log     <- log(d[inc_d][,1])
+    # Transforming data, logging flows -----------------------------------------
+    d <- d %>% 
+      mutate(
+        y_log_ols = log(!!sym(y)),
+        inc_o_log = log(!!sym(inc_o)),
+        inc_d_log = log(!!sym(inc_d))
+      ) %>%
+      
+      select(
+        !!sym("y_log_ols"), !!sym("inc_o_log"), !!sym("inc_d_log"), !!sym("dist_log"), !!sym("x")
+      )
     
     # Model --------------------------------------------------------------------
-    vars            <- paste(c("dist_log", x), collapse = " + ")
-    form            <- paste("y_log", "~", vars, "+ inc_o_log + inc_d_log")
-    form2           <- stats::as.formula(form)
-    
-    model.ols       <- stats::lm(form2, data = d)
+    model_ols <- stats::lm(y_log_ols ~ ., data = d)
   }
   
-  # Else -----------------------------------------------------------------------
-  
-  if ((uie %in% c(TRUE, FALSE)) == FALSE) {
-    stop("uie has to be either TRUE or FALSE")}
-  
   # Return ---------------------------------------------------------------------
-  
   if (vce_robust == TRUE) {
-    return.object.1      <- .robustsummary.lm(model.ols, robust = TRUE)
-    return.object.1$call <- form2
-    return(return.object.1)}
+    return_object_1      <- robust_summary(model_ols, robust = TRUE)
+    return_object_1$call <- as.formula(model_ols)
+    return(return_object_1)
+  }
   
   if (vce_robust == FALSE) {
-    return.object.1      <- .robustsummary.lm(model.ols, robust = FALSE)
-    return.object.1$call <- form2
-    return(return.object.1)}
+    return_object_1      <- robust_summary(model_ols, robust = FALSE)
+    return_object_1$call <- as.formula(model_ols)
+    return(return_object_1)
+  }
 }
