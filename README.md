@@ -2,6 +2,10 @@
 
 ## Todos
 
+### Check OLS
+
+- [ ] Robust object is called but never used in the original function (line 233) 
+
 ### Check ET Tobit
 
 - [ ] Warning that affects original and tidy function (Consider switching to a more robust optimisation method temporarily)
@@ -14,14 +18,22 @@
 
 ### Tidy functions
 
+- [x] bvu
+- [x] bvw
+- [x] ddm
+- [x] ek tobit
+- [x] et tobit
+- [x] ols
+- [x] tobit
+- [x] robust summary
 - [ ] fixed effects
 - [ ] gpml
 - [ ] nbpml
-- [ ] nls
+- [x] nls
 - [ ] ppml
 - [ ] sils
 - [ ] tetrads
 
 ### Data
 
-- [ ] Reproduce examples data
+- [x] Reproduce examples data

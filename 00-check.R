@@ -1453,3 +1453,133 @@ olsmod <- function() {
   }
 }
 olsmod()
+
+
+# nlsorig -----------------------------------------------------------------
+
+nlsorig <- function() {
+  if(!is.data.frame(data))                                                stop("'data' must be a 'data.frame'")
+  if((vce_robust %in% c(TRUE, FALSE)) == FALSE)                           stop("'vce_robust' has to be either 'TRUE' or 'FALSE'")
+  if(!is.character(y)     | !y%in%colnames(data)     | length(y)!=1)      stop("'y' must be a character of length 1 and a colname of 'data'")
+  if(!is.character(dist)  | !dist%in%colnames(data)  | length(dist)!=1)   stop("'dist' must be a character of length 1 and a colname of 'data'")
+  if(!is.character(x)     | !all(x%in%colnames(data)))                    stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
+  
+  # Transforming data, logging flows, distances --------------------------------
+  
+  d                 <- data
+  d$dist_log        <- (log(d[dist][,1]))
+  d$y               <- d[y][,1] 
+  
+  # Model ----------------------------------------------------------------------
+  
+  vars              <- paste(c("dist_log", x), collapse=" + ")
+  form              <- paste("y", "~",vars)
+  form2             <- stats::as.formula(form)
+  
+  # For NLS the starting values are retrieved from the resuts of PPML
+  model.PPML        <- stats::glm(form2, data = d, family = stats::quasipoisson(link = "log"))
+  model.PPML.eta    <- model.PPML$linear.predictors
+  model.PPML.mu     <- model.PPML$fitted.values
+  model.PPML.start  <- model.PPML$coefficients
+  
+  model.NLS         <- glm(form2, data = d, family = stats::gaussian(link = "log"), 
+                           control = list(maxit = 200, trace = FALSE),
+                           etastart = model.PPML.eta, # linear predictors
+                           mustart = model.PPML.mu, # fitted values
+                           start = model.PPML.start) # estimated coefficients
+  
+  model.NLS.robust  <- lmtest::coeftest(model.NLS, vcov=sandwich::vcovHC(model.NLS, "HC1"))
+  
+  # Return --------------------------------------------------------------------- 
+  
+  if(vce_robust == TRUE){
+    summary.NLS.1                 <- .robustsummary.lm(model.NLS, robust=TRUE)
+    summary.NLS.1$coefficients    <- model.NLS.robust[1:length(rownames(model.NLS.robust)),]
+    return.object.1               <- summary.NLS.1
+    return.object.1$call          <- form2
+    return.object.1$r.squared     <- NULL 
+    return.object.1$adj.r.squared <- NULL
+    return.object.1$fstatistic    <- NULL
+    return(return.object.1)
+  }
+  
+  if(vce_robust == FALSE){
+    return.object.1               <- summary(model.NLS)
+    return.object.1$call          <- form2
+    return(return.object.1)}
+}
+nlsorig()
+
+# nlsmod ------------------------------------------------------------------
+
+nlsmod <- function() {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  
+  # Split input vectors -----------------------------------------------------
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
+  
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance)))) %>% 
+    
+    filter_at(vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0)) %>% 
+    filter_at(vars(!!sym(dependent_variable)), any_vars(is.finite(!!sym(dependent_variable))))
+  
+  # Transforming data, logging distances ---------------------------------------
+  d <- d %>% 
+    mutate(
+      dist_log = log(!!sym(distance))
+    ) %>% 
+    
+    select(
+      !!sym("dependent_variable"), !!sym("dist_log"), !!sym("additional_regressors")
+    )
+  
+  # Model ----------------------------------------------------------------------
+  form <- stats::as.formula(
+    sprintf("%s ~ %s + %s", 
+            dependent_variable,
+            "dist_log",
+            paste(additional_regressors, sep = " + "))
+  )
+  
+  # For nls the starting values are retrieved from the resuts of PPML
+  model_PPML       <- stats::glm(form, data = d, family = stats::quasipoisson(link = "log"))
+  model_PPML_eta   <- model_PPML$linear.predictors
+  model_PPML_mu    <- model_PPML$fitted.values
+  model_PPML_start <- model_PPML$coefficients
+  
+  model_nls <- glm(form, data = d, family = stats::gaussian(link = "log"), 
+                   control = list(maxit = 200, trace = FALSE),
+                   etastart = model_PPML_eta, # linear predictors
+                   mustart = model_PPML_mu, # fitted values
+                   start = model_PPML_start) # estimated coefficients
+  
+  model_nls_robust <- lmtest::coeftest(model_nls, vcov = sandwich::vcovHC(model_nls, "HC1"))
+  
+  # Return --------------------------------------------------------------------- 
+  
+  if (vce_robust == TRUE) {
+    summary_nls                 <- robust_summary(model_nls, robust = TRUE)
+    summary_nls$coefficients    <- model_nls_robust[1:length(rownames(model_nls_robust)),]
+    return_object               <- summary_nls
+    return_object$call          <- form
+    return_object$r.squared     <- NULL 
+    return_object$adj.r.squared <- NULL
+    return_object$fstatistic    <- NULL
+    return(return_object)
+  }
+  
+  if (vce_robust == FALSE) {
+    return_object      <- summary(model_nls)
+    return_object$call <- form
+    return(return_object)
+  }
+}
+nlsmod()
