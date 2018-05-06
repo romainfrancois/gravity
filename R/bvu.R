@@ -28,7 +28,7 @@
 #' we do not recommend to apply this method in this case.
 #' 
 #' @param dependent_variable name (type: character) of the dependent variable in the dataset 
-#' \code{data}, e.g. trade flows. This dependent variable is divided by the 
+#' \code{data} (i.e trade flows). This dependent variable is divided by the 
 #' product of unilateral incomes (named \code{inc_o} and \code{inc_d}, e.g. 
 #' GDPs or GNPs of the countries of interest) and logged afterwards.
 #' The transformed variable is then used as the dependent variable in the 
