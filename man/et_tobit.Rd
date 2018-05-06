@@ -4,10 +4,10 @@
 \alias{et_tobit}
 \title{Eaton and Tamura (1994) threshold Tobit model (ET Tobit)}
 \usage{
-et_tobit(y, dist, x, data, ...)
+et_tobit(dependent_variable, regressors, data, ...)
 }
 \arguments{
-\item{y}{name (type: character) of the dependent variable in the dataset 
+\item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
 \code{data}, e.g. trade flows.
 Following Carson and Sun (2007), the smallest positive flow value is 
 used as an estimate of the threshold. 
@@ -15,20 +15,9 @@ It is added to \code{y}, the transformed variable is
 logged and taken as the dependent variable in the Tobit estimation with 
 lower bound equal to the log of the smallest possible flow value.}
 
-\item{dist}{name (type: character) of the distance variable in the dataset 
+\item{regressors}{name (type: character) of the distance variable in the dataset 
 \code{data} containing a measure of distance between all pairs of bilateral
 partners. It is logged automatically when the function is executed.}
-
-\item{x}{vector of names (type: character) of those bilateral variables in 
-the dataset \code{data} that should be taken as the independent variables 
-in the estimation. If an independent variable is a dummy variable,
-it should be of type numeric (0/1) in the dataset. If an independent variable 
-is defined as a ratio, it should be logged. 
-Unilateral variables such as country dummies or incomes can be added. 
-If unilateral metric variables such as GDPs should be used as independent 
-variables, those variables have to be logged first and the 
-logged variable can be used in \code{x}.
-Interaction terms can be added.}
 
 \item{data}{name of the dataset to be used (type: character). 
 To estimate gravity equations, a square gravity dataset including bilateral 
@@ -120,8 +109,7 @@ gravity_zeros <- gravity_zeros \%>\%
         lgdp_d = log(gdp_d)
     )
 
-et_tobit(y = "flow", dist = "distw", 
-x = c("rta","lgdp_o","lgdp_d"),
+et_tobit(y = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
 data = gravity_zeros)
 }
 
@@ -137,8 +125,7 @@ gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o \%in\% countries_chosen_zeros,]
-et_tobit(y = "flow", dist = "distw", 
-x = c("rta","lgdp_o","lgdp_d"),
+et_tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
 data = grav_small_zeros)
 }
 

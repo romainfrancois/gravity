@@ -43,7 +43,7 @@
 #' threshold Tobit model where instead of simply adding number \code{1} 
 #' to the data the threshold is estimated.
 #' 
-#' @param y name (type: character) of the dependent variable in the dataset 
+#' @param dependent_variable name (type: character) of the dependent variable in the dataset 
 #' \code{data}, e.g. trade flows.
 #' The variable is logged and then taken as the dependent variable in 
 #' the regression. As the log of zero is not defined, 
@@ -51,24 +51,14 @@
 #' a left open interval with the logged minimum trade flow of the
 #' respective importing country as right border.
 #' 
-#' @param dist name (type: character) of the distance variable in the dataset 
+#' @param regressors name (type: character) of the distance variable in the dataset 
 #' \code{data} containing a measure of distance between all pairs of bilateral
 #' partners. It is logged automatically when the function is executed. 
-#' 
-#' @param x vector of names (type: character) of those bilateral variables in 
-#' the dataset \code{data} that should be taken as the independent variables 
-#' in the estimation. If an independent variable is a dummy variable,
-#' it should be of type numeric (0/1) in the dataset. If an independent variable 
-#' is defined as a ratio, it should be logged. 
-#' Unilateral variables such as country dummies or incomes can be added. 
-#' If unilateral metric variables such as GDPs should be used as independent 
-#' variables, those variables have to be logged first and the 
-#' logged variable can be used in \code{x}.
 #' Interaction terms can be added.
 #' 
-#' @param lab_d variable name (type: character) of the label of the country 
+#' @param code_destination variable name (type: character) of the label of the country 
 #' (i.e ISO code) of destination in the dataset \code{data}. The variables 
-#' are grouped by using \code{lab_d} to obtain estimates.
+#' are grouped by using \code{code_d} to obtain estimates.
 #' 
 #' @param vce_robust robust (type: logic) determines whether a robust 
 #' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
@@ -137,12 +127,8 @@
 #'         lgdp_d = log(gdp_d)
 #'     )
 #' 
-#' ek_tobit(y = "flow", dist = "distw", 
-#' x = c("rta","lgdp_o","lgdp_d"), lab_d = "iso_d",
-#' vce_robust = TRUE, data = gravity_zeros)
-#' 
-#' ek_tobit(y = "flow", dist = "distw", 
-#' x = c("rta","iso_o","iso_d"), lab_d = "iso_d",
+#' ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"), 
+#' code_destination = "iso_d",
 #' vce_robust = TRUE, data = gravity_zeros)
 #' }
 #' 
@@ -158,8 +144,8 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' ek_tobit(y = "flow", dist = "distw", 
-#' x = c("rta","lgdp_o","lgdp_d"), lab_d = "iso_d",
+#' ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"), 
+#' code_destination = "iso_d",
 #' vce_robust = TRUE, data = grav_small_zeros)
 #' }
 #' 
@@ -171,35 +157,38 @@
 #' 
 #' @export 
 
-ek_tobit <- function(y, dist, x, lab_d, vce_robust = TRUE, data, ...) {
+ek_tobit <- function(dependent_variable, regressors, code_destination, vce_robust = TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
+  
+  # Split input vectors -----------------------------------------------------
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist))))
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y_log_ek = ifelse(!!sym(y) > 0, log(!!sym(y)), NA)
+      y_log_ek = ifelse(!!sym(dependent_variable) > 0, log(!!sym(dependent_variable)), NA)
     )
   
   # Minimum flows -----------------------------------------------------------
   d <- d %>% 
-    group_by(!!sym(lab_d)) %>% 
+    group_by(!!sym(code_destination)) %>% 
     mutate(
       exportmin = min(!!sym("y_log_ek"), na.rm = TRUE)
     )
@@ -207,11 +196,11 @@ ek_tobit <- function(y, dist, x, lab_d, vce_robust = TRUE, data, ...) {
   # Transforming censored variables -----------------------------------------
   d <- d %>% 
     mutate(
-      flows_ek1 = ifelse(!!sym(y) > 0, !!sym("y_log_ek"), -Inf)
+      flows_ek1 = ifelse(!!sym(dependent_variable) > 0, !!sym("y_log_ek"), -Inf)
     ) %>% 
     
     mutate(
-      flows_ek2 = ifelse(!!sym(y) > 0, !!sym("flows_ek1"), !!sym("exportmin"))
+      flows_ek2 = ifelse(!!sym(dependent_variable) > 0, !!sym("flows_ek1"), !!sym("exportmin"))
     ) %>% 
     
     ungroup()
@@ -223,7 +212,7 @@ ek_tobit <- function(y, dist, x, lab_d, vce_robust = TRUE, data, ...) {
   y_cens_log_ek <- survival::Surv(f1, f2, type = "interval2") %>% as_vector()
   
   # Model -------------------------------------------------------------------
-  vars           <- paste(c("dist_log", x), collapse = " + ")
+  vars           <- paste(c("dist_log", additional_regressors), collapse = " + ")
   form           <- stats::as.formula(paste("y_cens_log_ek", "~", vars))
   model_ek_tobit <- survival::survreg(form, data = d, dist = "gaussian", robust = vce_robust)
   

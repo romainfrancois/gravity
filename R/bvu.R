@@ -145,19 +145,19 @@ bvu <- function(dependent_variable, regressors, incomes, codes, vce_robust = TRU
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  stopifnot(is.character(regressors), all(regressors %in% colnames(data)))
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
   stopifnot(is.character(incomes) | all(incomes %in% colnames(data)) | length(incomes) == 2)
   stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
 
   # Split input vectors -----------------------------------------------------
-  inc_o <- incomes[[1]]
-  inc_d <- incomes[[2]]
+  inc_o <- incomes[1]
+  inc_d <- incomes[2]
   
-  code_o <- codes[[1]]
-  code_d <- codes[[2]]
+  code_o <- codes[1]
+  code_d <- codes[2]
   
-  distance <- regressors[[1]]
-  additional_regressors <- regressors[[-1]]
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 

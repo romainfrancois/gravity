@@ -4,36 +4,25 @@
 \alias{tobit}
 \title{Left-censored tobit model with known threshold}
 \usage{
-tobit(y, dist, x, added_constant = 1, data, ...)
+tobit(dependent_variable, regressors, added_constant = 1, data, ...)
 }
 \arguments{
-\item{y}{name (type: character) of the dependent variable in the dataset 
+\item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
 \code{data}, e.g. trade flows.
 The number \code{1} is added and the transformed variable is logged and 
 taken as the dependent variable in the tobit estimation with lower bound 
 equal to \code{0} as \code{log(1)=0} represents the smallest flows 
 in the transformed variable.}
 
-\item{dist}{name (type: character) of the distance variable in the dataset 
+\item{regressors}{name (type: character) of the distance variable in the dataset 
 \code{data} containing a measure of distance between all pairs of bilateral
 partners. It is logged automatically when the function is executed.}
-
-\item{x}{vector of names (type: character) of those bilateral variables in 
-the dataset \code{data} that should be taken as the independent variables 
-in the estimation. If an independent variable is a dummy variable,
-it should be of type numeric (0/1) in the dataset. If an independent variable 
-is defined as a ratio, it should be logged. 
-Unilateral variables such as country dummies or incomes can be added. 
-If unilateral metric variables such as GDPs should be used as independent 
-variables, those variables have to be logged first and the 
-logged variable can be used in \code{x}.
-Interaction terms can be added.}
 
 \item{added_constant}{scalar (type: numeric); represents
 the constant to be added to the dependent variable. The default value
 is \code{1}.
 The minimum of \code{log(y+added_constant)} is taken as the 
-left boundary in the tobit model.
+left boundary in the Tobit model.
 In the often used case of \code{added_constant=1}, the 
 dependent variable is left-censored at value \code{0} 
 as \code{log(1)=0}.}
@@ -118,8 +107,7 @@ gravity_zeros <- gravity_zeros \%>\%
         lgdp_d = log(gdp_d)
     )
 
-tobit(y = "flow", dist = "distw", 
-x = c("rta","lgdp_o","lgdp_d"),
+tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
 added_constant = 1, data = gravity_zeros)
 }
 
@@ -135,8 +123,7 @@ gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o \%in\% countries_chosen_zeros,]
-tobit(y = "flow", dist = "distw", 
-x = c("rta","lgdp_o","lgdp_d"),
+tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
 added_constant = 1, data = grav_small_zeros)
 }
 

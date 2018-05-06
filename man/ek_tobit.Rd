@@ -4,10 +4,11 @@
 \alias{ek_tobit}
 \title{Eaton and Kortum (2001) Tobit model (EK Tobit)}
 \usage{
-ek_tobit(y, dist, x, lab_d, vce_robust = TRUE, data, ...)
+ek_tobit(dependent_variable, regressors, code_destination, vce_robust = TRUE,
+  data, ...)
 }
 \arguments{
-\item{y}{name (type: character) of the dependent variable in the dataset 
+\item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
 \code{data}, e.g. trade flows.
 The variable is logged and then taken as the dependent variable in 
 the regression. As the log of zero is not defined, 
@@ -15,24 +16,14 @@ all flows equal to zero are replaced by
 a left open interval with the logged minimum trade flow of the
 respective importing country as right border.}
 
-\item{dist}{name (type: character) of the distance variable in the dataset 
+\item{regressors}{name (type: character) of the distance variable in the dataset 
 \code{data} containing a measure of distance between all pairs of bilateral
-partners. It is logged automatically when the function is executed.}
-
-\item{x}{vector of names (type: character) of those bilateral variables in 
-the dataset \code{data} that should be taken as the independent variables 
-in the estimation. If an independent variable is a dummy variable,
-it should be of type numeric (0/1) in the dataset. If an independent variable 
-is defined as a ratio, it should be logged. 
-Unilateral variables such as country dummies or incomes can be added. 
-If unilateral metric variables such as GDPs should be used as independent 
-variables, those variables have to be logged first and the 
-logged variable can be used in \code{x}.
+partners. It is logged automatically when the function is executed. 
 Interaction terms can be added.}
 
-\item{lab_d}{variable name (type: character) of the label of the country 
+\item{code_destination}{variable name (type: character) of the label of the country 
 (i.e ISO code) of destination in the dataset \code{data}. The variables 
-are grouped by using \code{lab_d} to obtain estimates.}
+are grouped by using \code{code_d} to obtain estimates.}
 
 \item{vce_robust}{robust (type: logic) determines whether a robust 
 variance-covariance matrix should be used. The default is set to \code{TRUE}. 
@@ -113,12 +104,8 @@ gravity_zeros <- gravity_zeros \%>\%
         lgdp_d = log(gdp_d)
     )
 
-ek_tobit(y = "flow", dist = "distw", 
-x = c("rta","lgdp_o","lgdp_d"), lab_d = "iso_d",
-vce_robust = TRUE, data = gravity_zeros)
-
-ek_tobit(y = "flow", dist = "distw", 
-x = c("rta","iso_o","iso_d"), lab_d = "iso_d",
+ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"), 
+code_destination = "iso_d",
 vce_robust = TRUE, data = gravity_zeros)
 }
 
@@ -134,8 +121,8 @@ gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o \%in\% countries_chosen_zeros,]
-ek_tobit(y = "flow", dist = "distw", 
-x = c("rta","lgdp_o","lgdp_d"), lab_d = "iso_d",
+ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"), 
+code_destination = "iso_d",
 vce_robust = TRUE, data = grav_small_zeros)
 }
 

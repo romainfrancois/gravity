@@ -18,6 +18,7 @@ vce_robust = TRUE
 incomes <- c("gdp_o", "gdp_d")
 codes <- c("iso_o", "iso_d")
 regressors = c("distw", "rta")
+code_destination <- lab_d
 
 # summary -----------------------------------------------------------------
 
@@ -875,30 +876,35 @@ ddmmod <- function() {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
-  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
+  
+  # Split input vectors -----------------------------------------------------
+  code_o <- codes[[1]]
+  code_d <- codes[[2]]
+  
+  distance <- regressors[[1]]
+  additional_regressors <- regressors[[-1]]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance)))) %>% 
     
-    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
-    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+    filter_at(vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0)) %>% 
+    filter_at(vars(!!sym(dependent_variable)), any_vars(is.finite(!!sym(dependent_variable))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y_log = log(!!sym(y))
+      y_log = log(!!sym(dependent_variable))
     )
   
   # Substracting the means -----------------------------------------------------
@@ -940,7 +946,7 @@ ddmmod <- function() {
   
   # Substracting the means for the other independent variables -----------------
   d2 <- d %>% 
-    select(!!sym(lab_o), !!sym(lab_d), x) %>% 
+    select(!!sym(lab_o), !!sym(lab_d), additional_regressors) %>% 
     gather(!!sym("key"), !!sym("value"), -!!sym(lab_o), -!!sym(lab_d)) %>% 
     
     mutate(key = paste0(!!sym("key"), "_ddm")) %>% 
@@ -965,22 +971,22 @@ ddmmod <- function() {
   
   # Return ---------------------------------------------------------------------
   if (vce_robust == TRUE) {
-    return_object_1         <- robust_summary(model_ddm, robust = TRUE)
-    return_object_1$call    <- as.formula(model_ddm)
-    return(return_object_1)
+    return_object      <- robust_summary(model_ddm, robust = TRUE)
+    return_object$call <- as.formula(model_ddm)
+    return(return_object)
   }
   
   if (vce_robust == FALSE) {
-    return_object_1        <- robust_summary(model_ddm, robust = FALSE)
-    return_object_1$call   <- as.formula(model_ddm)
-    return(return_object_1)
+    return_object      <- robust_summary(model_ddm, robust = FALSE)
+    return_object$call <- as.formula(model_ddm)
+    return(return_object)
   }
 }
 ddmmod()
 
 # ekorig ------------------------------------------------------------------
 
-data = as.data.frame(gravity_zeros)
+data <- as.data.frame(gravity_zeros)
 
 # the original function does not work with data without zeros
 ekorig <- function() {
@@ -1041,36 +1047,39 @@ ekorig <- function() {
 }
 ekorig()
 
+# ekmod --------------------------------------------------------------------
 ekmod <- function() {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
-  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
+  
+  # Split input vectors -----------------------------------------------------
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist))))
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y_log_ek = ifelse(!!sym(y) > 0, log(!!sym(y)), NA)
+      y_log_ek = ifelse(!!sym(dependent_variable) > 0, log(!!sym(dependent_variable)), NA)
     )
   
   # Minimum flows -----------------------------------------------------------
   d <- d %>% 
-    group_by(!!sym(lab_d)) %>% 
+    group_by(!!sym(code_destination)) %>% 
     mutate(
       exportmin = min(!!sym("y_log_ek"), na.rm = TRUE)
     )
@@ -1078,11 +1087,11 @@ ekmod <- function() {
   # Transforming censored variables -----------------------------------------
   d <- d %>% 
     mutate(
-      flows_ek1 = ifelse(!!sym(y) > 0, !!sym("y_log_ek"), -Inf)
+      flows_ek1 = ifelse(!!sym(dependent_variable) > 0, !!sym("y_log_ek"), -Inf)
     ) %>% 
     
     mutate(
-      flows_ek2 = ifelse(!!sym(y) > 0, !!sym("flows_ek1"), !!sym("exportmin"))
+      flows_ek2 = ifelse(!!sym(dependent_variable) > 0, !!sym("flows_ek1"), !!sym("exportmin"))
     ) %>% 
     
     ungroup()
@@ -1091,17 +1100,17 @@ ekmod <- function() {
   f1 <- d %>% select(!!sym("flows_ek1")) %>% as_vector()
   f2 <- d %>% select(!!sym("flows_ek2")) %>% as_vector()
   
-  survival_flows_ek <- survival::Surv(f1, f2, type = "interval2") %>% as_vector()
+  y_cens_log_ek <- survival::Surv(f1, f2, type = "interval2") %>% as_vector()
   
   # Model -------------------------------------------------------------------
-  vars                 <- paste(c("dist_log", x), collapse = " + ")
-  form                 <- stats::as.formula(paste("survival_flows_ek", "~", vars))
-  model_ek_tobit       <- survival::survreg(form, data = d, dist = "gaussian", robust = vce_robust)
+  vars           <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  form           <- stats::as.formula(paste("y_cens_log_ek", "~", vars))
+  model_ek_tobit <- survival::survreg(form, data = d, dist = "gaussian", robust = vce_robust)
   
   # Return ------------------------------------------------------------------
-  return_object_1      <- summary(model_ek_tobit)
-  return_object_1$call <- form
-  return(return_object_1)
+  return_object      <- summary(model_ek_tobit)
+  return_object$call <- form
+  return(return_object)
 }
 ekmod()
 
@@ -1141,64 +1150,67 @@ etorig <- function() {
 }
 etorig()
 
+# etmod -------------------------------------------------------------------
+
 etmod <- function() {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
-  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  
+  # Split input vectors -----------------------------------------------------
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist))))
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Transforming data, logging flows -------------------------------------------
-  flow_min_log <- filter_at(d, vars(!!sym(y)), any_vars(!!sym(y) > 0))
+  flow_min_log <- filter_at(d, vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0))
   
   d <- d %>% 
     mutate(
-      y_log_et = ifelse(!!sym(y) > 0, log(!!sym(y)), NA)
+      y_log_et = ifelse(!!sym(dependent_variable) > 0, log(!!sym(dependent_variable)), NA)
     )
   
   # Transforming data, logging flows, distances --------------------------------
-  min_flow <- d %>% 
+  d <- d %>% 
     mutate(
-      min_flow = min(ifelse(!!sym(y) > 0, !!sym(y), NA), na.rm = TRUE)
-    ) %>% 
-    select(!!sym("min_flow")) %>% 
-    distinct() %>% 
-    as_vector()
+      y2 = ifelse(!!sym(dependent_variable) > 0, !!sym(dependent_variable), NA),
+      y2_log = log(!!sym("y2"))
+    )
+  
+  y2min <- min(d %>% select(!!sym("y2")), na.rm = TRUE)
+  y2min_log <- log(y2min)
   
   d <- d %>% 
     rowwise() %>% 
-    mutate(y_plus_min_flow_log = log(sum(!!sym(y), min_flow, na.rm = TRUE))) %>% 
+    mutate(y_cens_log_et = log(sum(!!sym(dependent_variable), y2min, na.rm = TRUE))) %>% 
     ungroup()
   
   # Model -------------------------------------------------------------------
-  vars           <- paste(c("dist_log", x), collapse = " + ")
-  form           <- stats::as.formula(paste("y_plus_min_flow_log", "~", vars))
+  vars           <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  form           <- stats::as.formula(paste("y_cens_log_et", "~", vars))
   model_et_tobit <- censReg::censReg(formula = form, 
-                                     left = log(min_flow), right = Inf, 
+                                     left = y2min_log, right = Inf, 
                                      data = d, start = NULL)
   
   # Return ------------------------------------------------------------------
-  return_object_1      <- summary(model_et_tobit)
-  return_object_1$call <- form
-  return(return_object_1)
+  return_object      <- summary(model_et_tobit)
+  return_object$call <- form
+  return(return_object)
 }
 etmod()
 
-
-# tobit -------------------------------------------------------------------
+# tobitorig -------------------------------------------------------------------
 
 added_constant = 1
 
@@ -1233,36 +1245,40 @@ tobitorig <- function() {
 }
 tobitorig()
 
+# tobimod -----------------------------------------------------------------
+
 tobitmod <- function() {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.numeric(added_constant))
-  stopifnot(length(added_constant) == 1)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.numeric(added_constant), length(added_constant) == 1)
+  
+  # Split input vectors -----------------------------------------------------
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist))))
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     rowwise() %>% 
-    mutate(y_cens_log_tobit = log(sum(!!sym(y), added_constant, na.rm = TRUE))) %>% 
+    mutate(y_cens_log_tobit = log(sum(!!sym(dependent_variable), added_constant, na.rm = TRUE))) %>% 
     ungroup()
   
   ypc_log_min <- min(d %>% select(!!sym("y_cens_log_tobit")), na.rm = TRUE)
   
   # Model ----------------------------------------------------------------------
-  vars        <- paste(c("dist_log", x), collapse = " + ")
+  vars        <- paste(c("dist_log", additional_regressors), collapse = " + ")
   form        <- stats::as.formula(paste("y_cens_log_tobit", "~", vars))
   model_tobit <- censReg::censReg(formula = form, 
                                   left = ypc_log_min, right = Inf, 
@@ -1275,9 +1291,10 @@ tobitmod <- function() {
 }
 tobitmod()
 
-
 # olsoirg -----------------------------------------------------------------
 
+load("~/GitHub/gravity/data/gravity_no_zeros.rdata")
+data=as.data.frame(gravity_no_zeros)
 uie = TRUE
 
 olsorig <- function() {
@@ -1358,26 +1375,33 @@ olsmod <- function() {
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(uie))
   stopifnot(is.logical(vce_robust))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.character(inc_o) | inc_o %in% colnames(data) | length(inc_o) == 1)
-  stopifnot(is.character(inc_d) | inc_d %in% colnames(data) | length(inc_d) == 1)
-  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
-  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.character(incomes) | all(incomes %in% colnames(data)) | length(incomes) == 2)
+  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
+  
+  # Split input vectors -----------------------------------------------------
+  inc_o <- incomes[1]
+  inc_d <- incomes[2]
+  
+  code_o <- codes[1]
+  code_d <- codes[2]
+  
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance)))) %>% 
     
-    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
-    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+    filter_at(vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0)) %>% 
+    filter_at(vars(!!sym(dependent_variable)), any_vars(is.finite(!!sym(dependent_variable))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Income elasticities --------------------------------------------------------
@@ -1386,12 +1410,12 @@ olsmod <- function() {
     d <- d %>% 
       mutate(
         y_log_ols = log(
-          !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
+          !!sym(dependent_variable) / (!!sym(inc_o) * !!sym(inc_d))
         )
       ) %>% 
       
       select(
-        !!sym("y_log_ols"), !!sym("dist_log"), !!sym("x")
+        !!sym("y_log_ols"), !!sym("dist_log"), !!sym("additional_regressors")
       )
     
     # Model --------------------------------------------------------------------
@@ -1402,13 +1426,13 @@ olsmod <- function() {
     # Transforming data, logging flows -----------------------------------------
     d <- d %>% 
       mutate(
-        y_log_ols = log(!!sym(y)),
+        y_log_ols = log(!!sym(dependent_variable)),
         inc_o_log = log(!!sym(inc_o)),
         inc_d_log = log(!!sym(inc_d))
       ) %>%
       
       select(
-        !!sym("y_log_ols"), !!sym("inc_o_log"), !!sym("inc_d_log"), !!sym("dist_log"), !!sym("x")
+        !!sym("y_log_ols"), !!sym("inc_o_log"), !!sym("inc_d_log"), !!sym("dist_log"), !!sym("additional_regressors")
       )
     
     # Model --------------------------------------------------------------------

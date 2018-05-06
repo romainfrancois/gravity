@@ -4,32 +4,20 @@
 \alias{ddm}
 \title{Double Demeaning (DDM)}
 \usage{
-ddm(y, dist, x, lab_o, lab_d, vce_robust = TRUE, data, ...)
+ddm(dependent_variable, regressors, codes, vce_robust = TRUE, data, ...)
 }
 \arguments{
-\item{y}{name (type: character) of the dependent variable in the dataset 
+\item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
 \code{data}, e.g. trade flows. This variable is logged and then used as the 
 dependent variable in the estimation.}
 
-\item{dist}{name (type: character) of the distance variable in the dataset 
+\item{regressors}{name (type: character) of the distance variable in the dataset 
 \code{data} containing a measure of distance between all pairs of bilateral
 partners. It is logged automatically when the function is executed.}
 
-\item{x}{vector of names (type: character) of those bilateral variables in 
-the dataset \code{data} that should be taken as the independent variables 
-in the estimation. If an independent variable is a dummy variable,
-it should be of type numeric (0/1) in the dataset. If an independent variable 
-is defined as a ratio, it should be logged. 
-Unilateral effects drop out due to double demeaning and therefore 
-cannot be estimated.}
-
-\item{lab_o}{variable name (type: character) of the label of the country 
+\item{codes}{variable name (type: character) of the label of the country 
 (i.e ISO code) of origin in the dataset \code{data}. The variables 
-are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.}
-
-\item{lab_d}{variable name (type: character) of the label of the country 
-(i.e ISO code) of destination in the dataset \code{data}. The variables 
-are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.}
+are grouped by using \code{code_o} and \code{code_d} to obtain estimates.}
 
 \item{vce_robust}{robust (type: logic) determines whether a robust 
 variance-covariance matrix should be used. The default is set to \code{TRUE}. 
@@ -91,12 +79,12 @@ we do not recommend to apply this method in this case.
 \dontrun{
 data(gravity_no_zeros)
 
-ddm(y = "flow", dist = "distw", 
-x = c("rta"), lab_o = "iso_o", lab_d = "iso_d", 
+ddm(dependent_variable = "flow", regressors = c("distw", "rta"), 
+codes = c("iso_o", "iso_d"), 
 vce_robust = TRUE, data = gravity_no_zeros)
 
-ddm(y = "flow", dist = "distw", 
-x = c("rta", "comcur", "contig"), lab_o = "iso_o", lab_d = "iso_d", 
+ddm(dependent_variable = "flow", regressors = c("distw", "rta", "comcur", "contig"), 
+codes = c("iso_o", "iso_d"), 
 vce_robust=TRUE, data=gravity_no_zeros)
 }
 
@@ -109,8 +97,8 @@ data(gravity_no_zeros)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-ddm(y = "flow", dist = "distw", 
-x = c("rta"), lab_o = "iso_o", lab_d = "iso_d", 
+ddm(dependent_variable = "flow", regressors = c("distw", "rta"), 
+codes = c("iso_o", "iso_d"), 
 vce_robust = TRUE, data = grav_small)
 }
 

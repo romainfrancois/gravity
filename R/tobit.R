@@ -51,33 +51,22 @@
 #' bound equal to the minimum positive trade level of the respective
 #' importing country.
 #' 
-#' @param y name (type: character) of the dependent variable in the dataset 
+#' @param dependent_variable name (type: character) of the dependent variable in the dataset 
 #' \code{data}, e.g. trade flows.
 #' The number \code{1} is added and the transformed variable is logged and 
 #' taken as the dependent variable in the tobit estimation with lower bound 
 #' equal to \code{0} as \code{log(1)=0} represents the smallest flows 
 #' in the transformed variable. 
 #' 
-#' @param dist name (type: character) of the distance variable in the dataset 
+#' @param regressors name (type: character) of the distance variable in the dataset 
 #' \code{data} containing a measure of distance between all pairs of bilateral
-#' partners. It is logged automatically when the function is executed. 
-#' 
-#' @param x vector of names (type: character) of those bilateral variables in 
-#' the dataset \code{data} that should be taken as the independent variables 
-#' in the estimation. If an independent variable is a dummy variable,
-#' it should be of type numeric (0/1) in the dataset. If an independent variable 
-#' is defined as a ratio, it should be logged. 
-#' Unilateral variables such as country dummies or incomes can be added. 
-#' If unilateral metric variables such as GDPs should be used as independent 
-#' variables, those variables have to be logged first and the 
-#' logged variable can be used in \code{x}.
-#' Interaction terms can be added.
+#' partners. It is logged automatically when the function is executed.
 #' 
 #' @param added_constant scalar (type: numeric); represents
 #' the constant to be added to the dependent variable. The default value
 #' is \code{1}.
 #' The minimum of \code{log(y+added_constant)} is taken as the 
-#' left boundary in the tobit model.
+#' left boundary in the Tobit model.
 #' In the often used case of \code{added_constant=1}, the 
 #' dependent variable is left-censored at value \code{0} 
 #' as \code{log(1)=0}.
@@ -139,8 +128,7 @@
 #'         lgdp_d = log(gdp_d)
 #'     )
 #' 
-#' tobit(y = "flow", dist = "distw", 
-#' x = c("rta","lgdp_o","lgdp_d"),
+#' tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
 #' added_constant = 1, data = gravity_zeros)
 #' }
 #' 
@@ -156,8 +144,7 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' tobit(y = "flow", dist = "distw", 
-#' x = c("rta","lgdp_o","lgdp_d"),
+#' tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
 #' added_constant = 1, data = grav_small_zeros)
 #' }
 #' 
@@ -169,36 +156,38 @@
 #' 
 #' @export 
 
-tobit <- function(y, dist, x, added_constant = 1, data, ...) {
+tobit <- function(dependent_variable, regressors, added_constant = 1, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.numeric(added_constant))
-  stopifnot(length(added_constant) == 1)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.numeric(added_constant), length(added_constant) == 1)
+  
+  # Split input vectors -----------------------------------------------------
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist))))
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     rowwise() %>% 
-    mutate(y_cens_log_tobit = log(sum(!!sym(y), added_constant, na.rm = TRUE))) %>% 
+    mutate(y_cens_log_tobit = log(sum(!!sym(dependent_variable), added_constant, na.rm = TRUE))) %>% 
     ungroup()
   
   ypc_log_min <- min(d %>% select(!!sym("y_cens_log_tobit")), na.rm = TRUE)
   
   # Model ----------------------------------------------------------------------
-  vars        <- paste(c("dist_log", x), collapse = " + ")
+  vars        <- paste(c("dist_log", additional_regressors), collapse = " + ")
   form        <- stats::as.formula(paste("y_cens_log_tobit", "~", vars))
   model_tobit <- censReg::censReg(formula = form, 
                                   left = ypc_log_min, right = Inf, 

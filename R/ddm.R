@@ -27,29 +27,17 @@
 #' the estimation of a gravity equation by \code{ddm} using panel data, 
 #' we do not recommend to apply this method in this case.
 #' 
-#' @param y name (type: character) of the dependent variable in the dataset 
+#' @param dependent_variable name (type: character) of the dependent variable in the dataset 
 #' \code{data}, e.g. trade flows. This variable is logged and then used as the 
 #' dependent variable in the estimation.
 #' 
-#' @param dist name (type: character) of the distance variable in the dataset 
+#' @param regressors name (type: character) of the distance variable in the dataset 
 #' \code{data} containing a measure of distance between all pairs of bilateral
 #' partners. It is logged automatically when the function is executed. 
 #' 
-#' @param x vector of names (type: character) of those bilateral variables in 
-#' the dataset \code{data} that should be taken as the independent variables 
-#' in the estimation. If an independent variable is a dummy variable,
-#' it should be of type numeric (0/1) in the dataset. If an independent variable 
-#' is defined as a ratio, it should be logged. 
-#' Unilateral effects drop out due to double demeaning and therefore 
-#' cannot be estimated.
-#' 
-#' @param lab_o variable name (type: character) of the label of the country 
+#' @param codes variable name (type: character) of the label of the country 
 #' (i.e ISO code) of origin in the dataset \code{data}. The variables 
-#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
-#' 
-#' @param lab_d variable name (type: character) of the label of the country 
-#' (i.e ISO code) of destination in the dataset \code{data}. The variables 
-#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
+#' are grouped by using \code{code_o} and \code{code_d} to obtain estimates. 
 #' 
 #' @param vce_robust robust (type: logic) determines whether a robust 
 #' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
@@ -105,12 +93,12 @@
 #' \dontrun{
 #' data(gravity_no_zeros)
 #' 
-#' ddm(y = "flow", dist = "distw", 
-#' x = c("rta"), lab_o = "iso_o", lab_d = "iso_d", 
+#' ddm(dependent_variable = "flow", regressors = c("distw", "rta"), 
+#' codes = c("iso_o", "iso_d"), 
 #' vce_robust = TRUE, data = gravity_no_zeros)
 #' 
-#' ddm(y = "flow", dist = "distw", 
-#' x = c("rta", "comcur", "contig"), lab_o = "iso_o", lab_d = "iso_d", 
+#' ddm(dependent_variable = "flow", regressors = c("distw", "rta", "comcur", "contig"), 
+#' codes = c("iso_o", "iso_d"), 
 #' vce_robust=TRUE, data=gravity_no_zeros)
 #' }
 #' 
@@ -123,8 +111,8 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' ddm(y = "flow", dist = "distw", 
-#' x = c("rta"), lab_o = "iso_o", lab_d = "iso_d", 
+#' ddm(dependent_variable = "flow", regressors = c("distw", "rta"), 
+#' codes = c("iso_o", "iso_d"), 
 #' vce_robust = TRUE, data = grav_small)
 #' }
 #' 
@@ -137,34 +125,39 @@
 #' 
 #' @export 
 
-ddm <- function(y, dist, x, lab_o, lab_d, vce_robust=TRUE, data, ...) {
+ddm <- function(dependent_variable, regressors, codes, vce_robust=TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
-  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
+  
+  # Split input vectors -----------------------------------------------------
+  code_o <- codes[1]
+  code_d <- codes[2]
+  
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance)))) %>% 
     
-    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
-    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+    filter_at(vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0)) %>% 
+    filter_at(vars(!!sym(dependent_variable)), any_vars(is.finite(!!sym(dependent_variable))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Transforming data, logging flows -------------------------------------------
   d <- d %>% 
     mutate(
-      y_log = log(!!sym(y))
+      y_log = log(!!sym(dependent_variable))
     )
   
   # Substracting the means -----------------------------------------------------
@@ -174,25 +167,25 @@ ddm <- function(y, dist, x, lab_o, lab_d, vce_robust=TRUE, data, ...) {
       dist_log_ddm = !!sym("dist_log")
     ) %>% 
     
-    group_by(!!sym(lab_o), add = FALSE) %>% 
+    group_by(!!sym(code_o), add = FALSE) %>% 
     mutate(
       ym1 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
       dm1 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
     ) %>% 
     
-    group_by(!!sym(lab_d), add = FALSE) %>% 
+    group_by(!!sym(code_d), add = FALSE) %>% 
     mutate(
       ym2 = mean(!!sym("y_log_ddm"), na.rm = TRUE),
       dm2 = mean(!!sym("dist_log_ddm"), na.rm = TRUE)
     ) %>% 
     
-    group_by(!!sym(lab_o), add = FALSE) %>% 
+    group_by(!!sym(code_o), add = FALSE) %>% 
     mutate(
       y_log_ddm = !!sym("y_log_ddm") - !!sym("ym1"),
       dist_log_ddm = !!sym("dist_log_ddm") - !!sym("dm1")
     ) %>% 
     
-    group_by(!!sym(lab_d), add = FALSE) %>% 
+    group_by(!!sym(code_d), add = FALSE) %>% 
     mutate(
       y_log_ddm = !!sym("y_log_ddm") - !!sym("ym2"),
       dist_log_ddm = !!sym("dist_log_ddm") - !!sym("dm2")
@@ -206,25 +199,25 @@ ddm <- function(y, dist, x, lab_o, lab_d, vce_robust=TRUE, data, ...) {
   
   # Substracting the means for the other independent variables -----------------
   d2 <- d %>% 
-    select(!!sym(lab_o), !!sym(lab_d), x) %>% 
-    gather(!!sym("key"), !!sym("value"), -!!sym(lab_o), -!!sym(lab_d)) %>% 
+    select(!!sym(code_o), !!sym(code_d), additional_regressors) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym(code_o), -!!sym(code_d)) %>% 
     
     mutate(key = paste0(!!sym("key"), "_ddm")) %>% 
     
-    group_by(!!sym(lab_o), !!sym("key"), add = FALSE) %>% 
+    group_by(!!sym(code_o), !!sym("key"), add = FALSE) %>% 
     mutate(ddm = !!sym("value") - mean(!!sym("value"), na.rm = TRUE)) %>% 
     
-    group_by(!!sym(lab_d), !!sym("key"), add = FALSE) %>% 
+    group_by(!!sym(code_d), !!sym("key"), add = FALSE) %>% 
     mutate(ddm = !!sym("ddm") - mean(!!sym("value"), na.rm = TRUE)) %>% 
     
     ungroup() %>% 
     mutate(value = !!sym("ddm") + mean(!!sym("value"), na.rm = TRUE)) %>% 
     
-    select(!!!syms(c(lab_o, lab_d, "key", "value"))) %>% 
+    select(!!!syms(c(code_o, code_d, "key", "value"))) %>% 
     spread(!!sym("key"), !!sym("value"))
   
   # Model ----------------------------------------------------------------------
-  dmodel <- left_join(d, d2, by = c(lab_o, lab_d)) %>% 
+  dmodel <- left_join(d, d2, by = c(code_o, code_d)) %>% 
     select(!!sym("y_log_ddm"), ends_with("_ddm"))
   
   model_ddm <- stats::lm(y_log_ddm ~ . + 0, data = dmodel)

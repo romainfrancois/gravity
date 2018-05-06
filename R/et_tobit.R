@@ -61,7 +61,7 @@
 #' bound equal to the minimum positive trade level of the respective
 #' importing country.
 #' 
-#' @param y name (type: character) of the dependent variable in the dataset 
+#' @param dependent_variable name (type: character) of the dependent variable in the dataset 
 #' \code{data}, e.g. trade flows.
 #' Following Carson and Sun (2007), the smallest positive flow value is 
 #' used as an estimate of the threshold. 
@@ -69,20 +69,9 @@
 #' logged and taken as the dependent variable in the Tobit estimation with 
 #' lower bound equal to the log of the smallest possible flow value. 
 #' 
-#' @param dist name (type: character) of the distance variable in the dataset 
+#' @param regressors name (type: character) of the distance variable in the dataset 
 #' \code{data} containing a measure of distance between all pairs of bilateral
 #' partners. It is logged automatically when the function is executed. 
-#' 
-#' @param x vector of names (type: character) of those bilateral variables in 
-#' the dataset \code{data} that should be taken as the independent variables 
-#' in the estimation. If an independent variable is a dummy variable,
-#' it should be of type numeric (0/1) in the dataset. If an independent variable 
-#' is defined as a ratio, it should be logged. 
-#' Unilateral variables such as country dummies or incomes can be added. 
-#' If unilateral metric variables such as GDPs should be used as independent 
-#' variables, those variables have to be logged first and the 
-#' logged variable can be used in \code{x}.
-#' Interaction terms can be added.
 #' 
 #' @param data name of the dataset to be used (type: character). 
 #' To estimate gravity equations, a square gravity dataset including bilateral 
@@ -144,8 +133,7 @@
 #'         lgdp_d = log(gdp_d)
 #'     )
 #' 
-#' et_tobit(y = "flow", dist = "distw", 
-#' x = c("rta","lgdp_o","lgdp_d"),
+#' et_tobit(y = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
 #' data = gravity_zeros)
 #' }
 #' 
@@ -161,8 +149,7 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' et_tobit(y = "flow", dist = "distw", 
-#' x = c("rta","lgdp_o","lgdp_d"),
+#' et_tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
 #' data = grav_small_zeros)
 #' }
 #' 
@@ -174,36 +161,39 @@
 #' 
 #' @export 
 
-et_tobit <- function(y, dist, x, data, ...) {
+et_tobit <- function(dependent_variable, regressors, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  
+  # Split input vectors -----------------------------------------------------
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist))))
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Transforming data, logging flows -------------------------------------------
-  flow_min_log <- filter_at(d, vars(!!sym(y)), any_vars(!!sym(y) > 0))
+  flow_min_log <- filter_at(d, vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0))
   
   d <- d %>% 
     mutate(
-      y_log_et = ifelse(!!sym(y) > 0, log(!!sym(y)), NA)
+      y_log_et = ifelse(!!sym(dependent_variable) > 0, log(!!sym(dependent_variable)), NA)
     )
   
   # Transforming data, logging flows, distances --------------------------------
   d <- d %>% 
     mutate(
-      y2 = ifelse(!!sym(y) > 0, !!sym(y), NA),
+      y2 = ifelse(!!sym(dependent_variable) > 0, !!sym(dependent_variable), NA),
       y2_log = log(!!sym("y2"))
     )
   
@@ -212,11 +202,11 @@ et_tobit <- function(y, dist, x, data, ...) {
 
   d <- d %>% 
     rowwise() %>% 
-    mutate(y_cens_log_et = log(sum(!!sym(y), y2min, na.rm = TRUE))) %>% 
+    mutate(y_cens_log_et = log(sum(!!sym(dependent_variable), y2min, na.rm = TRUE))) %>% 
     ungroup()
   
   # Model -------------------------------------------------------------------
-  vars           <- paste(c("dist_log", x), collapse = " + ")
+  vars           <- paste(c("dist_log", additional_regressors), collapse = " + ")
   form           <- stats::as.formula(paste("y_cens_log_et", "~", vars))
   model_et_tobit <- censReg::censReg(formula = form, 
                                      left = y2min_log, right = Inf, 

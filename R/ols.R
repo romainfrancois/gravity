@@ -51,55 +51,33 @@
 #' see Egger and Pfaffermayr (2003), Gomez-Herrera (2013) and Head, Mayer and 
 #' Ries (2010) as well as the references therein. 
 #' 
-#' @param y name (type: character) of the dependent variable in the dataset 
+#' @param dependent_variable name (type: character) of the dependent variable in the dataset 
 #' \code{data}, e.g. trade flows. This variable is logged and taken as the 
 #' dependent variable in the estimation.
 #' If \code{uie=TRUE} the dependent variable is divided by the product of
-#' unilateral incomes \code{inc_o} and \code{inc_d}, e.g. GDPs or GNPs of the 
+#' unilateral incomes \code{code_o} and \code{code_d}, e.g. GDPs or GNPs of the 
 #' countries of interest and logged afterwards.
 #' If \code{uie=FALSE} the dependent variable is logged directly. 
 #' The transformed variable is then used as the dependent variable and 
 #' the logged income variables are used as independent variables in the 
 #' estimation.
 #' 
-#' @param dist name (type: character) of the distance variable in the dataset 
+#' @param regressors name (type: character) of the distance variable in the dataset 
 #' \code{data} containing a measure of distance between all pairs of bilateral
 #' partners. It is logged automatically when the function is executed. 
 #' 
-#' @param x vector of names (type: character) of those bilateral variables in 
-#' the dataset \code{data} that should be taken as the independent variables 
-#' in the estimation. If an independent variable is a dummy variable,
-#' it should be of type numeric (0/1) in the dataset. If an independent variable 
-#' is defined as a ratio, it should be logged. Unilateral metric variables 
-#' such as GDPs should be inserted via the arguments \code{inc_o} 
-#' for the country of origin and \code{inc_d} for the country of destination.
-#' Interaction terms can be added.
-#' 
-#' @param inc_o variable name (type: character) of the income of the country of 
+#' @param incomes variable name (type: character) of the income of the country of 
 #' origin in the dataset \code{data}. If \code{uie=TRUE}, the dependent variable 
-#' \code{y} is divided by the product of the incomes \code{inc_d} and \code{inc_o}.
+#' \code{y} is divided by the product of the incomes \code{code_d} and \code{code_o}.
 #' If \code{uie=FALSE}, the incomes are logged and taken as independent 
 #' variables in the estimation. 
 #' If one wants to use more than one unilateral variable, 
 #' e.g. GDP and population, those variables have to be merged into one 
-#' variable, e.g. GDP per capita, which can be inserted into \code{inc_o}.
+#' variable, e.g. GDP per capita, which can be inserted into \code{code_o}.
 #' 
-#' @param inc_d variable name (type: character) of the income of the country of 
-#' destination in the dataset \code{data}. If \code{uie=TRUE}, the dependent variable 
-#' \code{y} is divided by the product of the incomes \code{inc_d} and \code{inc_o}.
-#' If \code{uie=FALSE}, the incomes are logged and taken as independent 
-#' variables in the estimation. 
-#' If one wants to use more than one unilateral variable, 
-#' e.g. GDP and population, those variables have to be merged into one 
-#' variable, e.g. GDP per capita, which can be inserted into \code{inc_d}.
-#' 
-#' @param lab_o variable name (type: character) of the label of the country 
+#' @param codes variable name (type: character) of the label of the country 
 #' (i.e ISO code) of origin in the dataset \code{data}. The variables 
-#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
-#' 
-#' @param lab_d variable name (type: character) of the label of the country 
-#' (i.e ISO code) of destination in the dataset \code{data}. The variables 
-#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates. 
+#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.
 #' 
 #' @param uie Unitary Income Elasticities (type: logic) determines whether the 
 #' parameters are to be estimated assuming unitary income elasticities. 
@@ -108,8 +86,8 @@
 #' the country pairs' incomes before the estimation. If \code{uie} is set to
 #' \code{FALSE}, the income variables are logged and taken as independent
 #' variables in the estimation. The variable names for the 
-#' incomes should be inserted into \code{inc_o} for the country of origin 
-#' and into \code{inc_d} for destination country. 
+#' incomes should be inserted into \code{code_o} for the country of origin 
+#' and into \code{code_d} for destination country. 
 #' 
 #' @param vce_robust robust (type: logic) determines whether a robust 
 #' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
@@ -172,12 +150,8 @@
 #' \dontrun{
 #' data(gravity_no_zeros)
 #' 
-#' ols(y = "flow", dist = "distw", x = c("rta", "contig", "comcur"), 
-#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
-#' uie = FALSE, vce_robust = TRUE, data = gravity_no_zeros)
-#' 
-#' ols(y = "flow", dist = "distw", x = c("rta", "contig", "comcur"), 
-#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+#' ols(dependent_variable = "flow", regressors = c("distw", "rta", "contig", "comcur"), 
+#' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
 #' uie = TRUE, vce_robust = TRUE, data = gravity_no_zeros)
 #' }
 #' 
@@ -190,8 +164,8 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' ols(y = "flow", dist = "distw", x = c("rta"), 
-#' inc_o = "gdp_o", inc_d = "gdp_d", lab_o = "iso_o", lab_d = "iso_d",
+#' ols(dependent_variable = "flow", regressors = c("distw", "rta"),
+#' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
 #' uie = FALSE, vce_robust = TRUE, data = grav_small)
 #' }
 #' 
@@ -204,31 +178,38 @@
 #' 
 #' @export
 
-ols <- function(y, dist, x, inc_d, inc_o, lab_o, lab_d, uie = FALSE, vce_robust = TRUE, data, ...) {
+ols <- function(dependent_variable, regressors, incomes, codes, uie = FALSE, vce_robust = TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(uie))
   stopifnot(is.logical(vce_robust))
-  stopifnot(is.character(y), y %in% colnames(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% colnames(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.character(inc_o) | inc_o %in% colnames(data) | length(inc_o) == 1)
-  stopifnot(is.character(inc_d) | inc_d %in% colnames(data) | length(inc_d) == 1)
-  stopifnot(is.character(lab_o) | lab_o %in% colnames(data) | length(lab_o) == 1)
-  stopifnot(is.character(lab_d) | lab_d %in% colnames(data) | length(lab_d) == 1)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.character(incomes) | all(incomes %in% colnames(data)) | length(incomes) == 2)
+  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
+  
+  # Split input vectors -----------------------------------------------------
+  inc_o <- incomes[1]
+  inc_d <- incomes[2]
+  
+  code_o <- codes[1]
+  code_d <- codes[2]
+  
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
   # Discarding unusable observations ----------------------------------------
   d <- data %>% 
-    filter_at(vars(!!sym(dist)), any_vars(!!sym(dist) > 0)) %>% 
-    filter_at(vars(!!sym(dist)), any_vars(is.finite(!!sym(dist)))) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance)))) %>% 
     
-    filter_at(vars(!!sym(y)), any_vars(!!sym(y) > 0)) %>% 
-    filter_at(vars(!!sym(y)), any_vars(is.finite(!!sym(y))))
+    filter_at(vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0)) %>% 
+    filter_at(vars(!!sym(dependent_variable)), any_vars(is.finite(!!sym(dependent_variable))))
   
   # Transforming data, logging distances ---------------------------------------
   d <- d %>% 
     mutate(
-      dist_log = log(!!sym(dist))
+      dist_log = log(!!sym(distance))
     )
   
   # Income elasticities --------------------------------------------------------
@@ -237,12 +218,12 @@ ols <- function(y, dist, x, inc_d, inc_o, lab_o, lab_d, uie = FALSE, vce_robust 
     d <- d %>% 
       mutate(
         y_log_ols = log(
-          !!sym(y) / (!!sym(inc_o) * !!sym(inc_d))
+          !!sym(dependent_variable) / (!!sym(inc_o) * !!sym(inc_d))
         )
       ) %>% 
       
       select(
-        !!sym("y_log_ols"), !!sym("dist_log"), !!sym("x")
+        !!sym("y_log_ols"), !!sym("dist_log"), !!sym("additional_regressors")
       )
     
     # Model --------------------------------------------------------------------
@@ -253,13 +234,13 @@ ols <- function(y, dist, x, inc_d, inc_o, lab_o, lab_d, uie = FALSE, vce_robust 
     # Transforming data, logging flows -----------------------------------------
     d <- d %>% 
       mutate(
-        y_log_ols = log(!!sym(y)),
+        y_log_ols = log(!!sym(dependent_variable)),
         inc_o_log = log(!!sym(inc_o)),
         inc_d_log = log(!!sym(inc_d))
       ) %>%
       
       select(
-        !!sym("y_log_ols"), !!sym("inc_o_log"), !!sym("inc_d_log"), !!sym("dist_log"), !!sym("x")
+        !!sym("y_log_ols"), !!sym("inc_o_log"), !!sym("inc_d_log"), !!sym("dist_log"), !!sym("additional_regressors")
       )
     
     # Model --------------------------------------------------------------------
