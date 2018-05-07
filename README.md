@@ -26,7 +26,7 @@
 - [x] ols
 - [x] tobit
 - [x] robust summary
-- [ ] fixed effects
+- [x] fixed effects
 - [ ] gpml
 - [ ] nbpml
 - [x] nls
