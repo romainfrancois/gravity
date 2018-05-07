@@ -2,7 +2,7 @@
 % Please edit documentation in R/tobit.R
 \name{tobit}
 \alias{tobit}
-\title{Left-censored tobit model with known threshold}
+\title{Left-censored Tobit model with known threshold}
 \usage{
 tobit(dependent_variable, regressors, added_constant = 1, data, ...)
 }
@@ -107,7 +107,7 @@ gravity_zeros <- gravity_zeros \%>\%
         lgdp_d = log(gdp_d)
     )
 
-tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
+tobit(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
 added_constant = 1, data = gravity_zeros)
 }
 

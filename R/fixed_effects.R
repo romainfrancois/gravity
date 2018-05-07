@@ -58,28 +58,19 @@
 #' see Egger and Pfaffermayr (2003), Gomez-Herrera (2013) and Head, Mayer and 
 #' Ries (2010) as well as the references therein. 
 #' 
-#' @param y name (type: character) of the dependent variable in the dataset 
+#' @param dependent_variable name (type: character) of the dependent variable in the dataset 
 #' \code{data}, e.g. trade flows. This variable is logged and taken as the 
 #' dependent variable in the estimation.
 #' 
-#' @param dist name (type: character) of the distance variable in the dataset 
+#' @param regressors name (type: character) of the distance variable in the dataset 
 #' \code{data} containing a measure of distance between all pairs of bilateral
 #' partners. It is logged automatically when the function is executed. 
 #' 
-#' @param fe vector of names (type: character) of fixed effects.
+#' @param codes vector of names (type: character) of fixed effects.
 #' The default is set to the unilateral identifiers
 #' \code{"iso_o"} and \code{"iso_d"} for cross-sectional data. 
 #' When using panel data, interaction terms of the iso-codes and time
 #' may be added in either \code{fe} or \code{x}. 
-#' 
-#' @param x vector of names (type: character) of those bilateral variables in 
-#' the dataset \code{data} that should be taken as the independent variables 
-#' in the estimation. If an independent variable is a dummy variable
-#' it should be of type numeric (0/1) in the dataset. If an independent variable is 
-#' defined as a ratio, it should be logged. 
-#' The fixed effects catch all unilateral effects. Therefore, 
-#' no other unilateral variables such as GDP can be
-#' included as independent variables in the estimation.
 #'
 #' @param vce_robust robust (type: logic) determines whether a robust 
 #' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
@@ -147,11 +138,13 @@
 #' \dontrun{
 #' data(gravity_no_zeros)
 #' 
-#' fixed_effects(y="flow", dist="distw", fe=c("iso_o", "iso_d"), 
-#' x=c("rta"), vce_robust=TRUE, data=gravity_no_zeros)
+#' fixed_effects(dependent_variable = "flow", 
+#' regressors = c("distw", "rta"), codes = c("iso_o", "iso_d"), 
+#' vce_robust = TRUE, data = gravity_no_zeros)
 #' 
-#' fixed_effects(y="flow", dist="distw", fe=c("iso_o", "iso_d"), 
-#' x=c("rta", "comcur", "contig"), vce_robust=TRUE, data=gravity_no_zeros)
+#' fixed_effects(dependent_variable = "flow", 
+#' regressors = c("distw", "rta", "comcur", "contig"), 
+#' codes = c("iso_o", "iso_d"), vce_robust = TRUE, data = gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -163,7 +156,8 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' fixed_effects(y="flow", dist="distw", fe=c("iso_o", "iso_d"), x=c("rta"), vce_robust=TRUE, data=grav_small)
+#' fixed_effects(dependent_variable = "flow", regressors = c("distw", "rta"), 
+#' codes = c("iso_o", "iso_d"), vce_robust = TRUE, data = grav_small)
 #' }
 #' 
 #' @return
@@ -175,31 +169,41 @@
 #' 
 #' @export 
 
-fixed_effects <- function(y, dist, fe = c("iso_o", "iso_d"), x, vce_robust = TRUE, data, ...) {
-  
+fixed_effects <- function(dependent_variable, regressors, codes = c("iso_o", "iso_d"), vce_robust = TRUE, data, ...) {
+  # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(vce_robust))
-  stopifnot(is.character(y))
-  stopifnot(y %in% names(data), length(y) == 1)
-  stopifnot(is.character(dist), dist %in% names(data), length(dist) == 1)
-  stopifnot(is.character(x), all(x %in% colnames(data)))
-  stopifnot(is.character(fe), !all(unique(unlist(strsplit(fe,c("[:]|[*]")))) %in% colnames(data)), length(fe) < 2)
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) <= 2)
   
-  # Transforming data, logging flows and distances -----------------------------
+  # Split input vectors -----------------------------------------------------
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
+  
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance)))) %>% 
+    
+    filter_at(vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0)) %>% 
+    filter_at(vars(!!sym(dependent_variable)), any_vars(is.finite(!!sym(dependent_variable))))
+  
+  # Transforming data, logging flows and distances --------------------------
   d <- data %>% 
     mutate(
-      dist_log = !!sym(dist),
-      y_log = !!sym(y)
+      dist_log = log(!!sym(distance)),
+      y_log_fe = log(!!sym(dependent_variable))
     )
   
   # Model ----------------------------------------------------------------------
-  vars <- paste(c("dist_log", x, fe), collapse = " + ")
-  form <- stats::as.formula(paste("y_log", "~", vars))
-  model.fe <- stats::lm(form2, data = d)
-
-  # Return ---------------------------------------------------------------------
-  return.object.1      <- .robustsummary.lm(model.fe, robust = vce_robust)
-  return.object.1$call <- form2
+  vars <- paste(c("dist_log", additional_regressors, codes), collapse = " + ")
+  form <- stats::as.formula(paste("y_log_fe", "~", vars))
+  model_fe <- stats::lm(form, data = d)
   
-  return(return.object.1)
+  # Return ---------------------------------------------------------------------
+  return_object      <- robust_summary(model_fe, robust = vce_robust)
+  return_object$call <- form
+  
+  return(return_object)
 }

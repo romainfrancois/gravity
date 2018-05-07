@@ -1598,3 +1598,90 @@ nlsmod <- function() {
   }
 }
 nlsmod()
+
+
+# feorig ------------------------------------------------------------------
+
+load("~/GitHub/gravity/data/gravity_no_zeros.rdata")
+dependent_variable = "flow"
+regressors = c("distw", "rta")
+codes = c("iso_o", "iso_d")
+fe = codes
+
+vce_robust = TRUE
+data = as.data.frame(gravity_no_zeros)
+
+feorig <- function(){
+  
+  if(!is.data.frame(data))                                                stop("'data' must be a 'data.frame'")
+  if((vce_robust %in% c(TRUE, FALSE)) == FALSE)                           stop("'vce_robust' has to be either 'TRUE' or 'FALSE'")
+  if(!is.character(y)     | !y%in%colnames(data)     | length(y)!=1)      stop("'y' must be a character of length 1 and a colname of 'data'")
+  if(!is.character(dist)  | !dist%in%colnames(data)  | length(dist)!=1)   stop("'dist' must be a character of length 1 and a colname of 'data'")
+  if(!is.character(x)     | !all(x%in%colnames(data)))                    stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
+  
+  if(!is.character(fe) | !all(unique(unlist(strsplit(fe,c("[:]|[*]"))))%in%colnames(data)) | length(fe)<2)  stop("'fe' must be a character vector of length >=2 and all main variables of the fe's have to be colnames of 'data'")
+  
+  # Transforming data, logging flows and distances -----------------------------
+  
+  d                      <- data
+  d$dist_log             <- (log(d[dist][,1]))
+  d$y_log                <- log(d[y][,1])
+  
+  # Model ----------------------------------------------------------------------
+  
+  vars                   <- paste(c("dist_log", x, fe), collapse = " + ")
+  vars2                  <- paste(vars)
+  form                   <- paste("y_log", "~", vars2)
+  form2                  <- stats::as.formula(form)
+  model.fe               <- stats::lm(form2, data = d)
+  
+  # Return ---------------------------------------------------------------------
+  
+  return.object.1      <- .robustsummary.lm(model.fe, robust=vce_robust)
+  return.object.1$call <- form2
+  return(return.object.1)
+}
+feorig()
+
+# femod -------------------------------------------------------------------
+
+femod <- function() {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(y))
+  stopifnot(y %in% names(data), length(y) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) <= 2)
+  
+  # Split input vectors -----------------------------------------------------
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
+  
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance)))) %>% 
+    
+    filter_at(vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0)) %>% 
+    filter_at(vars(!!sym(dependent_variable)), any_vars(is.finite(!!sym(dependent_variable))))
+  
+  # Transforming data, logging flows and distances --------------------------
+  d <- data %>% 
+    mutate(
+      dist_log = log(!!sym(distance)),
+      y_log_fe = log(!!sym(dependent_variable))
+    )
+  
+  # Model ----------------------------------------------------------------------
+  vars <- paste(c("dist_log", additional_regressors, codes), collapse = " + ")
+  form <- stats::as.formula(paste("y_log_fe", "~", vars))
+  model_fe <- stats::lm(form, data = d)
+  
+  # Return ---------------------------------------------------------------------
+  return_object      <- robust_summary(model_fe, robust = vce_robust)
+  return_object$call <- form
+  
+  return(return_object)
+}
+femod()

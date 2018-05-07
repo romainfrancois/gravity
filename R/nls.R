@@ -44,23 +44,12 @@
 #' see Egger and Pfaffermayr (2003), Gomez-Herrera (2013) and Head, Mayer and 
 #' Ries (2010) as well as the references therein. 
 #' 
-#' @param y name (type: character) of the dependent variable in the dataset 
+#' @param dependent_variable name (type: character) of the dependent variable in the dataset 
 #' \code{data}, e.g. trade flows. 
 #' 
-#' @param dist name (type: character) of the distance variable in the dataset 
+#' @param regressors name (type: character) of the distance variable in the dataset 
 #' \code{data} containing a measure of distance between all pairs of bilateral
-#' partners. It is logged automatically when the function is executed. 
-#' 
-#' @param x vector of names (type: character) of those bilateral variables in 
-#' the dataset \code{data} that should be taken as the independent variables 
-#' in the estimation. If an independent variable is a dummy variable,
-#' it should be of type numeric (0/1) in the dataset. If an independent variable 
-#' is defined as a ratio, it should be logged. 
-#' Unilateral variables such as country dummies or incomes can be added. 
-#' If unilateral metric variables such as GDPs should be used as independent 
-#' variables, those variables have to be logged first and the 
-#' logged variable can be used in \code{x}.
-#' Interaction terms can be added.
+#' partners. It is logged automatically when the function is executed.
 #' 
 #' @param vce_robust robust (type: logic) determines whether a robust 
 #' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
@@ -117,23 +106,14 @@
 #' 
 #' @examples 
 #' \dontrun{
-#' # Example for data with zero trade flows
-#' data(gravity_zeros)
-#' 
-#' gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
-#' gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
-#' 
-#' nls(y="flow", dist="distw", x=c("rta","lgdp_o","lgdp_d"), 
-#' vce_robust=TRUE, data=gravity_zeros)
-#' 
 #' # Example for data without zero trade flows
 #' data(gravity_no_zeros)
 #' 
 #' gravity_no_zeros$lgdp_o <- log(gravity_no_zeros$gdp_o)
 #' gravity_no_zeros$lgdp_d <- log(gravity_no_zeros$gdp_d)
 #' 
-#' nls(y="flow", dist="distw", x=c("rta","lgdp_o","lgdp_d"), 
-#' vce_robust=TRUE, data=gravity_no_zeros)
+#' nls(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"), 
+#' vce_robust = TRUE, data = gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -148,8 +128,9 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' nls(y="flow", dist="distw", x=c("rta","lgdp_o","lgdp_d"), vce_robust=TRUE, data=grav_small_zeros)
-#' }
+#' nls(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"), 
+#' vce_robust = TRUE, data = grav_small_zeros)
+#' } 
 #' 
 #' @return
 #' The function returns the summary of the estimated gravity model similar to a

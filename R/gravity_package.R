@@ -9,7 +9,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom tibble tibble
 #' @importFrom survival Surv
-#' @importFrom stats lm as.formula
+#' @importFrom stats lm as.formula glm
 #' @importFrom censReg censReg
 #' @name gravity-exports
 NULL
