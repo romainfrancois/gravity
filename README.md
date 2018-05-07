@@ -8,7 +8,7 @@
 
 ### Check ET Tobit
 
-- [ ] Warning that affects original and tidy function (Consider switching to a more robust optimisation method temporarily)
+- [x] Warning that affects original and tidy function "Consider switching to a more robust optimisation method temporarily + In sqrt(diag(vc)) : NaNs produced" -> *Solved switching from Newton-Rhapson to Simulated Annealing + starting from all betas equal to zero*
 
 ### Vignettes
 

@@ -209,8 +209,11 @@ et_tobit <- function(dependent_variable, regressors, data, ...) {
   vars           <- paste(c("dist_log", additional_regressors), collapse = " + ")
   form           <- stats::as.formula(paste("y_cens_log_et", "~", vars))
   model_et_tobit <- censReg::censReg(formula = form, 
-                                     left = y2min_log, right = Inf, 
-                                     data = d, start = NULL)
+                                     left = y2min_log, 
+                                     right = Inf, 
+                                     data = d, 
+                                     start = rep(0, 2 + length(regressors)),
+                                     method = "SANN")
   
   # Return ------------------------------------------------------------------
   return_object      <- summary(model_et_tobit)

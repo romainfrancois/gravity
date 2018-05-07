@@ -1152,6 +1152,18 @@ etorig()
 
 # etmod -------------------------------------------------------------------
 
+data(gravity_zeros)
+
+gravity_zeros <- gravity_zeros %>%
+    mutate(
+        lgdp_o = log(gdp_o),
+        lgdp_d = log(gdp_d)
+    )
+
+regressors = c("distw", "rta","lgdp_o","lgdp_d")
+
+data = gravity_zeros
+
 etmod <- function() {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
@@ -1200,8 +1212,11 @@ etmod <- function() {
   vars           <- paste(c("dist_log", additional_regressors), collapse = " + ")
   form           <- stats::as.formula(paste("y_cens_log_et", "~", vars))
   model_et_tobit <- censReg::censReg(formula = form, 
-                                     left = y2min_log, right = Inf, 
-                                     data = d, start = NULL)
+                                     left = y2min_log, 
+                                     right = Inf, 
+                                     data = d, 
+                                     start = rep(0, 2 + length(regressors)),
+                                     method = "SANN")
   
   # Return ------------------------------------------------------------------
   return_object      <- summary(model_et_tobit)

@@ -1,4 +1,4 @@
-#' @title Left-censored tobit model with known threshold
+#' @title Left-censored Tobit model with known threshold
 #' 
 #' @description \code{tobit} estimates gravity models in their additive form
 #' by conducting a left-censored regression, which, after adding the
@@ -128,7 +128,7 @@
 #'         lgdp_d = log(gdp_d)
 #'     )
 #' 
-#' tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
+#' tobit(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
 #' added_constant = 1, data = gravity_zeros)
 #' }
 #' 
@@ -190,8 +190,11 @@ tobit <- function(dependent_variable, regressors, added_constant = 1, data, ...)
   vars        <- paste(c("dist_log", additional_regressors), collapse = " + ")
   form        <- stats::as.formula(paste("y_cens_log_tobit", "~", vars))
   model_tobit <- censReg::censReg(formula = form, 
-                                  left = ypc_log_min, right = Inf, 
-                                  data = d, start = NULL)
+                                  left = ypc_log_min, 
+                                  right = Inf, 
+                                  data = d, 
+                                  start = rep(0, 2 + length(regressors)),
+                                  method = "SANN")
 
   # Return --------------------------------------------------------------------- 
   return_object      <- summary(model_tobit)
