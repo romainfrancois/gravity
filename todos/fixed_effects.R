@@ -175,32 +175,31 @@
 #' 
 #' @export 
 
-fixed_effects <- function(y, dist, fe=c("iso_o", "iso_d"), x, vce_robust=TRUE, data, ...) {
-  if (!is.data.frame(data))                                                  stop("'data' must be a 'data.frame'")
-  if ((vce_robust %in% c(TRUE, FALSE)) == FALSE)                             stop("'vce_robust' has to be either 'TRUE' or 'FALSE'")
-  if (!is.character(y)    | !y %in% colnames(data)    | length(y) != 1)      stop("'y' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(dist) | !dist %in% colnames(data) | length(dist) != 1)   stop("'dist' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(x)    | !all(x %in% colnames(data)))                     stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
-
-  if (!is.character(fe) | !all(unique(unlist(strsplit(fe,c("[:]|[*]")))) %in% colnames(data)) | length(fe) < 2)   stop("'fe' must be a character vector of length >=2 and all main variables of the fe's have to be colnames of 'data'")
+fixed_effects <- function(y, dist, fe = c("iso_o", "iso_d"), x, vce_robust = TRUE, data, ...) {
+  
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(y))
+  stopifnot(y %in% names(data), length(y) == 1)
+  stopifnot(is.character(dist), dist %in% names(data), length(dist) == 1)
+  stopifnot(is.character(x), all(x %in% colnames(data)))
+  stopifnot(is.character(fe), !all(unique(unlist(strsplit(fe,c("[:]|[*]")))) %in% colnames(data)), length(fe) < 2)
   
   # Transforming data, logging flows and distances -----------------------------
-  
-  d                      <- data
-  d$dist_log             <- (log(d[dist][,1]))
-  d$y_log                <- log(d[y][,1])
+  d <- data %>% 
+    mutate(
+      dist_log = !!sym(dist),
+      y_log = !!sym(y)
+    )
   
   # Model ----------------------------------------------------------------------
-  
-  vars                   <- paste(c("dist_log", x, fe), collapse = " + ")
-  vars2                  <- paste(vars)
-  form                   <- paste("y_log", "~", vars2)
-  form2                  <- stats::as.formula(form)
-  model.fe               <- stats::lm(form2, data = d)
+  vars <- paste(c("dist_log", x, fe), collapse = " + ")
+  form <- stats::as.formula(paste("y_log", "~", vars))
+  model.fe <- stats::lm(form2, data = d)
 
   # Return ---------------------------------------------------------------------
-  
   return.object.1      <- .robustsummary.lm(model.fe, robust = vce_robust)
   return.object.1$call <- form2
+  
   return(return.object.1)
 }
