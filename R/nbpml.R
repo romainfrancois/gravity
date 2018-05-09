@@ -17,7 +17,7 @@
 #' excluded from the dataset.
 #' Zero trade flows are allowed.
 #' For similar functions, utilizing the multiplicative form via the log-link,
-#' but different distributions, see \code{\link[gravity]{ppml}}, \code{\link[gravity]{gpml}}, and \code{\link[gravity]{nls}}.
+#' but different distributions, see \code{\link[gravity]{nbpml}}, \code{\link[gravity]{gpml}}, and \code{\link[gravity]{nls}}.
 #'
 #' \code{nbpml} estimation can be used for both, cross-sectional as well as
 #' panel data.
@@ -41,23 +41,12 @@
 #' see Egger and Pfaffermayr (2003), Gomez-Herrera (2013) and Head, Mayer and
 #' Ries (2010) as well as the references therein.
 #'
-#' @param y name (type: character) of the dependent variable in the dataset
+#' @param dependent_variable name (type: character) of the dependent variable in the dataset
 #' \code{data}, e.g. trade flows.
 #'
-#' @param dist name (type: character) of the distance variable in the dataset
+#' @param regressors name (type: character) of the distance variable in the dataset
 #' \code{data} containing a measure of distance between all pairs of bilateral
 #' partners. It is logged automatically when the function is executed.
-#'
-#' @param x vector of names (type: character) of those bilateral variables in
-#' the dataset \code{data} that should be taken as the independent variables
-#' in the estimation. If an independent variable is a dummy variable,
-#' it should be of type numeric (0/1) in the dataset. If an independent variable
-#' is defined as a ratio, it should be logged.
-#' Unilateral variables such as country dummies or incomes can be added.
-#' If unilateral metric variables such as GDPs should be used as independent
-#' variables, those variables have to be logged first and the
-#' logged variable can be used in \code{x}.
-#' Interaction terms can be added.
 #'
 #' @param vce_robust robust (type: logic) determines whether a robust
 #' variance-covariance matrix should be used. The default is set to \code{TRUE}.
@@ -112,37 +101,38 @@
 #'
 #' and the references therein.
 #'
-#' @examples
+#' @examples 
 #' \dontrun{
 #' # Example for data with zero trade flows
 #' data(gravity_zeros)
-#'
-#' nbpml(y="flow", dist="distw", x=c("rta","iso_o","iso_d"),
-#' vce_robust=TRUE, data=gravity_zeros)
-#'
+#' 
+#' nbpml(dependent_variable = "flow", regressors = c("distw", "rta","iso_o","iso_d"), 
+#' vce_robust = TRUE, data = gravity_zeros)
+#' 
 #' # Example for data without zero trade flows
 #' data(gravity_no_zeros)
-#'
+#' 
 #' gravity_no_zeros$lgdp_o <- log(gravity_no_zeros$gdp_o)
 #' gravity_no_zeros$lgdp_d <- log(gravity_no_zeros$gdp_d)
-#'
-#' nbpml(y="flow", dist="distw", x=c("rta","lgdp_o","lgdp_d"),
-#' vce_robust=TRUE, data=gravity_no_zeros)
+#' 
+#' nbpml(dependent_variable = "flow", regressors = c("distw","rta","lgdp_o","lgdp_d"), 
+#' vce_robust = TRUE, data = gravity_no_zeros)
 #' }
-#'
+#' 
 #' \dontshow{
 #' # examples for CRAN checks:
 #' # executable in < 5 sec together with the examples above
 #' # not shown to users
-#'
+#' 
 #' data(gravity_zeros)
 #' gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
 #' gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
-#'
+#' 
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' nbpml(y="flow", dist="distw", x=c("rta","lgdp_o","lgdp_d"), vce_robust=TRUE, data=grav_small_zeros)
+#' nbpml(dependent_variable = "flow", regressors = c("distw","rta","lgdp_o","lgdp_d"), 
+#' vce_robust = TRUE, data = grav_small_zeros)
 #' }
 #'
 #' @return
@@ -154,45 +144,56 @@
 #'
 #' @export
 
-nbpml <- function(y, dist, x, vce_robust = TRUE, data, ...) {
-  if (!is.data.frame(data))                                                 stop("'data' must be a 'data.frame'")
-  if ((vce_robust %in% c(TRUE, FALSE)) == FALSE)                            stop("'vce_robust' has to be either 'TRUE' or 'FALSE'")
-  if (!is.character(y) | !y %in% colnames(data) | length(y) != 1)           stop("'y' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(dist) | !dist %in% colnames(data) | length(dist) != 1)  stop("'dist' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(x) | !all(x %in% colnames(data)))                       stop("'x' must be a character vector and all x's have to be colnames of 'data'")
+nbpml <- function(dependent_variable, regressors, vce_robust = TRUE, data, ...) {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)  
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
   
-  # Transforming data, logging flows, distances --------------------------------
+  # Split input vectors -----------------------------------------------------
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
-  d                  <- data
-  d$dist_log         <- (log(d[dist][, 1]))
-  d$y                <- d[y][, 1]
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance))))
+  
+  # Transforming data, logging distances ---------------------------------------
+  d <- d %>% 
+    mutate(
+      dist_log = log(!!sym(distance))
+    ) %>% 
+    rename(
+      y_nbpml = !!sym(dependent_variable)
+    )
   
   # Model ----------------------------------------------------------------------
+  vars               <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  form               <- stats::as.formula(paste("y_nbpml", "~", vars))
+  model_nbpml        <- MASS::glm.nb(form,
+                                     data = d,
+                                     link = "log")
+  model_nbpml_robust <- lmtest::coeftest(model_nbpml, 
+                                         vcov = sandwich::vcovHC(model_nbpml, "HC1"))
   
-  vars               <- paste(c("dist_log", x), collapse = " + ")
-  form               <- paste("y", "~", vars)
-  form2              <- stats::as.formula(form)
-  model.nbpml        <- MASS::glm.nb(form2, data = d, link = "log")
-  model.nbpml.robust <- lmtest::coeftest(model.nbpml, vcov = sandwich::vcovHC(model.nbpml, "HC1"))
-  
-  # Return ---------------------------------------------------------------------
+  # Return --------------------------------------------------------------------- 
   
   if (vce_robust == TRUE) {
-    summary.nbpml.1                <-
-      .robustsummary.lm(model.nbpml, robust = TRUE)
-    summary.nbpml.1$coefficients   <-
-      model.nbpml.robust[1:length(rownames(model.nbpml.robust)), ]
-    return.object.1                <- summary.nbpml.1
-    return.object.1$call           <- form2
-    return.object.1$r.squared      <- NULL
-    return.object.1$adj.r.squared  <- NULL
-    return.object.1$fstatistic     <- NULL
-    return(return.object.1)
+    summary_nbpml               <- robust_summary(model_nbpml, robust = TRUE)
+    summary_nbpml$coefficients  <- model_nbpml_robust[1:length(rownames(model_nbpml_robust)),]
+    return_object               <- summary_nbpml
+    return_object$call          <- form
+    return_object$r.squared     <- NULL 
+    return_object$adj.r.squared <- NULL
+    return_object$fstatistic    <- NULL
+    return(return_object)
   }
   
   if (vce_robust == FALSE) {
-    return.object.1                <- summary(model.nbpml)
-    return.object.1$call           <- form2
-    return(return.object.1)
+    return_object               <- summary(model_nbpml)
+    return_object$call          <- form
+    return(return_object)
   }
 }

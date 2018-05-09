@@ -40,23 +40,16 @@
 #' see Egger and Pfaffermayr (2003), Gomez-Herrera (2013) and Head, Mayer and 
 #' Ries (2010) as well as the references therein. 
 #' 
-#' @param y name (type: character) of the dependent variable in the dataset 
+#' @param dependent_variable name (type: character) of the dependent variable in the dataset 
 #' \code{data}, e.g. trade flows. 
 #' 
-#' @param dist name (type: character) of the distance variable in the dataset 
+#' @param regressors name (type: character) of the distance variable in the dataset 
 #' \code{data} containing a measure of distance between all pairs of bilateral
 #' partners. It is logged automatically when the function is executed. 
-#' 
-#' @param x vector of names (type: character) of those bilateral variables in 
-#' the dataset \code{data} that should be taken as the independent variables 
-#' in the estimation. If an independent variable is a dummy variable,
-#' it should be of type numeric (0/1) in the dataset. If an independent variable 
-#' is defined as a ratio, it should be logged. 
 #' Unilateral variables such as country dummies or incomes can be added. 
 #' If unilateral metric variables such as GDPs should be used as independent 
 #' variables, those variables have to be logged first and the 
 #' logged variable can be used in \code{x}.
-#' Interaction terms can be added.
 #' 
 #' @param vce_robust robust (type: logic) determines whether a robust 
 #' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
@@ -122,11 +115,8 @@
 #' gravity_no_zeros$lgdp_o <- log(gravity_no_zeros$gdp_o)
 #' gravity_no_zeros$lgdp_d <- log(gravity_no_zeros$gdp_d)
 #' 
-#' gpml(y="flow", dist="distw", x=c("rta", "lgdp_o", "lgdp_d"), 
-#' vce_robust=TRUE, data=gravity_no_zeros)
-#' 
-#' gpml(y="flow", dist="distw", x=c("rta", "iso_o", "iso_d"), 
-#' vce_robust=TRUE, data=gravity_no_zeros)
+#' gpml(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"), 
+#' vce_robust = TRUE, data = gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -138,7 +128,8 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' gpml(y="flow", dist="distw", x=c("rta", "iso_o", "iso_d"), vce_robust=TRUE, data=grav_small)
+#' gpml(dependent_variable = "flow",  regressors = c("distw", "rta", "iso_o", "iso_d"), 
+#'     vce_robust = TRUE, data = grav_small)
 #' }
 #' 
 #' @return
@@ -148,46 +139,58 @@
 #' @seealso \code{\link[glm2]{glm2}}, \code{\link[lmtest]{coeftest}}, 
 #' \code{\link[sandwich]{vcovHC}}
 #' 
-#' 
 #' @export 
 
-gpml <- function(y, dist, x, vce_robust = TRUE, data, ...) {
-  if (!is.data.frame(data))                                                   stop("'data' must be a 'data.frame'")
-  if ((vce_robust %in% c(TRUE, FALSE)) == FALSE)                              stop("'vce_robust' has to be either 'TRUE' or 'FALSE'")
-  if (!is.character(y)    | !y %in% colnames(data)    | length(y) != 1)       stop("'y' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(dist) | !dist %in% colnames(data) | length(dist) != 1)    stop("'dist' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(x)    | !all(x %in% colnames(data)))                      stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
- 
-  # Transforming data, logging flows, distances --------------------------------
+gpml <- function(dependent_variable, regressors, vce_robust = TRUE, data, ...) {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(vce_robust))
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)  
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+
+  # Split input vectors -----------------------------------------------------
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
   
-  d                  <- data
-  d$dist_log         <- (log(d[dist][,1]))
-  d$y                <- d[y][,1] 
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance))))
+    
+  # Transforming data, logging distances ---------------------------------------
+  d <- d %>% 
+    mutate(
+      dist_log = log(!!sym(distance))
+    ) %>% 
+    rename(
+      y_gpml = !!sym(dependent_variable)
+    )
   
   # Model ----------------------------------------------------------------------
-  
-  vars               <- paste(c("dist_log", x), collapse = " + ")
-  form               <- paste("y", "~", vars)
-  form2              <- stats::as.formula(form)
-  model.gpml         <- glm2::glm2(form2, data = d, family = stats::Gamma(link = "log"), control = list(maxit = 200, trace = FALSE)) # maxit default = 25
-  model.gpml.robust  <- lmtest::coeftest(model.gpml, vcov = sandwich::vcovHC(model.gpml, "HC1"))
+  vars              <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  form              <- stats::as.formula(paste("y_gpml", "~", vars))
+  model_gpml        <- glm2::glm2(form, 
+                                  data = d, 
+                                  family = stats::Gamma(link = "log"), 
+                                  control = list(maxit = 200, trace = FALSE))
+  model_gpml_robust <- lmtest::coeftest(model_gpml, 
+                                        vcov = sandwich::vcovHC(model_gpml, "HC1"))
   
   # Return --------------------------------------------------------------------- 
-  
   if (vce_robust == TRUE) {
-    summary.gpml.1                <- .robustsummary.lm(model.gpml, robust = TRUE)
-    summary.gpml.1$coefficients   <- model.gpml.robust[1:length(rownames(model.gpml.robust)),]
-    return.object.1               <- summary.gpml.1
-    return.object.1$call          <- form2
-    return.object.1$r.squared     <- NULL 
-    return.object.1$adj.r.squared <- NULL
-    return.object.1$fstatistic    <- NULL
-    return(return.object.1)
+    summary_gpml                <- robust_summary(model_gpml, robust = TRUE)
+    summary_gpml$coefficients   <- model_gpml_robust[1:length(rownames(model_gpml_robust)),]
+    return_object               <- summary_gpml
+    return_object$call          <- form
+    return_object$r.squared     <- NULL 
+    return_object$adj.r.squared <- NULL
+    return_object$fstatistic    <- NULL
+    return(return_object)
   }
   
   if (vce_robust == FALSE) {
-    return.object.1               <- summary(model.gpml)
-    return.object.1$call          <- form2
-    return(return.object.1)
+    return_object               <- summary(model_gpml)
+    return_object$call          <- form
+    return(return_object)
   }
 }
