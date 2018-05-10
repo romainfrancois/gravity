@@ -27,10 +27,10 @@
 - [x] tobit
 - [x] robust summary
 - [x] fixed effects
-- [ ] gpml
-- [ ] nbpml
+- [x] gpml
+- [x] nbpml
 - [x] nls
-- [ ] ppml
+- [x] ppml
 - [ ] sils
 - [ ] tetrads
 
