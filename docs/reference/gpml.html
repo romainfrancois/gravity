@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Eaton and Kortum (2001) Tobit model (EK Tobit) — ek_tobit • gravity</title>
+<title>Gamma Pseudo Maximum Likelihood (GPML) — gpml • gravity</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -28,12 +28,10 @@
 
 
 
-<meta property="og:title" content="Eaton and Kortum (2001) Tobit model (EK Tobit) — ek_tobit" />
+<meta property="og:title" content="Gamma Pseudo Maximum Likelihood (GPML) — gpml" />
 
-<meta property="og:description" content="ek_tobit estimates gravity models in their additive form
-by conducting a censored regression.
-It follows the Eaton and Kortum (2001) Tobit model where each country 
-is assigned specific ceonsoring bounds." />
+<meta property="og:description" content="gpml estimates gravity models in their 
+multiplicative form via Gamma Pseudo Maximum Likelihood." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -104,22 +102,19 @@ is assigned specific ceonsoring bounds." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Eaton and Kortum (2001) Tobit model (EK Tobit)</h1>
+    <h1>Gamma Pseudo Maximum Likelihood (GPML)</h1>
     
-    <div class="hidden name"><code>ek_tobit.Rd</code></div>
+    <div class="hidden name"><code>gpml.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p><code>ek_tobit</code> estimates gravity models in their additive form
-by conducting a censored regression.
-It follows the Eaton and Kortum (2001) Tobit model where each country 
-is assigned specific ceonsoring bounds.</p>
+    <p><code>gpml</code> estimates gravity models in their 
+multiplicative form via Gamma Pseudo Maximum Likelihood.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>ek_tobit</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='no'>code_destination</span>, <span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='no'>data</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>gpml</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -127,34 +122,22 @@ is assigned specific ceonsoring bounds.</p>
     <tr>
       <th>dependent_variable</th>
       <td><p>name (type: character) of the dependent variable in the dataset 
-<code>data</code>, e.g. trade flows.
-The variable is logged and then taken as the dependent variable in 
-the regression. As the log of zero is not defined, 
-all flows equal to zero are replaced by
-a left open interval with the logged minimum trade flow of the
-respective importing country as right border.</p></td>
+<code>data</code>, e.g. trade flows.</p></td>
     </tr>
     <tr>
       <th>regressors</th>
       <td><p>name (type: character) of the distance variable in the dataset 
 <code>data</code> containing a measure of distance between all pairs of bilateral
 partners. It is logged automatically when the function is executed. 
-Interaction terms can be added.</p></td>
-    </tr>
-    <tr>
-      <th>code_destination</th>
-      <td><p>variable name (type: character) of the label of the country 
-(i.e ISO code) of destination in the dataset <code>data</code>. The variables 
-are grouped by using <code>code_d</code> to obtain estimates.</p></td>
+Unilateral variables such as country dummies or incomes can be added. 
+If unilateral metric variables such as GDPs should be used as independent 
+variables, those variables have to be logged first and the 
+logged variable can be used in <code>x</code>.</p></td>
     </tr>
     <tr>
       <th>vce_robust</th>
       <td><p>robust (type: logic) determines whether a robust 
-variance-covariance matrix should be used. The default is set to <code>TRUE</code>. 
-If set <code>TRUE</code> the estimation results are consistent with the 
-Stata code provided at the website
-<a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
-when choosing robust estimation.</p></td>
+variance-covariance matrix should be used. The default is set to <code>TRUE</code>.</p></td>
     </tr>
     <tr>
       <th>data</th>
@@ -166,58 +149,68 @@ destination country), a distance measure defined by the argument <code>dist</cod
 and other potential influences given as a vector in <code>x</code> are required. 
 All dummy variables should be of type numeric (0/1). Missing trade flows as 
 well as incomplete rows should be excluded from the dataset. 
-Zero trade flows are allowed.</p></td>
+Flows equal to zero have to be excluded as the gamma distribution 
+is used. 
+When using panel data, a variable for the time may be included in the 
+dataset. Note that the variable for the time dimension should be of 
+type: factor. See the references for more information on panel data.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>additional arguments to be passed to <code>ek_tobit</code>.</p></td>
+      <td><p>additional arguments to be passed to functions used by 
+<code>gpml</code>.</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The function returns the summary of the estimated gravity model as a 
-<code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code>-object.</p>
+    <p>The function returns the summary of the estimated gravity model similar to a 
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/glm'>glm</a></code>-object.</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p><code>ek_tobit</code> represents the Eaton and Kortum (2001) Tobit model.
-When taking the log of the gravity equation flows equal to zero
-constitute a problem as their log is not defined.
-Therefore, in <code>ek_tobit</code> all values of the dependent variable 
-are redefined as intervals.
-The positive observations have both interval bounds equal
-to their original value. 
-For zero flows the interval is left open. The right border
-of the interval is set to the log of the minimum positive trade flow of 
-the respective importing country.
-The defined data object of class <code><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></code> is
-then inserted in <code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code> for the 
-parameter estimation.</p> 
-<p>To execute the function a square gravity dataset with all pairs of 
+    <p><code>gpml</code> is an estimation method for gravity models
+belonging to generalized linear models.
+It is estimated via <code><a href='http://www.rdocumentation.org/packages/glm2/topics/glm2'>glm2</a></code> using the gamma distribution and a log-link.
+To execute the function a square gravity dataset with all pairs of 
 countries, ISO-codes for the country of origin and destination, a measure of 
 distance between the bilateral partners as well as all 
 information that should be considered as dependent an independent 
 variables is needed. 
+Make sure the ISO-codes are of type "character".
 Missing bilateral flows as well as incomplete rows should be 
 excluded from the dataset.  
-Zero trade flows are allowed.</p>
-<p><code>ek_tobit</code> is designed to be consistent with the Stata code provided at
-the website
-<a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
-when choosing robust estimation.</p>
-<p>Up to now, the function is designed for cross-sectional data,
-but can be extended to panel data using the 
-<code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code> function.</p>
-<p>For other Tobit functions, see <code><a href='tobit.html'>tobit</a></code>
-for a simple Tobit model where number <code>1</code> is added to all observations
-and <code><a href='et_tobit.html'>et_tobit</a></code> for the Eaton and Tamura (1994) 
-threshold Tobit model where instead of simply adding number <code>1</code> 
-to the data the threshold is estimated.</p>
+Flows equal to zero have to be excluded as the gamma distribution is used. 
+For similar functions, utilizing the multiplicative form via the log-link, 
+but different distributions, see <code><a href='ppml.html'>ppml</a></code>, <code><a href='nls.html'>nls</a></code>, and <code><a href='nbpml.html'>nbpml</a></code>.</p>
+<p><code>gpml</code> estimation can be used for both, cross-sectional as well as 
+panel data. 
+It is up to the user to ensure that the functions can be applied 
+to panel data. 
+Depending on the panel dataset and the variables - 
+specifically the type of fixed effects - 
+included in the model, it may easily occur that the model is not computable. 
+Also, note that by including bilateral fixed effects such as country-pair 
+effects, the coefficients of time-invariant observables such as distance 
+can no longer be estimated. 
+Depending on the specific model, the code of the 
+respective function may has to be changed in order to exclude the distance 
+variable from the estimation. 
+At the very least, the user should take special 
+care with respect to the meaning of the estimated coefficients and variances 
+as well as the decision about which effects to include in the estimation. 
+When using panel data, the parameter and variance estimation of the models 
+may have to be changed accordingly.
+For a comprehensive overview of gravity models for panel data 
+see Egger and Pfaffermayr (2003), Gomez-Herrera (2013) and Head, Mayer and 
+Ries (2010) as well as the references therein.</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>For more information on gravity models, theoretical foundations and
+    <p>For more information on the estimation of gravity equations via Gamma
+Pseudo maximum Likelihood see</p>
+<p>Santos-Silva, J. M. C. and Tenreyro, S. (2006) &lt;DOI:10.1162/rest.88.4.641&gt;</p>
+<p>For more information on gravity models, theoretical foundations and
 estimation methods in general see</p>
 <p>Anderson, J. E. (1979) &lt;DOI:10.12691/wjssh-2-2-5&gt;</p>
 <p>Anderson, J. E. (2010) &lt;DOI:10.3386/w16576&gt;</p>
@@ -226,35 +219,28 @@ estimation methods in general see</p>
 <p>Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., &amp; Brakman, S. (Eds.) (2010) chapter 4 &lt;DOI:10.1111/j.1467-9396.2011.01000.x&gt;</p>
 <p>Head, K., Mayer, T., &amp; Ries, J. (2010) &lt;DOI:10.1016/j.jinteco.2010.01.002&gt;</p>
 <p>Head, K. and Mayer, T. (2014) &lt;DOI:10.1016/B978-0-444-54314-1.00003-3&gt;</p>
-<p>Santos-Silva, J. M. C. and Tenreyro, S. (2006) &lt;DOI:10.1162/rest.88.4.641&gt;</p>
 <p>and the citations therein.</p>
-    <p>Especially for Tobit models see</p>
-<p>Tobin, J. (1958) &lt;DOI:10.2307/1907382&gt;</p>
-<p>Eaton, J., &amp; Tamura, A. (1994) &lt;DOI:10.3386/w4758&gt;</p>
-<p>Eaton, J., &amp; Kortum, S. (2001) &lt;DOI:10.3386/w8070&gt;.</p>
-    <p>See Carson, R. T., &amp; Sun, Yixiao (2007) &lt;DOI:10.1111/j.1368-423X.2007.00218.x&gt;
-for the estimation of the threshold in a Tobit model.</p>
-<p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
+    <p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
+    <p>For estimating gravity equations using panel data see</p>
+<p>Egger, P., &amp; Pfaffermayr, M. (2003) &lt;DOI:10.1007/s001810200146&gt;</p>
+<p>Gomez-Herrera, E. (2013) &lt;DOI:10.1007/s00181-012-0576-2&gt;</p>
+<p>and the references therein.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></code>, <code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code></p></div>
+    <div class='dont-index'><p><code><a href='http://www.rdocumentation.org/packages/glm2/topics/glm2'>glm2</a></code>, <code><a href='http://www.rdocumentation.org/packages/lmtest/topics/coeftest'>coeftest</a></code>, 
+<code><a href='http://www.rdocumentation.org/packages/sandwich/topics/vcovHC'>vcovHC</a></code></p></div>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='co'># Example for data with zero trade flows</span>
-<span class='fu'>data</span>(<span class='no'>gravity_zeros</span>)
+<span class='fu'>data</span>(<span class='no'>gravity_no_zeros</span>)
 
-<span class='no'>gravity_zeros</span> <span class='kw'>&lt;-</span> <span class='no'>gravity_zeros</span> <span class='kw'>%&gt;%</span>
-    <span class='fu'>mutate</span>(
-        <span class='kw'>lgdp_o</span> <span class='kw'>=</span> <span class='fu'>log</span>(<span class='no'>gdp_o</span>),
-        <span class='kw'>lgdp_d</span> <span class='kw'>=</span> <span class='fu'>log</span>(<span class='no'>gdp_d</span>)
-    )
+<span class='no'>gravity_no_zeros</span>$<span class='no'>lgdp_o</span> <span class='kw'>&lt;-</span> <span class='fu'>log</span>(<span class='no'>gravity_no_zeros</span>$<span class='no'>gdp_o</span>)
+<span class='no'>gravity_no_zeros</span>$<span class='no'>lgdp_d</span> <span class='kw'>&lt;-</span> <span class='fu'>log</span>(<span class='no'>gravity_no_zeros</span>$<span class='no'>gdp_d</span>)
 
-<span class='fu'>ek_tobit</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>,<span class='st'>"lgdp_o"</span>,<span class='st'>"lgdp_d"</span>),
-<span class='kw'>code_destination</span> <span class='kw'>=</span> <span class='st'>"iso_d"</span>,
-<span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_zeros</span>)
+<span class='fu'>gpml</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>, <span class='st'>"lgdp_o"</span>, <span class='st'>"lgdp_d"</span>),
+<span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
 <span class='co'># }</span><div class='input'>
 </div><div class='input'>
 </div></pre>

@@ -10,7 +10,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="jquery.sticky-kit.min.js"></script><script src="pkgdown.js"></script><meta property="og:title" content="Estimation Methods for Gravity Models">
-<meta property="og:description" content="Gravity models are used to explain bilateral flows related to the sizes of bilateral partners, a measure of distance between them and other influences on interaction costs. The underlying idea is rather simple. 	The greater the masses of two bodies and the smaller the distance between them, the stronger their attraction. This concept is applied to several research topics such as trade, migration or foreign direct investment. Even though their basic idea is rather simple, gravity models can become complex regarding the choice of models or estimation methods. As especially for gravity beginners it is difficult to get an overview of the different methods and implement them in R, the package provides a wrapper of different standard estimation methods for gravity models. By considering the descriptions and codes of the estimation methods, users get a comprehensive and application-oriented overview of the different methods, see which method may be suitable for a certain research question or type of data and extend the code available to their research projects. The package contains two types of estimation methods: those estimating gravity models in their log-log form, such as Ordinary Least Squares (OLS), Fixed Effects, Double Demeaning (DDM), Bonus vetus OLS with simple averages (BVU) and with GDP-weights (BVW), Structural Iterated Least Squares (SILS), Tetrads, and different Tobit models (Tobit, ET-Tobit, EK-Tobit). These methods are partly complex to understand and program and thus a comparison of them is not straightforward, wherefore the package aims at easing an overview of the different methods combined with a direct application. A second type of estimation methods utilizes the gravity model in its multiplicative form with a log-link and different families of distributions. They are relatively easy to compute, added for completeness and contain the methods Poisson Pseudo Maximum Likelihood (PPML), Gamma Pseudo Maximum Likelihood (GPML), Negative Binomial Pseudo Maximum Likelihood (NBPML), and Nonlinear Least Squares (NLS). All functions named estimate gravity models, but they differ in whether they estimate them in their multiplicative or additive form, their requirements and assumptions with respect to data, their handling of Multilateral Resistance terms as well as their possibilities concerning the inclusion of unilateral independent variables. Therefore, they normally lead to different estimation results. We refer the user to the Gravity Cookbook website (&lt;https://sites.google.com/site/hiegravity/&gt;) for more information on gravity models in general. Head, K. and Mayer, T. (2014) &lt;DOI:10.1016/B978-0-444-54314-1.00003-3&gt; provide a comprehensive and accessible overview of the theoretical and empirical development of the gravity literature as well as the use of gravity models and the various estimation methods, especially their merits and potential problems regarding applicability as well as different datasets. In order to have a straightforward application of all methods, the package comes with two example dataset, one including and the other one excluding zero trade flows. Examples utilizing these dataset are included in the description of the methods. As the range of gravity models and their suitable estimation methods is huge and specific to data and research question at hand, the functions are kept simple such that researchers can utilize them as a starting point of their research and get familiar with them. On the Gravity Cookbook website (&lt;https://sites.google.com/site/hiegravity/&gt;) Keith Head and Thierry Mayer provide Stata code for most methods. Where possible, the functions are tested to lead the same results as the Stata code when choosing the option of robust variance estimation. However, compared to the Stata code available, the functions presented in this package provide users with more flexibility regarding the type of estimation, the number and type of independent variables as well as the possible data. Furthermore, additional functions are added. The functions of the package include distance as an independent variable. If a panel model is used time-invariant effects, such as geographical distance, may have to be excluded; see the respective descriptions. Therefore, it is up to the user to ensure that the functions can be applied to panel data. Depending on the panel dataset and the variables - specifically the type of fixed effects - included in the model, it may easily occur that the model is not computable. Depending on the specific model, the code of the respective function may has to be changed in order to exclude the distance variable from the estimation. For a comprehensive overview of gravity models for panel data see Egger, P., &amp; Pfaffermayr, M. (2003) &lt;DOI:10.1007/s001810200146&gt;, Gomez-Herrera, E. (2013) &lt;DOI:10.1007/s00181-012-0576-2&gt; and Head, K., Mayer, T., &amp; Ries, J. (2010) &lt;DOI:10.1016/j.jinteco.2010.01.002&gt; as well as the references therein (see also the references included in the descriptions of the different functions). At the very least, the user should take special care with respect to the meaning of the estimated coefficients and variances as well as the decision about which effects to include in the estimation. As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity equation by Double Demeaning, Structural Iterated Least Squares or Bonus vetus OLS using panel data, we do not recommend to apply these methods in this case. Contributions, extensions and error corrections are very welcome. Please do not hesitate to contact us. We thank Martin Bresslein for valuable comments and advice on early versions of the package.">
+<meta property="og:description" content="A wrapper of different standard estimation methods for gravity models">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -18,7 +18,7 @@
 <![endif]-->
 </head>
 <body>
-    <div class="container template-home">
+    <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -29,7 +29,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.22</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.24</span>
       </span>
     </div>
 
@@ -67,10 +67,48 @@
 
       
       </header><div class="row">
-  <div class="contents col-md-9">
-    <div id="gravity" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#gravity" class="anchor"></a>gravity</h1></div>
+  <div class="col-md-9 contents">
+    
+
+    
+    
+<div id="about" class="section level2">
+<h2 class="hasAnchor">
+<a href="#about" class="anchor"></a>About</h2>
+<p>Gravity models are used to explain bilateral flows related to the sizes of bilateral partners, a measure of distance between them and other influences on interaction costs.</p>
+<p>The underlying idea is rather simple. The greater the masses of two bodies and the smaller the distance between them, the stronger their attraction. This concept is applied to several research topics such as trade, migration or foreign direct investment. Even though their basic idea is rather simple, gravity models can become complex regarding the choice of models or estimation methods.</p>
+<p>As especially for gravity beginners it is difficult to get an overview of the different methods and implement them in R, the package provides a wrapper of different standard estimation methods for gravity models. By considering the descriptions and codes of the estimation methods, users get a comprehensive and application-oriented overview of the different methods, see which method may be suitable for a certain research question or type of data and extend the code available to their research projects.</p>
+<p>The package provides estimation methods for log-log models and multiplicative models.</p>
+<p>Log-log estimation covers:</p>
+<ul>
+<li>Ordinary Least Squares (OLS)</li>
+<li>Fixed Effects</li>
+<li>Double Demeaning (DDM)</li>
+<li>Bonus vetus OLS with simple averages (BVU) and with GDP-weights (BVW)</li>
+<li>Structural Iterated Least Squares (SILS)</li>
+<li>Tetrads</li>
+<li>Different Tobit models (Tobit, ET-Tobit, EK-Tobit)</li>
+</ul>
+<p>Log-log models are partly complex to understand and program and thus a comparison of them is not straightforward, wherefore the package aims at easing an overview of the different methods combined with a direct application.</p>
+<p>Multiplicative estimation covers:</p>
+<ul>
+<li>Poisson Pseudo Maximum Likelihood (PPML)</li>
+<li>Gamma Pseudo Maximum Likelihood (GPML)</li>
+<li>Negative Binomial Pseudo Maximum Likelihood (NBPML)</li>
+<li>Nonlinear Least Squares (NLS)</li>
+</ul>
+<p>Multiplicative models are covered with a log-link and different families of distributions. These models are relatively easy to compute.</p>
+<p>All functions named estimate gravity models, but they differ in whether they estimate them in their additive or multiplicative form, their requirements and assumptions with respect to data, their handling of Multilateral Resistance terms as well as their possibilities concerning the inclusion of unilateral independent variables. Therefore, they normally lead to different estimation results. We refer the user to the <a href="https://sites.google.com/site/hiegravity/">Gravity Cookbook website</a> for more information on gravity models in general.</p>
+<p><span class="citation">(Head and Mayer 2014)</span> provide a comprehensive and accessible overview of the theoretical and empirical development of the gravity literature as well as the use of gravity models and the various estimation methods, especially their merits and potential problems regarding applicability as well as different datasets. In order to have a straightforward application of all methods, the package comes with two example dataset, one including and the other one excluding zero trade flows.</p>
+<p>Examples utilizing these dataset are included in the description of the methods. As the range of gravity models and their suitable estimation methods is huge and specific to data and research question at hand, the functions are kept simple such that researchers can utilize them as a starting point of their research and get familiar with them.</p>
+<p>On the <a href="https://sites.google.com/site/hiegravity/">Gravity Cookbook website</a> Keith Head and Thierry Mayer provide Stata code for most methods. Where possible, the functions are tested to lead the same results as the Stata code when choosing the option of robust variance estimation. However, compared to the Stata code available, the functions presented in this package provide users with more flexibility regarding the type of estimation, the number and type of independent variables as well as the possible data.</p>
+<p>Furthermore, additional functions are added. The functions of the package include distance as an independent variable. If a panel model is used time-invariant effects, such as geographical distance, may have to be excluded; see the respective descriptions. Therefore, it is up to the user to ensure that the functions can be applied to panel data.</p>
+<p>Depending on the panel dataset and the variables - specifically the type of fixed effects - included in the model, it may easily occur that the model is not computable.</p>
+<p>Depending on the specific model, the code of the respective function may has to be changed in order to exclude the distance variable from the estimation.</p>
+<p>For a comprehensive overview of gravity models for panel data see <span class="citation">(Egger and Pfaffermayr 2003)</span>, <span class="citation">(Gómez-Herrera 2013)</span> and <span class="citation">(Head, Mayer, and Ries 2010)</span> as well as the references therein (see also the references included in the descriptions of the different functions).</p>
+<p>At the very least, the user should take special care with respect to the meaning of the estimated coefficients and variances as well as the decision about which effects to include in the estimation. As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity equation by Double Demeaning, Structural Iterated Least Squares or Bonus vetus OLS using panel data, we do not recommend to apply these methods in this case.</p>
+<p>Contributions, extensions and error corrections are very welcome. Please do not hesitate to contact us. We thank Martin Bresslein for valuable comments and advice on early versions of the package.</p>
+</div>
 <div id="todos" class="section level2">
 <h2 class="hasAnchor">
 <a href="#todos" class="anchor"></a>Todos</h2>
@@ -110,11 +148,11 @@
 <li>[x] ols</li>
 <li>[x] tobit</li>
 <li>[x] robust summary</li>
-<li>[ ] fixed effects</li>
-<li>[ ] gpml</li>
-<li>[ ] nbpml</li>
+<li>[x] fixed effects</li>
+<li>[x] gpml</li>
+<li>[x] nbpml</li>
 <li>[x] nls</li>
-<li>[ ] ppml</li>
+<li>[x] ppml</li>
 <li>[ ] sils</li>
 <li>[ ] tetrads</li>
 </ul>
@@ -127,10 +165,27 @@
 </ul>
 </div>
 </div>
+<div id="references" class="section level2 unnumbered">
+<h2 class="hasAnchor">
+<a href="#references" class="anchor"></a>References</h2>
+<div id="refs" class="references">
+<div id="ref-Egger2003">
+<p>Egger, Peter, and Michael Pfaffermayr. 2003. “The Proper Panel Econometric Specification of the Gravity Equation: A Three-Way Model with Bilateral Interaction Effects.” <em>Empirical Economics</em> 28 (3): 571–80. doi:<a href="https://doi.org/10.1007/s001810200146">10.1007/s001810200146</a>.</p>
+</div>
+<div id="ref-Gomez-Herrera2013">
+<p>Gómez-Herrera, Estrella. 2013. “Comparing Alternative Methods to Estimate Gravity Models of Bilateral Trade.” <em>Empirical Economics</em> 44 (3): 1087–1111. doi:<a href="https://doi.org/10.1007/s00181-012-0576-2">10.1007/s00181-012-0576-2</a>.</p>
+</div>
+<div id="ref-Head2014">
+<p>Head, Keith, and Thierry Mayer. 2014. “Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.” In <em>Handbook of International Economics</em>, edited by Gita Gopinath, Elhanan Helpman, and Kenneth Rogoff, 4:131–95. Handbook of International Economics. Elsevier. doi:<a href="https://doi.org/https://doi.org/10.1016/B978-0-444-54314-1.00003-3">https://doi.org/10.1016/B978-0-444-54314-1.00003-3</a>.</p>
+</div>
+<div id="ref-Head2010">
+<p>Head, Keith, Thierry Mayer, and John Ries. 2010. “The Erosion of Colonial Trade Linkages After Independence.” <em>Journal of International Economics</em> 81 (1): 1–14. doi:<a href="https://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002">https://doi.org/10.1016/j.jinteco.2010.01.002</a>.</p>
+</div>
+</div>
 </div>
   </div>
 
-  <div class="col-md-3" id="sidebar">
+  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <div class="links">
 <h2>Links</h2>
 <ul class="list-unstyled">
@@ -155,10 +210,12 @@
 <li>Jan Pablo Burgard <br><small class="roles"> Author </small>  </li>
 <li>Joshua Kunst <br><small class="roles"> Author </small>  </li>
 <li>Mauricio Vargas <br><small class="roles"> Author </small>  </li>
+<li><a href="authors.html">All authors...</a></li>
 </ul>
 </div>
 
-  </div>
+      </div>
+
 </div>
 
 
