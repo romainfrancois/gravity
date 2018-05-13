@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Eaton and Kortum (2001) Tobit model (EK Tobit) — ek_tobit • gravity</title>
+<title>Eaton and Kortum (2001)
+ Tobit model (EK Tobit) — ek_tobit • gravity</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -28,12 +29,14 @@
 
 
 
-<meta property="og:title" content="Eaton and Kortum (2001) Tobit model (EK Tobit) — ek_tobit" />
+<meta property="og:title" content="Eaton and Kortum (2001)
+ Tobit model (EK Tobit) — ek_tobit" />
 
 <meta property="og:description" content="ek_tobit estimates gravity models in their additive form
 by conducting a censored regression.
-It follows the Eaton and Kortum (2001) Tobit model where each country 
-is assigned specific ceonsoring bounds." />
+It follows the Eaton and Kortum (2001)
+ Tobit model where each country 
+is assigned specific censoring bounds." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -61,7 +64,7 @@ is assigned specific ceonsoring bounds." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.25</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.27</span>
       </span>
     </div>
 
@@ -104,7 +107,8 @@ is assigned specific ceonsoring bounds." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Eaton and Kortum (2001) Tobit model (EK Tobit)</h1>
+    <h1>Eaton and Kortum (2001)
+ Tobit model (EK Tobit)</h1>
     
     <div class="hidden name"><code>ek_tobit.Rd</code></div>
     </div>
@@ -112,9 +116,10 @@ is assigned specific ceonsoring bounds." />
     <div class="ref-description">
     
     <p><code>ek_tobit</code> estimates gravity models in their additive form
-by conducting a censored regression.
-It follows the Eaton and Kortum (2001) Tobit model where each country 
-is assigned specific ceonsoring bounds.</p>
+by conducting a censored regression.</p>
+<p>It follows the Eaton and Kortum (2001)
+ Tobit model where each country 
+is assigned specific censoring bounds.</p>
     
     </div>
 
@@ -134,17 +139,18 @@ with the logged minimum trade flow of the respective importing country as right 
     </tr>
     <tr>
       <th>regressors</th>
-      <td><p>name (type: character) of the distance variable in the dataset 
-<code>data</code> containing a measure of distance between all pairs of bilateral
-partners.</p>
-<p>It is logged automatically when the function is executed.</p>
+      <td><p>name (type: character) of the regressors to include in the model.</p>
+<p>Include the distance variable in the dataset <code>data</code> containing a measure of 
+distance between all pairs of bilateral partners and bilateral variables that should 
+be taken as the independent variables in the estimation.</p>
+<p>Unilateral metric variables such as GDPs should be inserted via the argument <code>incomes</code>.</p>
 <p>Interaction terms can be added.</p></td>
     </tr>
     <tr>
       <th>code_destination</th>
       <td><p>variable name (type: character) of the label of the country 
-(i.e ISO code) of destination in the dataset <code>data</code>. The variables 
-are grouped by using <code>code_d</code> to obtain estimates.</p></td>
+(e.g. ISO-3 code) of destination in the dataset <code>data</code>. The variables 
+are grouped by using <code>iso_d</code> to obtain estimates.</p></td>
     </tr>
     <tr>
       <th>robust</th>
@@ -157,18 +163,18 @@ when choosing robust estimation.</p></td>
     <tr>
       <th>data</th>
       <td><p>name of the dataset to be used (type: character).</p>
-<p>As an example, to estimate gravity equations you need a square dataset including bilateral 
-flows defined by the argument <code>dependent_variable</code>, ISO-codes of type character 
-(i.e. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
+<p>To estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character 
+(e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
 destination country), a distance measure defined by the argument <code>distance</code> 
-and other potential influences (i.e. contiguity or common currency) given as a vector in 
+and other potential influences (e.g. contiguity and common currency) given as a vector in 
 <code>regressors</code> are required.</p>
-<p>All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
-null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates.</p>
+<p>All dummy variables should be of type numeric (0/1).</p>
+<p>Make sure the ISO codes are of type "character".</p>
+<p>If an independent variable is defined as a ratio, it should be logged.</p>
 <p>The user should perform some data cleaning beforehand to remove observations that contain entries that 
 can distort estimates.</p>
-<p>As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
-equation by <code>bvu</code> using panel data, cross-sectional data should be used.</p></td>
+<p>The function allows zero flows but will remove zero distances.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -183,7 +189,8 @@ equation by <code>bvu</code> using panel data, cross-sectional data should be us
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p><code>ek_tobit</code> represents the Eaton and Kortum (2001) Tobit model.</p>
+    <p><code>ek_tobit</code> represents the Eaton and Kortum (2001)
+ Tobit model.</p>
 <p>When taking the log of the gravity equation flows equal to zero
 constitute a problem as their log is not defined. Therefore, in <code>ek_tobit</code> all values of 
 the dependent variable are redefined as intervals.</p>
@@ -191,26 +198,17 @@ the dependent variable are redefined as intervals.</p>
 <p>For zero flows the interval is left open. The right border of the interval is set to the 
 log of the minimum positive trade flow of the respective importing country.</p>
 <p>The defined data object of class <code><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></code> is then inserted 
-in <code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code> for the parameter estimation.</p> 
-<p>To execute the function a square gravity dataset with all pairs of 
-countries, ISO-codes for the country of origin and destination, a measure of 
-distance between the bilateral partners as well as all 
-information that should be considered as dependent an independent 
-variables is needed.</p>
-<p>Missing bilateral flows as well as incomplete rows should be 
-excluded from the dataset.</p>
-<p>Zero trade flows are allowed.</p>
+in <code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code> for the parameter estimation.</p>
 <p><code>ek_tobit</code> is designed to be consistent with the Stata code provided at
 <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p>
-<p>The function is designed for cross-sectional data,
-but can be extended to panel data using the 
-<code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code> function.</p>
 <p>For other Tobit functions, see <code><a href='tobit.html'>tobit</a></code>
 for a simple Tobit model where number <code>1</code> is added to all observations
 and <code><a href='et_tobit.html'>et_tobit</a></code> for the Eaton and Tamura (1994) 
 threshold Tobit model where instead of simply adding number <code>1</code> 
 to the data the threshold is estimated.</p>
+<p>The function is designed for cross-sectional data, but can be extended to panel data using the 
+<code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code> function.</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
@@ -270,7 +268,7 @@ doi: <a href='http://doi.org/10.3386/w4758'>10.3386/w4758</a>
 Technical Report 8070, National Bureau of Economic Research.
 doi: <a href='http://doi.org/10.3386/w8070'>10.3386/w8070</a>
 , <a href='http://www.nber.org/papers/w8070'>http://www.nber.org/papers/w8070</a>.</p>
-<p>Carson RT and Sun Y (2004).
+<p>Carson RT and Sun Y (2007).
 &#8220;The Tobit model with a non‐zero threshold.&#8221;
 <em>The Econometrics Journal</em>, <b>10</b>(3), pp. 488-502.
 doi: <a href='http://doi.org/10.1111/j.1368-423X.2007.00218.x'>10.1111/j.1368-423X.2007.00218.x</a>

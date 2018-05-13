@@ -59,7 +59,7 @@ left hand side and right hand side of the gravity equation." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.25</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.27</span>
       </span>
     </div>
 
@@ -122,7 +122,7 @@ left hand side and right hand side of the gravity equation.</p>
     <tr>
       <th>dependent_variable</th>
       <td><p>name (type: character) of the dependent variable in the dataset 
-<code>data</code> (i.e trade flows).</p>
+<code>data</code> (e.g. trade flows).</p>
 <p>This variable is logged and then used as the dependent variable in the estimation.</p></td>
     </tr>
     <tr>
@@ -135,9 +135,10 @@ be taken as the independent variables in the estimation.</p></td>
     <tr>
       <th>codes</th>
       <td><p>variable name (type: character) of the code of the country 
-(i.e ISO-3 code) of origin (i.e <code>iso_o</code>) and destination (i.e <code>iso_d</code>) in the dataset <code>data</code>.</p>
-<p>The variables are grouped by using <code>code_o</code> and <code>code_d</code> to obtain estimates.</p>
-<p>Write this argument as <code>c(origin, destination)</code>.</p></td>
+(e.g. ISO-3 code) of origin (e.g. <code>iso_o</code>) and destination (e.g. <code>iso_d</code>) in the dataset 
+<code>data</code>.</p>
+<p>The variables are grouped by using <code>iso_o</code> and <code>iso_d</code> to obtain estimates.</p>
+<p>Write this argument as <code>c(code origin, code destination)</code>.</p></td>
     </tr>
     <tr>
       <th>robust</th>
@@ -150,18 +151,18 @@ when choosing robust estimation.</p></td>
     <tr>
       <th>data</th>
       <td><p>name of the dataset to be used (type: character).</p>
-<p>As an example, to estimate gravity equations you need a square dataset including bilateral 
-flows defined by the argument <code>dependent_variable</code>, ISO-codes of type character 
-(i.e. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
+<p>To estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character 
+(e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
 destination country), a distance measure defined by the argument <code>distance</code> 
-and other potential influences (i.e. contiguity or common currency) given as a vector in 
+and other potential influences (e.g. contiguity and common currency) given as a vector in 
 <code>regressors</code> are required.</p>
-<p>All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
-null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates.</p>
+<p>All dummy variables should be of type numeric (0/1).</p>
+<p>Make sure the ISO codes are of type "character".</p>
+<p>If an independent variable is defined as a ratio, it should be logged.</p>
 <p>The user should perform some data cleaning beforehand to remove observations that contain entries that 
 can distort estimates.</p>
-<p>As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
-equation by <code>bvu</code> using panel data, cross-sectional data should be used.</p></td>
+<p>The function will remove zero flows and distances.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -179,18 +180,9 @@ equation by <code>bvu</code> using panel data, cross-sectional data should be us
     <p><code>ddm</code> is an estimation method for gravity models presented
 in Head and Mayer (2014)
 .</p>
-<p>To execute the function a square gravity dataset with all pairs of 
-countries, ISO-codes for the country of origin and destination, a measure of 
-distance between the bilateral partners as well as all 
-information that should be considered as dependent an independent 
-variables is needed.</p>
-<p>Make sure the ISO-codes are of type "character".</p>
-<p>Missing bilateral flows as well as incomplete rows should be 
-excluded from the dataset.</p>
-<p>Furthermore, flows equal to zero should be excluded as the gravity equation 
-is estimated in its additive form.</p>
 <p>Country specific effects are subdued due double demeaning. Hence, unilateral income 
 proxies such as GDP cannot be considered as exogenous variables.</p>
+<p>Unilateral effect drop out due to double demeaning and therefore cannot be estimated.</p>
 <p><code>ddm</code> is designed to be consistent with the Stata code provided at
 <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p>

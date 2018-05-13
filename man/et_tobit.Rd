@@ -2,32 +2,48 @@
 % Please edit documentation in R/et_tobit.R
 \name{et_tobit}
 \alias{et_tobit}
-\title{Eaton and Tamura (1994) threshold Tobit model (ET Tobit)}
+\title{\insertCite{Eaton1995;textual}{gravity} threshold Tobit model (ET Tobit)}
 \usage{
 et_tobit(dependent_variable, regressors, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
 \code{data}, e.g. trade flows.
+
 Following Carson and Sun (2007), the smallest positive flow value is 
-used as an estimate of the threshold. 
-It is added to \code{y}, the transformed variable is 
-logged and taken as the dependent variable in the Tobit estimation with 
+used as an estimate of the threshold, this value is is added to the \code{dependent_variable}, 
+the result is logged and taken as the dependent variable in the Tobit estimation with 
 lower bound equal to the log of the smallest possible flow value.}
 
-\item{regressors}{name (type: character) of the distance variable in the dataset 
-\code{data} containing a measure of distance between all pairs of bilateral
-partners. It is logged automatically when the function is executed.}
+\item{regressors}{name (type: character) of the regressors to include in the model.
 
-\item{data}{name of the dataset to be used (type: character). 
-To estimate gravity equations, a square gravity dataset including bilateral 
-flows defined by the argument \code{y}, ISO-codes of type character 
-(called \code{iso_o} for the country of origin and \code{iso_d} for the 
-destination country), a distance measure defined by the argument \code{dist} 
-and other potential influences given as a vector in \code{x} are required. 
-All dummy variables should be of type numeric (0/1). Missing trade flows as 
-well as incomplete rows should be excluded from the dataset. 
-Zero trade flows are allowed.}
+Include the distance variable in the dataset \code{data} containing a measure of 
+distance between all pairs of bilateral partners and bilateral variables that should 
+be taken as the independent variables in the estimation.
+
+Unilateral metric variables such as GDPs can be added but those variables have to be legged first. 
+
+Interaction terms can be added.}
+
+\item{data}{name of the dataset to be used (type: character).
+
+To estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character 
+(e.g. \code{iso_o} for the country of origin and \code{iso_d} for the 
+destination country), a distance measure defined by the argument \code{distance} 
+and other potential influences (e.g. contiguity and common currency) given as a vector in 
+\code{regressors} are required.
+
+All dummy variables should be of type numeric (0/1).
+
+Make sure the ISO codes are of type "character".
+
+If an independent variable is defined as a ratio, it should be logged.
+
+The user should perform some data cleaning beforehand to remove observations that contain entries that 
+can distort estimates.
+
+The function allows zero flows but will remove zero distances.}
 
 \item{...}{additional arguments to be passed to \code{et_tobit}.}
 }
@@ -38,65 +54,59 @@ The function returns the summary of the estimated gravity model as a
 \description{
 \code{et_tobit} estimates gravity models in their additive form
 by conducting a left-censored regression.
-It follows the Eaton and Tamura (1994) Tobit model,
+
+It follows the \insertCite{Eaton1995;textual}{gravity} Tobit model,
 also called threshold Tobit model, where,
 instead of adding number \code{1} to the dependent variable as done 
 in \code{\link[gravity]{tobit}}, the constant added to the
 data is estimated and interpreted as a threshold.
-For estimating this threshold, we follow Carson and Sun (2007).
+
+For estimating this threshold, we follow \insertCite{Carson2007;textual}{gravity}.
 }
 \details{
-\code{et_tobit} represents the Eaton and Tamura (1994) Tobit model
+\code{et_tobit} represents the \insertCite{Eaton1995;textual}{gravity} Tobit model
 which is often used when several gravity models are compared.
-When taking the log of the gravity equation flows equal to zero
-constitute a problem as their log is not defined.
-Therefore, a constant is added to the flows. 
+
+When taking the log of the gravity equation flows equal to zero constitute a problem as their 
+log is not defined. Therefore, a constant is added to the flows. 
+
 This constant, opposed to \code{\link[gravity]{tobit}}, is estimated. 
 Compared to the usual ET-Tobit approaches, in this package, the estimation
 of the threshold is done before the other parameters are estimated.
-We follow Carson and Sun (2007), who show that taking the minimum
+
+We follow \insertCite{Carson2007;textual}{gravity}, who show that taking the minimum
 positive flow value as an estimate of the threshold is super-consistent and that
-using this threshold estimate ensures that the parameter MLE 
-are asymptotically normal with the asymptotic variance
-identical to the variance achieved when the threshold is known. 
-Hence, first the threshold is estimated as the minimum positive flow. 
-This threshold is added to the flow variable. It is logged
-afterwards and taken as the dependent variable. 
+using this threshold estimate ensures that the parameter MLE are asymptotically normal with 
+the asymptotic variance identical to the variance achieved when the threshold is known. Hence, first 
+the threshold is estimated as the minimum positive flow. This threshold is added to the flow variable, 
+it is logged afterwards and taken as the dependent variable.
+
 The Tobit estimation is then conducted using the 
 \code{\link[censReg]{censReg}} function and setting the lower bound 
 equal to the log of the minimum positive flow value which was added to all
 observations.
+
 A Tobit regression represents a combination of a binary and a
-linear regression. 
-This procedure has to be taken into consideration when
+linear regression. This procedure has to be taken into consideration when
 interpreting the estimated coefficients.
+
 The marginal effects of an explanatory variable on the expected value of 
 the dependent variable equals the product of both the probability of the 
 latent variable exceeding the threshold and the marginal effect of the 
 explanatory variable of the expected value of the latent variable. 
 
-To execute the function a square gravity dataset with all pairs of 
-countries, ISO-codes for the country of origin and destination, a measure of 
-distance between the bilateral partners as well as all 
-information that should be considered as dependent an independent 
-variables is needed. 
-Missing bilateral flows as well as incomplete rows should be 
-excluded from the dataset.  
-Zero trade flows are allowed. 
-
-Up to now, the function is designed for cross-sectional data,
-but can be easily extended to panel data using the 
-\code{\link[censReg]{censReg}} function.
-A robust estimations is not implemented to the present
-as the \code{\link[censReg]{censReg}} function is not
-compatible with the \code{\link[sandwich]{vcovHC}} function.
-
 For a more elaborate Tobit function, see \code{\link[gravity]{ek_tobit}} 
-for the
-Eaton and Kortum (2001) Tobit model where each zero trade volume
+for the Eaton and Kortum (2001) Tobit model where each zero trade volume
 is assigned a country specific interval with the upper 
 bound equal to the minimum positive trade level of the respective
 importing country.
+
+The function is designed for cross-sectional data, but can be extended to panel data using the 
+\code{\link[censReg]{censReg}} function.
+
+A robust estimations is not implemented to the present
+as the \code{\link[censReg]{censReg}} function is not
+compatible with the \code{\link[sandwich]{vcovHC}} function.
 }
 \examples{
 \dontrun{
@@ -134,36 +144,31 @@ data = grav_small_zeros)
 For more information on gravity models, theoretical foundations and
 estimation methods in general see 
 
-Anderson, J. E. (1979) <DOI:10.12691/wjssh-2-2-5>
+\insertRef{Anderson1979}{gravity}
 
-Anderson, J. E. (2010) <DOI:10.3386/w16576>
+\insertRef{Anderson2001}{gravity}
 
-Anderson, J. E. and van Wincoop, E. (2003) <DOI:10.3386/w8079> 
+\insertRef{Anderson2010}{gravity}
 
-Baier, S. L. and Bergstrand, J. H. (2009) <DOI:10.1016/j.jinteco.2008.10.004>
+\insertRef{Baier2009}{gravity}
 
-Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., & Brakman, S. (Eds.) (2010) chapter 4 <DOI:10.1111/j.1467-9396.2011.01000.x>
+\insertRef{Baier2010}{gravity}
 
-Head, K., Mayer, T., & Ries, J. (2010) <DOI:10.1016/j.jinteco.2010.01.002>
+\insertRef{Head2010}{gravity}
 
-Head, K. and Mayer, T. (2014) <DOI:10.1016/B978-0-444-54314-1.00003-3>
-
-Santos-Silva, J. M. C. and Tenreyro, S. (2006) <DOI:10.1162/rest.88.4.641> 
+\insertRef{Santos2006}{gravity}
 
 and the citations therein.
 
-
 Especially for Tobit models see
 
-Tobin, J. (1958) <DOI:10.2307/1907382>
+\insertRef{Tobin1958}{gravity}
 
-Eaton, J., & Tamura, A. (1994) <DOI:10.3386/w4758>
+\insertRef{Eaton1995}{gravity}
 
-Eaton, J., & Kortum, S. (2001) <DOI:10.3386/w8070>.
+\insertRef{Eaton2001}{gravity}
 
-
-See Carson, R. T., & Sun, Yixiao (2007) <DOI:10.1111/j.1368-423X.2007.00218.x>
-for the estimation of the threshold in a Tobit model. 
+\insertRef{Carson2007}{gravity}
 
 See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
 }

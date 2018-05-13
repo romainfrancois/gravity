@@ -16,17 +16,19 @@ This variable is logged and then used as the dependent variable in the estimatio
 As the log of zero is not defined, all flows equal to zero are replaced by a left open interval 
 with the logged minimum trade flow of the respective importing country as right border.}
 
-\item{regressors}{name (type: character) of the distance variable in the dataset 
-\code{data} containing a measure of distance between all pairs of bilateral
-partners. 
+\item{regressors}{name (type: character) of the regressors to include in the model.
 
-It is logged automatically when the function is executed. 
+Include the distance variable in the dataset \code{data} containing a measure of 
+distance between all pairs of bilateral partners and bilateral variables that should 
+be taken as the independent variables in the estimation.
+
+Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes}. 
 
 Interaction terms can be added.}
 
 \item{code_destination}{variable name (type: character) of the label of the country 
-(i.e ISO code) of destination in the dataset \code{data}. The variables 
-are grouped by using \code{code_d} to obtain estimates.}
+(e.g. ISO-3 code) of destination in the dataset \code{data}. The variables 
+are grouped by using \code{iso_d} to obtain estimates.}
 
 \item{robust}{robust (type: logical) determines whether a robust 
 variance-covariance matrix should be used. By default is set to \code{TRUE}.
@@ -37,21 +39,23 @@ when choosing robust estimation.}
 
 \item{data}{name of the dataset to be used (type: character).
 
-As an example, to estimate gravity equations you need a square dataset including bilateral 
-flows defined by the argument \code{dependent_variable}, ISO-codes of type character 
-(i.e. \code{iso_o} for the country of origin and \code{iso_d} for the 
+To estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character 
+(e.g. \code{iso_o} for the country of origin and \code{iso_d} for the 
 destination country), a distance measure defined by the argument \code{distance} 
-and other potential influences (i.e. contiguity or common currency) given as a vector in 
+and other potential influences (e.g. contiguity and common currency) given as a vector in 
 \code{regressors} are required.
 
-All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
-null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates. 
+All dummy variables should be of type numeric (0/1).
+
+Make sure the ISO codes are of type "character".
+
+If an independent variable is defined as a ratio, it should be logged.
 
 The user should perform some data cleaning beforehand to remove observations that contain entries that 
 can distort estimates.
 
-As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
-equation by \code{bvu} using panel data, cross-sectional data should be used.}
+The function allows zero flows but will remove zero distances.}
 
 \item{...}{additional arguments to be passed to \code{ek_tobit}.}
 }
@@ -62,6 +66,7 @@ The function returns the summary of the estimated gravity model as a
 \description{
 \code{ek_tobit} estimates gravity models in their additive form
 by conducting a censored regression.
+
 It follows the \insertCite{Eaton2001;textual}{gravity} Tobit model where each country 
 is assigned specific censoring bounds.
 }
@@ -79,31 +84,19 @@ log of the minimum positive trade flow of the respective importing country.
 
 The defined data object of class \code{\link[survival]{Surv}} is then inserted 
 in \code{\link[survival]{survreg}} for the parameter estimation.
- 
-To execute the function a square gravity dataset with all pairs of 
-countries, ISO-codes for the country of origin and destination, a measure of 
-distance between the bilateral partners as well as all 
-information that should be considered as dependent an independent 
-variables is needed. 
-
-Missing bilateral flows as well as incomplete rows should be 
-excluded from the dataset.  
-
-Zero trade flows are allowed. 
 
 \code{ek_tobit} is designed to be consistent with the Stata code provided at
 \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 when choosing robust estimation.
-
-The function is designed for cross-sectional data,
-but can be extended to panel data using the 
-\code{\link[survival]{survreg}} function.
 
 For other Tobit functions, see \code{\link[gravity]{tobit}}
 for a simple Tobit model where number \code{1} is added to all observations
 and \code{\link[gravity]{et_tobit}} for the Eaton and Tamura (1994) 
 threshold Tobit model where instead of simply adding number \code{1} 
 to the data the threshold is estimated.
+
+The function is designed for cross-sectional data, but can be extended to panel data using the 
+\code{\link[survival]{survreg}} function.
 }
 \examples{
 \dontrun{
@@ -167,7 +160,7 @@ Especially for Tobit models see
 
 \insertRef{Eaton2001}{gravity}
 
-\insertRef{Carson2004}{gravity}
+\insertRef{Carson2007}{gravity}
 
 See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
 }

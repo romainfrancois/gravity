@@ -8,7 +8,7 @@ ddm(dependent_variable, regressors, codes, robust = TRUE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
-\code{data} (i.e trade flows).
+\code{data} (e.g. trade flows). 
 
 This variable is logged and then used as the dependent variable in the estimation.}
 
@@ -19,11 +19,12 @@ distance between all pairs of bilateral partners and bilateral variables that sh
 be taken as the independent variables in the estimation.}
 
 \item{codes}{variable name (type: character) of the code of the country 
-(i.e ISO-3 code) of origin (i.e \code{iso_o}) and destination (i.e \code{iso_d}) in the dataset \code{data}. 
+(e.g. ISO-3 code) of origin (e.g. \code{iso_o}) and destination (e.g. \code{iso_d}) in the dataset 
+\code{data}. 
 
-The variables are grouped by using \code{code_o} and \code{code_d} to obtain estimates.
+The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 
-Write this argument as \code{c(origin, destination)}.}
+Write this argument as \code{c(code origin, code destination)}.}
 
 \item{robust}{robust (type: logical) determines whether a robust 
 variance-covariance matrix should be used. By default is set to \code{TRUE}.
@@ -34,21 +35,23 @@ when choosing robust estimation.}
 
 \item{data}{name of the dataset to be used (type: character).
 
-As an example, to estimate gravity equations you need a square dataset including bilateral 
-flows defined by the argument \code{dependent_variable}, ISO-codes of type character 
-(i.e. \code{iso_o} for the country of origin and \code{iso_d} for the 
+To estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character 
+(e.g. \code{iso_o} for the country of origin and \code{iso_d} for the 
 destination country), a distance measure defined by the argument \code{distance} 
-and other potential influences (i.e. contiguity or common currency) given as a vector in 
+and other potential influences (e.g. contiguity and common currency) given as a vector in 
 \code{regressors} are required.
 
-All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
-null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates. 
+All dummy variables should be of type numeric (0/1).
+
+Make sure the ISO codes are of type "character".
+
+If an independent variable is defined as a ratio, it should be logged.
 
 The user should perform some data cleaning beforehand to remove observations that contain entries that 
 can distort estimates.
 
-As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
-equation by \code{bvu} using panel data, cross-sectional data should be used.}
+The function will remove zero flows and distances.}
 
 \item{...}{additional arguments to be passed to \code{ddm}.}
 }
@@ -64,22 +67,10 @@ left hand side and right hand side of the gravity equation.
 \code{ddm} is an estimation method for gravity models presented
 in \insertCite{Head2014;textual}{gravity}.
 
-To execute the function a square gravity dataset with all pairs of 
-countries, ISO-codes for the country of origin and destination, a measure of 
-distance between the bilateral partners as well as all 
-information that should be considered as dependent an independent 
-variables is needed. 
-
-Make sure the ISO-codes are of type "character".
-
-Missing bilateral flows as well as incomplete rows should be 
-excluded from the dataset.
-
-Furthermore, flows equal to zero should be excluded as the gravity equation 
-is estimated in its additive form.
-
 Country specific effects are subdued due double demeaning. Hence, unilateral income 
 proxies such as GDP cannot be considered as exogenous variables.
+
+Unilateral effect drop out due to double demeaning and therefore cannot be estimated.
 
 \code{ddm} is designed to be consistent with the Stata code provided at
 \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}

@@ -6,17 +6,6 @@
 #' developed by \insertCite{Baier2009,Baier2010;textual}{gravity} using simple averages to center a
 #' Taylor-series.
 #' 
-#' To execute the function a square gravity dataset with all pairs of 
-#' countries, ISO-codes for the country of origin and destination, a measure of 
-#' distance between the bilateral partners as well as all 
-#' information that should be considered as dependent an independent 
-#' variables is needed. 
-#' 
-#' Make sure the ISO-codes are of type "character".
-#' 
-#' Missing bilateral flows and flows equal to zero are be excluded as the gravity equation 
-#' is estimated in its additive form.
-#' 
 #' The \code{bvu} function considers Multilateral Resistance terms and allows to 
 #' conduct comparative statics. Country specific effects are subdued due 
 #' to demeaning. Hence, unilateral variables apart from \code{inc_o}
@@ -31,7 +20,7 @@
 #' we do not recommend to apply this method in this case.
 #' 
 #' @param dependent_variable name (type: character) of the dependent variable in the dataset 
-#' \code{data} (i.e trade flows). 
+#' \code{data} (e.g. trade flows). 
 #' 
 #' This dependent variable is divided by the 
 #' product of unilateral incomes (e.g. 
@@ -49,30 +38,27 @@
 #' 
 #' The distance is logged automatically when the function is executed.
 #' 
-#' If an independent variable is a dummy variable, it should be of type numeric (0/1) in the dataset.
-#' 
-#' If an independent variable is defined as a ratio, it should be logged.
-#' 
 #' Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes}. 
 #' 
 #' As country specific effects are subdued due to demeaning, no further unilateral variables 
-#' equivalent to \code{c(gdp origin, gdp destination)} can be added.
+#' apart from unilateral incomes can be added.
 #' 
-#' Write this argument as \code{c(distance, other variables)}. 
+#' Write this argument as \code{c(distance, contiguity, common curreny, ...)}. 
 #' 
 #' @param incomes variable name (type: character) of the income of the country of 
-#' origin (i.e \code{gdp_o}) and destination (i.e \code{gdp_d}) in the dataset \code{data}. 
+#' origin (e.g. \code{inc_o}) and destination (e.g. \code{inc_d}) in the dataset \code{data}. 
 #' 
 #' The dependent variable \code{dependent_variable} is divided by the product of the incomes.
 #' 
-#' Write this argument as \code{c(origin, destination)}. 
+#' Write this argument as \code{c(income origin, income destination)}. 
 #' 
 #' @param codes variable name (type: character) of the code of the country 
-#' (i.e ISO-3 code) of origin (i.e \code{iso_o}) and destination (i.e \code{iso_d}) in the dataset \code{data}. 
+#' (e.g. ISO-3 code) of origin (e.g. \code{iso_o}) and destination (e.g. \code{iso_d}) in the dataset 
+#' \code{data}. 
 #' 
-#' The variables are grouped by using \code{code_o} and \code{code_d} to obtain estimates.
+#' The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 #' 
-#' Write this argument as \code{c(origin, destination)}.
+#' Write this argument as \code{c(code origin, code destination)}.
 #' 
 #' @param robust robust (type: logical) determines whether a robust 
 #' variance-covariance matrix should be used. By default is set to \code{TRUE}.
@@ -83,21 +69,23 @@
 #' 
 #' @param data name of the dataset to be used (type: character).
 #' 
-#' As an example, to estimate gravity equations you need a square dataset including bilateral 
-#' flows defined by the argument \code{dependent_variable}, ISO-codes of type character 
-#' (i.e. \code{iso_o} for the country of origin and \code{iso_d} for the 
+#' To estimate gravity equations you need a square dataset including bilateral 
+#' flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character 
+#' (e.g. \code{iso_o} for the country of origin and \code{iso_d} for the 
 #' destination country), a distance measure defined by the argument \code{distance} 
-#' and other potential influences (i.e. contiguity or common currency) given as a vector in 
+#' and other potential influences (e.g. contiguity and common currency) given as a vector in 
 #' \code{regressors} are required.
 #' 
-#' All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
-#' null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates. 
+#' All dummy variables should be of type numeric (0/1).
+#' 
+#' Make sure the ISO codes are of type "character".
+#' 
+#' If an independent variable is defined as a ratio, it should be logged.
 #' 
 #' The user should perform some data cleaning beforehand to remove observations that contain entries that 
 #' can distort estimates.
 #' 
-#' As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
-#' equation by \code{bvu} using panel data, cross-sectional data should be used. 
+#' The function will remove zero flows and distances.
 #' 
 #' @param ... additional arguments to be passed to \code{bvu}.
 #' 

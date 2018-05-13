@@ -58,7 +58,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.25</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.27</span>
       </span>
     </div>
 
@@ -120,10 +120,11 @@
     <tr>
       <th>dependent_variable</th>
       <td><p>name (type: character) of the dependent variable in the dataset 
-<code>data</code> (i.e trade flows).</p>
+<code>data</code> (e.g. trade flows).</p>
 <p>This dependent variable is divided by the 
-product of unilateral incomes (named <code>inc_o</code> and <code>inc_d</code>, e.g. 
-GDPs or GNPs of the countries of interest) and logged afterwards.</p>
+product of unilateral incomes (e.g. 
+GDPs or GNPs of the countries of interest, named <code>inc_o</code> and <code>inc_d</code> in the example datasets) 
+and logged afterwards.</p>
 <p>The transformed variable is then used as the dependent variable in the 
 estimation.</p></td>
     </tr>
@@ -134,26 +135,25 @@ estimation.</p></td>
 distance between all pairs of bilateral partners and bilateral variables that should 
 be taken as the independent variables in the estimation.</p>
 <p>The distance is logged automatically when the function is executed.</p>
-<p>If an independent variable is a dummy variable, it should be of type numeric (0/1) in the dataset.</p>
-<p>If an independent variable is defined as a ratio, it should be logged.</p>
 <p>Unilateral metric variables such as GDPs should be inserted via the argument <code>incomes</code>.</p>
 <p>As country specific effects are subdued due to demeaning, no further unilateral variables 
-equivalent to <code>c(gdp origin, gdp destination)</code> can be added.</p>
-<p>Write this argument as <code>c(distance, other variables)</code>.</p></td>
+apart from unilateral incomes can be added.</p>
+<p>Write this argument as <code>c(distance, contiguity, common curreny, ...)</code>.</p></td>
     </tr>
     <tr>
       <th>incomes</th>
       <td><p>variable name (type: character) of the income of the country of 
-origin (i.e <code>gdp_o</code>) and destination (i.e <code>gdp_d</code>) in the dataset <code>data</code>.</p>
+origin (e.g. <code>inc_o</code>) and destination (e.g. <code>inc_d</code>) in the dataset <code>data</code>.</p>
 <p>The dependent variable <code>dependent_variable</code> is divided by the product of the incomes.</p>
-<p>Write this argument as <code>c(origin, destination)</code>.</p></td>
+<p>Write this argument as <code>c(income origin, income destination)</code>.</p></td>
     </tr>
     <tr>
       <th>codes</th>
       <td><p>variable name (type: character) of the code of the country 
-(i.e ISO-3 code) of origin (i.e <code>iso_o</code>) and destination (i.e <code>iso_d</code>) in the dataset <code>data</code>.</p>
-<p>The variables are grouped by using <code>code_o</code> and <code>code_d</code> to obtain estimates.</p>
-<p>Write this argument as <code>c(origin, destination)</code>.</p></td>
+(e.g. ISO-3 code) of origin (e.g. <code>iso_o</code>) and destination (e.g. <code>iso_d</code>) in the dataset 
+<code>data</code>.</p>
+<p>The variables are grouped by using <code>iso_o</code> and <code>iso_d</code> to obtain estimates.</p>
+<p>Write this argument as <code>c(code origin, code destination)</code>.</p></td>
     </tr>
     <tr>
       <th>robust</th>
@@ -166,18 +166,18 @@ when choosing robust estimation.</p></td>
     <tr>
       <th>data</th>
       <td><p>name of the dataset to be used (type: character).</p>
-<p>As an example, to estimate gravity equations you need a square dataset including bilateral 
-flows defined by the argument <code>dependent_variable</code>, ISO-codes of type character 
-(i.e. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
+<p>To estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character 
+(e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
 destination country), a distance measure defined by the argument <code>distance</code> 
-and other potential influences (i.e. contiguity or common currency) given as a vector in 
+and other potential influences (e.g. contiguity and common currency) given as a vector in 
 <code>regressors</code> are required.</p>
-<p>All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
-null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates.</p>
+<p>All dummy variables should be of type numeric (0/1).</p>
+<p>Make sure the ISO codes are of type "character".</p>
+<p>If an independent variable is defined as a ratio, it should be logged.</p>
 <p>The user should perform some data cleaning beforehand to remove observations that contain entries that 
 can distort estimates.</p>
-<p>As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
-equation by <code>bvu</code> using panel data, cross-sectional data should be used.</p></td>
+<p>The function will remove zero flows and distances.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -196,14 +196,6 @@ equation by <code>bvu</code> using panel data, cross-sectional data should be us
 developed by Baier and Bergstrand (2009); Baier and Bergstrand (2010)
  using simple averages to center a
 Taylor-series.</p>
-<p>To execute the function a square gravity dataset with all pairs of 
-countries, ISO-codes for the country of origin and destination, a measure of 
-distance between the bilateral partners as well as all 
-information that should be considered as dependent an independent 
-variables is needed.</p>
-<p>Make sure the ISO-codes are of type "character".</p>
-<p>Missing bilateral flows and flows equal to zero are be excluded as the gravity equation 
-is estimated in its additive form.</p>
 <p>The <code>bvu</code> function considers Multilateral Resistance terms and allows to 
 conduct comparative statics. Country specific effects are subdued due 
 to demeaning. Hence, unilateral variables apart from <code>inc_o</code>
