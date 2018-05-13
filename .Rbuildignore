@@ -9,3 +9,4 @@ docs/*
 bibliography.bib
 README.Rmd
 README.md
+_pkgdown.yml

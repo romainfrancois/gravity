@@ -1,0 +1,7 @@
+language: r
+cache: packages
+sudo: required
+r:
+  - release
+repos:
+  CRAN: https://cloud.r-project.org
