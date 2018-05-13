@@ -61,7 +61,7 @@ is assigned specific ceonsoring bounds." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.24</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.25</span>
       </span>
     </div>
 
@@ -118,7 +118,7 @@ is assigned specific ceonsoring bounds.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>ek_tobit</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='no'>code_destination</span>, <span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+    <pre class="usage"><span class='fu'>ek_tobit</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='no'>code_destination</span>, <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='no'>data</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -127,19 +127,18 @@ is assigned specific ceonsoring bounds.</p>
     <tr>
       <th>dependent_variable</th>
       <td><p>name (type: character) of the dependent variable in the dataset 
-<code>data</code>, e.g. trade flows.
-The variable is logged and then taken as the dependent variable in 
-the regression. As the log of zero is not defined, 
-all flows equal to zero are replaced by
-a left open interval with the logged minimum trade flow of the
-respective importing country as right border.</p></td>
+<code>data</code> (i.e trade flows).</p>
+<p>This variable is logged and then used as the dependent variable in the estimation.</p>
+<p>As the log of zero is not defined, all flows equal to zero are replaced by a left open interval 
+with the logged minimum trade flow of the respective importing country as right border.</p></td>
     </tr>
     <tr>
       <th>regressors</th>
       <td><p>name (type: character) of the distance variable in the dataset 
 <code>data</code> containing a measure of distance between all pairs of bilateral
-partners. It is logged automatically when the function is executed. 
-Interaction terms can be added.</p></td>
+partners.</p>
+<p>It is logged automatically when the function is executed.</p>
+<p>Interaction terms can be added.</p></td>
     </tr>
     <tr>
       <th>code_destination</th>
@@ -148,25 +147,28 @@ Interaction terms can be added.</p></td>
 are grouped by using <code>code_d</code> to obtain estimates.</p></td>
     </tr>
     <tr>
-      <th>vce_robust</th>
-      <td><p>robust (type: logic) determines whether a robust 
-variance-covariance matrix should be used. The default is set to <code>TRUE</code>. 
-If set <code>TRUE</code> the estimation results are consistent with the 
-Stata code provided at the website
-<a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
+      <th>robust</th>
+      <td><p>robust (type: logical) determines whether a robust 
+variance-covariance matrix should be used. By default is set to <code>TRUE</code>.</p>
+<p>If <code>robust = TRUE</code> the estimation results are consistent with the 
+Stata code provided at <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p></td>
     </tr>
     <tr>
       <th>data</th>
-      <td><p>name of the dataset to be used (type: character). 
-To estimate gravity equations, a square gravity dataset including bilateral 
-flows defined by the argument <code>y</code>, ISO-codes of type character 
-(called <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
-destination country), a distance measure defined by the argument <code>dist</code> 
-and other potential influences given as a vector in <code>x</code> are required. 
-All dummy variables should be of type numeric (0/1). Missing trade flows as 
-well as incomplete rows should be excluded from the dataset. 
-Zero trade flows are allowed.</p></td>
+      <td><p>name of the dataset to be used (type: character).</p>
+<p>As an example, to estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument <code>dependent_variable</code>, ISO-codes of type character 
+(i.e. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
+destination country), a distance measure defined by the argument <code>distance</code> 
+and other potential influences (i.e. contiguity or common currency) given as a vector in 
+<code>regressors</code> are required.</p>
+<p>All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
+null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates.</p>
+<p>The user should perform some data cleaning beforehand to remove observations that contain entries that 
+can distort estimates.</p>
+<p>As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
+equation by <code>bvu</code> using panel data, cross-sectional data should be used.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -181,32 +183,27 @@ Zero trade flows are allowed.</p></td>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p><code>ek_tobit</code> represents the Eaton and Kortum (2001) Tobit model.
-When taking the log of the gravity equation flows equal to zero
-constitute a problem as their log is not defined.
-Therefore, in <code>ek_tobit</code> all values of the dependent variable 
-are redefined as intervals.
-The positive observations have both interval bounds equal
-to their original value. 
-For zero flows the interval is left open. The right border
-of the interval is set to the log of the minimum positive trade flow of 
-the respective importing country.
-The defined data object of class <code><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></code> is
-then inserted in <code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code> for the 
-parameter estimation.</p> 
+    <p><code>ek_tobit</code> represents the Eaton and Kortum (2001) Tobit model.</p>
+<p>When taking the log of the gravity equation flows equal to zero
+constitute a problem as their log is not defined. Therefore, in <code>ek_tobit</code> all values of 
+the dependent variable are redefined as intervals.</p>
+<p>The positive observations have both interval bounds equal to their original value.</p>
+<p>For zero flows the interval is left open. The right border of the interval is set to the 
+log of the minimum positive trade flow of the respective importing country.</p>
+<p>The defined data object of class <code><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></code> is then inserted 
+in <code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code> for the parameter estimation.</p> 
 <p>To execute the function a square gravity dataset with all pairs of 
 countries, ISO-codes for the country of origin and destination, a measure of 
 distance between the bilateral partners as well as all 
 information that should be considered as dependent an independent 
-variables is needed. 
-Missing bilateral flows as well as incomplete rows should be 
-excluded from the dataset.  
-Zero trade flows are allowed.</p>
+variables is needed.</p>
+<p>Missing bilateral flows as well as incomplete rows should be 
+excluded from the dataset.</p>
+<p>Zero trade flows are allowed.</p>
 <p><code>ek_tobit</code> is designed to be consistent with the Stata code provided at
-the website
 <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p>
-<p>Up to now, the function is designed for cross-sectional data,
+<p>The function is designed for cross-sectional data,
 but can be extended to panel data using the 
 <code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code> function.</p>
 <p>For other Tobit functions, see <code><a href='tobit.html'>tobit</a></code>
@@ -219,21 +216,65 @@ to the data the threshold is estimated.</p>
 
     <p>For more information on gravity models, theoretical foundations and
 estimation methods in general see</p>
-<p>Anderson, J. E. (1979) &lt;DOI:10.12691/wjssh-2-2-5&gt;</p>
-<p>Anderson, J. E. (2010) &lt;DOI:10.3386/w16576&gt;</p>
-<p>Anderson, J. E. and van Wincoop, E. (2003) &lt;DOI:10.3386/w8079&gt;</p>
-<p>Baier, S. L. and Bergstrand, J. H. (2009) &lt;DOI:10.1016/j.jinteco.2008.10.004&gt;</p>
-<p>Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., &amp; Brakman, S. (Eds.) (2010) chapter 4 &lt;DOI:10.1111/j.1467-9396.2011.01000.x&gt;</p>
-<p>Head, K., Mayer, T., &amp; Ries, J. (2010) &lt;DOI:10.1016/j.jinteco.2010.01.002&gt;</p>
-<p>Head, K. and Mayer, T. (2014) &lt;DOI:10.1016/B978-0-444-54314-1.00003-3&gt;</p>
-<p>Santos-Silva, J. M. C. and Tenreyro, S. (2006) &lt;DOI:10.1162/rest.88.4.641&gt;</p>
+<p>Anderson JE (1979).
+&#8220;A Theoretical Foundation for the Gravity Equation.&#8221;
+<em>The American Economic Review</em>, <b>69</b>(1), pp. 106--116.
+ISSN 00028282, <a href='http://www.jstor.org/stable/1802501'>http://www.jstor.org/stable/1802501</a>.</p>
+<p>Anderson JE and van
+Wincoop E (2001).
+&#8220;Gravity with Gravitas: A Solution to the Border Puzzle.&#8221;
+Technical Report 8079, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w8079'>10.3386/w8079</a>
+.</p>
+<p>Anderson JE (2010).
+&#8220;The Gravity Model.&#8221;
+Technical Report 16576, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w16576'>10.3386/w16576</a>
+.</p>
+<p>Baier SL and Bergstrand JH (2009).
+&#8220;Bonus vetus OLS: A simple method for approximating international trade-cost effects using the gravity equation.&#8221;
+<em>Journal of International Economics</em>, <b>77</b>(1), pp. 77 - 85.
+ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2008.10.004'>https://doi.org/10.1016/j.jinteco.2008.10.004</a>
+.</p>
+<p>Baier SL and Bergstrand JH (2010).
+&#8220;The Gravity Model in International Trade: Advances and Applications.&#8221;
+In van
+Bergeijk PAG and Brakman S (eds.), chapter 4.
+Cambridge University Press.
+doi: <a href='http://doi.org/10.1017/CBO9780511762109'>10.1017/CBO9780511762109</a>
+.</p>
+<p>Head K, Mayer T and Ries J (2010).
+&#8220;The erosion of colonial trade linkages after independence.&#8221;
+<em>Journal of International Economics</em>, <b>81</b>(1), pp. 1 - 14.
+ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002'>https://doi.org/10.1016/j.jinteco.2010.01.002</a>
+.</p>
+<p>Silva JMCS and Tenreyro S (2006).
+&#8220;The Log of Gravity.&#8221;
+<em>The Review of Economics and Statistics</em>, <b>88</b>(4), pp. 641-658.
+doi: <a href='http://doi.org/10.1162/rest.88.4.641'>10.1162/rest.88.4.641</a>
+.</p>
 <p>and the citations therein.</p>
-    <p>Especially for Tobit models see</p>
-<p>Tobin, J. (1958) &lt;DOI:10.2307/1907382&gt;</p>
-<p>Eaton, J., &amp; Tamura, A. (1994) &lt;DOI:10.3386/w4758&gt;</p>
-<p>Eaton, J., &amp; Kortum, S. (2001) &lt;DOI:10.3386/w8070&gt;.</p>
-    <p>See Carson, R. T., &amp; Sun, Yixiao (2007) &lt;DOI:10.1111/j.1368-423X.2007.00218.x&gt;
-for the estimation of the threshold in a Tobit model.</p>
+<p>Especially for Tobit models see</p>
+<p>Tobin J (1958).
+&#8220;Estimation of Relationships for Limited Dependent Variables.&#8221;
+<em>Econometrica</em>, <b>26</b>(1), pp. 24--36.
+ISSN 14680262, doi: <a href='http://doi.org/10.2307/1907382'>10.2307/1907382</a>
+.</p>
+<p>Eaton J and Tamura A (1995).
+&#8220;Bilateralism and Regionalism in Japanese and U.S. Trade and Direct Foreign Investment Patterns.&#8221;
+Technical Report 4758, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w4758'>10.3386/w4758</a>
+.</p>
+<p>Eaton J and Kortum S (2001).
+&#8220;Trade in Capital Goods.&#8221;
+Technical Report 8070, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w8070'>10.3386/w8070</a>
+, <a href='http://www.nber.org/papers/w8070'>http://www.nber.org/papers/w8070</a>.</p>
+<p>Carson RT and Sun Y (2004).
+&#8220;The Tobit model with a non‐zero threshold.&#8221;
+<em>The Econometrics Journal</em>, <b>10</b>(3), pp. 488-502.
+doi: <a href='http://doi.org/10.1111/j.1368-423X.2007.00218.x'>10.1111/j.1368-423X.2007.00218.x</a>
+.</p>
 <p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
@@ -254,7 +295,7 @@ for the estimation of the threshold in a Tobit model.</p>
 
 <span class='fu'>ek_tobit</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>,<span class='st'>"lgdp_o"</span>,<span class='st'>"lgdp_d"</span>),
 <span class='kw'>code_destination</span> <span class='kw'>=</span> <span class='st'>"iso_d"</span>,
-<span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_zeros</span>)
+<span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_zeros</span>)
 <span class='co'># }</span><div class='input'>
 </div><div class='input'>
 </div></pre>

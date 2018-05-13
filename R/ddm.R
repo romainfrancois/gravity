@@ -4,61 +4,75 @@
 #' left hand side and right hand side of the gravity equation.
 #' 
 #' @details \code{ddm} is an estimation method for gravity models presented
-#' in Head and Mayer (2014) (see the references for more information).  
+#' in \insertCite{Head2014;textual}{gravity}.
+#' 
 #' To execute the function a square gravity dataset with all pairs of 
 #' countries, ISO-codes for the country of origin and destination, a measure of 
 #' distance between the bilateral partners as well as all 
 #' information that should be considered as dependent an independent 
 #' variables is needed. 
+#' 
 #' Make sure the ISO-codes are of type "character".
+#' 
 #' Missing bilateral flows as well as incomplete rows should be 
-#' excluded from the dataset. 
+#' excluded from the dataset.
+#' 
 #' Furthermore, flows equal to zero should be excluded as the gravity equation 
-#' is estimated in its additive form.  
-#' Country specific effects are subdued due double demeaning. 
-#' Hence, unilateral income proxies such as GDP cannot be 
-#' considered as exogenous variables.
+#' is estimated in its additive form.
+#' 
+#' Country specific effects are subdued due double demeaning. Hence, unilateral income 
+#' proxies such as GDP cannot be considered as exogenous variables.
 #' 
 #' \code{ddm} is designed to be consistent with the Stata code provided at
-#' the website
 #' \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 #' when choosing robust estimation.
+#' 
 #' As, to our knowledge at the moment, there is no explicit literature covering 
 #' the estimation of a gravity equation by \code{ddm} using panel data, 
 #' we do not recommend to apply this method in this case.
 #' 
 #' @param dependent_variable name (type: character) of the dependent variable in the dataset 
-#' \code{data}, e.g. trade flows. This variable is logged and then used as the 
-#' dependent variable in the estimation.
+#' \code{data} (i.e trade flows).
 #' 
-#' @param regressors name (type: character) of the distance variable in the dataset 
-#' \code{data} containing a measure of distance between all pairs of bilateral
-#' partners. It is logged automatically when the function is executed. 
+#' This variable is logged and then used as the dependent variable in the estimation.
 #' 
-#' @param codes variable name (type: character) of the label of the country 
-#' (i.e ISO code) of origin in the dataset \code{data}. The variables 
-#' are grouped by using \code{code_o} and \code{code_d} to obtain estimates. 
+#' @param regressors name (type: character) of the regressors to include in the model.
 #' 
-#' @param vce_robust robust (type: logic) determines whether a robust 
-#' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
-#' If set \code{TRUE} the estimation results are consistent with the 
-#' Stata code provided at the website
-#' \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
+#' Include the distance variable in the dataset \code{data} containing a measure of 
+#' distance between all pairs of bilateral partners and bilateral variables that should 
+#' be taken as the independent variables in the estimation. 
+#' 
+#' @param codes variable name (type: character) of the code of the country 
+#' (i.e ISO-3 code) of origin (i.e \code{iso_o}) and destination (i.e \code{iso_d}) in the dataset \code{data}. 
+#' 
+#' The variables are grouped by using \code{code_o} and \code{code_d} to obtain estimates.
+#' 
+#' Write this argument as \code{c(origin, destination)}.
+#' 
+#' @param robust robust (type: logical) determines whether a robust 
+#' variance-covariance matrix should be used. By default is set to \code{TRUE}.
+#' 
+#' If \code{robust = TRUE} the estimation results are consistent with the 
+#' Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 #' when choosing robust estimation.
 #' 
-#' @param data name of the dataset to be used (type: character). 
-#' To estimate gravity equations, a square gravity dataset including bilateral 
-#' flows defined by the argument \code{y}, ISO-codes of type character 
-#' (called \code{iso_o} for the country of origin and \code{iso_d} for the 
-#' destination country), a distance measure defined by the argument \code{dist} 
-#' and other potential influences given as a vector in \code{x} are required. 
-#' All dummy variables should be of type numeric (0/1). Missing trade flows as 
-#' well as incomplete rows should be excluded from the dataset. 
-#' Furthermore, flows equal to zero should be excluded as the gravity equation 
-#' is estimated in its additive form.
-#' As, to our knowledge at the moment, there is no explicit literature covering 
-#' the estimation of a gravity equation by \code{ddm} 
-#' using panel data, cross-sectional data should be used. 
+#' @param data name of the dataset to be used (type: character).
+#' 
+#' As an example, to estimate gravity equations you need a square dataset including bilateral 
+#' flows defined by the argument \code{dependent_variable}, ISO-codes of type character 
+#' (i.e. \code{iso_o} for the country of origin and \code{iso_d} for the 
+#' destination country), a distance measure defined by the argument \code{distance} 
+#' and other potential influences (i.e. contiguity or common currency) given as a vector in 
+#' \code{regressors} are required.
+#' 
+#' All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
+#' null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates. 
+#' 
+#' The user should perform some data cleaning beforehand to remove observations that contain entries that 
+#' can distort estimates.
+#' 
+#' As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
+#' equation by \code{bvu} using panel data, cross-sectional data should be used. 
 #' 
 #' @param ... additional arguments to be passed to \code{ddm}.
 #' 
@@ -66,26 +80,25 @@
 #' For more information on Double Demeaning as well as information on gravity 
 #' models, theoretical foundations and estimation methods in general see
 #' 
-#' Head, K. and Mayer, T. (2014) <DOI:10.1016/B978-0-444-54314-1.00003-3>
+#' \insertRef{Head2014}{gravity}
 #' 
 #' as well as
 #' 
-#' Anderson, J. E. (1979) <DOI:10.12691/wjssh-2-2-5>
+#' \insertRef{Anderson1979}{gravity}
 #' 
-#' Anderson, J. E. (2010) <DOI:10.3386/w16576>
+#' \insertRef{Anderson2001}{gravity}
 #' 
-#' Anderson, J. E. and van Wincoop, E. (2003) <DOI:10.3386/w8079> 
+#' \insertRef{Anderson2010}{gravity}
 #' 
-#' Baier, S. L. and Bergstrand, J. H. (2009) <DOI:10.1016/j.jinteco.2008.10.004>
+#' \insertRef{Baier2009}{gravity}
 #' 
-#' Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., & Brakman, S. (Eds.) (2010) chapter 4 <DOI:10.1111/j.1467-9396.2011.01000.x>
+#' \insertRef{Baier2010}{gravity}
 #' 
-#' Head, K., Mayer, T., & Ries, J. (2010) <DOI:10.1016/j.jinteco.2010.01.002>
+#' \insertRef{Head2010}{gravity}
 #' 
-#' Santos-Silva, J. M. C. and Tenreyro, S. (2006) <DOI:10.1162/rest.88.4.641> 
+#' \insertRef{Santos2006}{gravity}
 #' 
 #' and the citations therein.
-#' 
 #' 
 #' See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
 #' 
@@ -95,11 +108,11 @@
 #' 
 #' ddm(dependent_variable = "flow", regressors = c("distw", "rta"), 
 #' codes = c("iso_o", "iso_d"), 
-#' vce_robust = TRUE, data = gravity_no_zeros)
+#' robust = TRUE, data = gravity_no_zeros)
 #' 
 #' ddm(dependent_variable = "flow", regressors = c("distw", "rta", "comcur", "contig"), 
 #' codes = c("iso_o", "iso_d"), 
-#' vce_robust=TRUE, data=gravity_no_zeros)
+#' robust=TRUE, data=gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -113,7 +126,7 @@
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
 #' ddm(dependent_variable = "flow", regressors = c("distw", "rta"), 
 #' codes = c("iso_o", "iso_d"), 
-#' vce_robust = TRUE, data = grav_small)
+#' robust = TRUE, data = grav_small)
 #' }
 #' 
 #' @return
@@ -125,10 +138,10 @@
 #' 
 #' @export 
 
-ddm <- function(dependent_variable, regressors, codes, vce_robust=TRUE, data, ...) {
+ddm <- function(dependent_variable, regressors, codes, robust=TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.logical(vce_robust))
+  stopifnot(is.logical(robust))
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
   stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
   stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
@@ -223,13 +236,13 @@ ddm <- function(dependent_variable, regressors, codes, vce_robust=TRUE, data, ..
   model_ddm <- stats::lm(y_log_ddm ~ . + 0, data = dmodel)
   
   # Return ---------------------------------------------------------------------
-  if (vce_robust == TRUE) {
+  if (robust == TRUE) {
     return_object      <- robust_summary(model_ddm, robust = TRUE)
     return_object$call <- as.formula(model_ddm)
     return(return_object)
   }
   
-  if (vce_robust == FALSE) {
+  if (robust == FALSE) {
     return_object      <- robust_summary(model_ddm, robust = FALSE)
     return_object$call <- as.formula(model_ddm)
     return(return_object)

@@ -4,24 +4,25 @@
 \alias{bvw}
 \title{Bonus vetus OLS (BVW)}
 \usage{
-bvw(dependent_variable, regressors, incomes, codes, vce_robust = TRUE, data,
-  ...)
+bvw(dependent_variable, regressors, incomes, codes, robust = TRUE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
 \code{data} (i.e trade flows). 
 
 This dependent variable is divided by the 
-product of unilateral incomes (named \code{inc_o} and \code{inc_d}, e.g. 
-GDPs or GNPs of the countries of interest) and logged afterwards.
+product of unilateral incomes (e.g. 
+GDPs or GNPs of the countries of interest, named \code{inc_o} and \code{inc_d} in the example datasets) 
+and logged afterwards.
 
 The transformed variable is then used as the dependent variable in the 
 estimation.}
 
-\item{regressors}{name (type: character) of the distance variable in the dataset 
-\code{data} containing a measure of distance between all pairs of bilateral
-partners and bilateral variables that should be taken as the independent variables 
-in the estimation. 
+\item{regressors}{name (type: character) of the regressors to include in the model.
+
+Include the distance variable in the dataset \code{data} containing a measure of 
+distance between all pairs of bilateral partners and bilateral variables that should 
+be taken as the independent variables in the estimation. 
 
 The distance is logged automatically when the function is executed.
 
@@ -50,10 +51,10 @@ The variables are grouped by using \code{code_o} and \code{code_d} to obtain est
 
 Write this argument as \code{c(origin, destination)}.}
 
-\item{vce_robust}{robust (type: logical) determines whether a robust 
+\item{robust}{robust (type: logical) determines whether a robust 
 variance-covariance matrix should be used. By default is set to \code{TRUE}.
 
-If \code{vce_robust = TRUE} the estimation results are consistent with the 
+If \code{robust = TRUE} the estimation results are consistent with the 
 Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 when choosing robust estimation.}
 
@@ -123,11 +124,11 @@ data(gravity_no_zeros)
 
 bvw(dependent_variable = "flow", regressors = c("distw", "rta"), 
 incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
-vce_robust = TRUE, data = gravity_no_zeros)
+robust = TRUE, data = gravity_no_zeros)
 
 bvw(dependent_variable = "flow", regressors = c("distw", "rta", "comcur", "contig"), 
 incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
-vce_robust = TRUE, data = gravity_no_zeros)
+robust = TRUE, data = gravity_no_zeros)
 }
 
 \dontshow{
@@ -141,7 +142,7 @@ countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)
 grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
 bvw(dependent_variable = "flow", regressors = c("distw", "rta"), 
 incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
-vce_robust = TRUE, data = grav_small)
+robust = TRUE, data = grav_small)
 }
 
 }

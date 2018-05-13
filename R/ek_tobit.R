@@ -1,39 +1,40 @@
-#' @title Eaton and Kortum (2001) Tobit model (EK Tobit)
+#' @title \insertCite{Eaton2001;textual}{gravity} Tobit model (EK Tobit)
 #' 
 #' @description \code{ek_tobit} estimates gravity models in their additive form
 #' by conducting a censored regression.
-#' It follows the Eaton and Kortum (2001) Tobit model where each country 
-#' is assigned specific ceonsoring bounds.
+#' It follows the \insertCite{Eaton2001;textual}{gravity} Tobit model where each country 
+#' is assigned specific censoring bounds.
 #' 
-#' @details \code{ek_tobit} represents the Eaton and Kortum (2001) Tobit model.
+#' @details \code{ek_tobit} represents the \insertCite{Eaton2001;textual}{gravity} Tobit model.
+#' 
 #' When taking the log of the gravity equation flows equal to zero
-#' constitute a problem as their log is not defined.
-#' Therefore, in \code{ek_tobit} all values of the dependent variable 
-#' are redefined as intervals.
-#' The positive observations have both interval bounds equal
-#' to their original value. 
-#' For zero flows the interval is left open. The right border
-#' of the interval is set to the log of the minimum positive trade flow of 
-#' the respective importing country.
-#' The defined data object of class \code{\link[survival]{Surv}} is
-#' then inserted in \code{\link[survival]{survreg}} for the 
-#' parameter estimation.
+#' constitute a problem as their log is not defined. Therefore, in \code{ek_tobit} all values of 
+#' the dependent variable are redefined as intervals.
+#' 
+#' The positive observations have both interval bounds equal to their original value. 
+#' 
+#' For zero flows the interval is left open. The right border of the interval is set to the 
+#' log of the minimum positive trade flow of the respective importing country.
+#' 
+#' The defined data object of class \code{\link[survival]{Surv}} is then inserted 
+#' in \code{\link[survival]{survreg}} for the parameter estimation.
 #'  
 #' To execute the function a square gravity dataset with all pairs of 
 #' countries, ISO-codes for the country of origin and destination, a measure of 
 #' distance between the bilateral partners as well as all 
 #' information that should be considered as dependent an independent 
 #' variables is needed. 
+#' 
 #' Missing bilateral flows as well as incomplete rows should be 
 #' excluded from the dataset.  
+#' 
 #' Zero trade flows are allowed. 
 #' 
 #' \code{ek_tobit} is designed to be consistent with the Stata code provided at
-#' the website
 #' \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 #' when choosing robust estimation.
 #' 
-#' Up to now, the function is designed for cross-sectional data,
+#' The function is designed for cross-sectional data,
 #' but can be extended to panel data using the 
 #' \code{\link[survival]{survreg}} function.
 #' 
@@ -44,38 +45,49 @@
 #' to the data the threshold is estimated.
 #' 
 #' @param dependent_variable name (type: character) of the dependent variable in the dataset 
-#' \code{data}, e.g. trade flows.
-#' The variable is logged and then taken as the dependent variable in 
-#' the regression. As the log of zero is not defined, 
-#' all flows equal to zero are replaced by
-#' a left open interval with the logged minimum trade flow of the
-#' respective importing country as right border.
+#' \code{data} (i.e trade flows).
+#' 
+#' This variable is logged and then used as the dependent variable in the estimation. 
+#' 
+#' As the log of zero is not defined, all flows equal to zero are replaced by a left open interval 
+#' with the logged minimum trade flow of the respective importing country as right border.
 #' 
 #' @param regressors name (type: character) of the distance variable in the dataset 
 #' \code{data} containing a measure of distance between all pairs of bilateral
-#' partners. It is logged automatically when the function is executed. 
+#' partners. 
+#' 
+#' It is logged automatically when the function is executed. 
+#' 
 #' Interaction terms can be added.
 #' 
 #' @param code_destination variable name (type: character) of the label of the country 
 #' (i.e ISO code) of destination in the dataset \code{data}. The variables 
 #' are grouped by using \code{code_d} to obtain estimates.
 #' 
-#' @param vce_robust robust (type: logic) determines whether a robust 
-#' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
-#' If set \code{TRUE} the estimation results are consistent with the 
-#' Stata code provided at the website
-#' \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
+#' @param robust robust (type: logical) determines whether a robust 
+#' variance-covariance matrix should be used. By default is set to \code{TRUE}.
+#' 
+#' If \code{robust = TRUE} the estimation results are consistent with the 
+#' Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 #' when choosing robust estimation.
 #' 
-#' @param data name of the dataset to be used (type: character). 
-#' To estimate gravity equations, a square gravity dataset including bilateral 
-#' flows defined by the argument \code{y}, ISO-codes of type character 
-#' (called \code{iso_o} for the country of origin and \code{iso_d} for the 
-#' destination country), a distance measure defined by the argument \code{dist} 
-#' and other potential influences given as a vector in \code{x} are required. 
-#' All dummy variables should be of type numeric (0/1). Missing trade flows as 
-#' well as incomplete rows should be excluded from the dataset. 
-#' Zero trade flows are allowed.
+#' @param data name of the dataset to be used (type: character).
+#' 
+#' As an example, to estimate gravity equations you need a square dataset including bilateral 
+#' flows defined by the argument \code{dependent_variable}, ISO-codes of type character 
+#' (i.e. \code{iso_o} for the country of origin and \code{iso_d} for the 
+#' destination country), a distance measure defined by the argument \code{distance} 
+#' and other potential influences (i.e. contiguity or common currency) given as a vector in 
+#' \code{regressors} are required.
+#' 
+#' All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
+#' null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates. 
+#' 
+#' The user should perform some data cleaning beforehand to remove observations that contain entries that 
+#' can distort estimates.
+#' 
+#' As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
+#' equation by \code{bvu} using panel data, cross-sectional data should be used. 
 #' 
 #' @param ... additional arguments to be passed to \code{ek_tobit}.
 #' 
@@ -83,36 +95,31 @@
 #' For more information on gravity models, theoretical foundations and
 #' estimation methods in general see 
 #' 
-#' Anderson, J. E. (1979) <DOI:10.12691/wjssh-2-2-5>
+#' \insertRef{Anderson1979}{gravity}
 #' 
-#' Anderson, J. E. (2010) <DOI:10.3386/w16576>
+#' \insertRef{Anderson2001}{gravity}
 #' 
-#' Anderson, J. E. and van Wincoop, E. (2003) <DOI:10.3386/w8079> 
+#' \insertRef{Anderson2010}{gravity}
 #' 
-#' Baier, S. L. and Bergstrand, J. H. (2009) <DOI:10.1016/j.jinteco.2008.10.004>
+#' \insertRef{Baier2009}{gravity}
 #' 
-#' Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., & Brakman, S. (Eds.) (2010) chapter 4 <DOI:10.1111/j.1467-9396.2011.01000.x>
+#' \insertRef{Baier2010}{gravity}
 #' 
-#' Head, K., Mayer, T., & Ries, J. (2010) <DOI:10.1016/j.jinteco.2010.01.002>
+#' \insertRef{Head2010}{gravity}
 #' 
-#' Head, K. and Mayer, T. (2014) <DOI:10.1016/B978-0-444-54314-1.00003-3>
-#' 
-#' Santos-Silva, J. M. C. and Tenreyro, S. (2006) <DOI:10.1162/rest.88.4.641> 
+#' \insertRef{Santos2006}{gravity}
 #' 
 #' and the citations therein.
 #' 
-#' 
 #' Especially for Tobit models see
 #' 
-#' Tobin, J. (1958) <DOI:10.2307/1907382>
+#' \insertRef{Tobin1958}{gravity}
 #' 
-#' Eaton, J., & Tamura, A. (1994) <DOI:10.3386/w4758>
+#' \insertRef{Eaton1995}{gravity}
 #' 
-#' Eaton, J., & Kortum, S. (2001) <DOI:10.3386/w8070>.
+#' \insertRef{Eaton2001}{gravity}
 #' 
-#' 
-#' See Carson, R. T., & Sun, Yixiao (2007) <DOI:10.1111/j.1368-423X.2007.00218.x>
-#' for the estimation of the threshold in a Tobit model. 
+#' \insertRef{Carson2004}{gravity}
 #' 
 #' See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
 #' 
@@ -129,7 +136,7 @@
 #' 
 #' ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"), 
 #' code_destination = "iso_d",
-#' vce_robust = TRUE, data = gravity_zeros)
+#' robust = TRUE, data = gravity_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -146,7 +153,7 @@
 #' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
 #' ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"), 
 #' code_destination = "iso_d",
-#' vce_robust = TRUE, data = grav_small_zeros)
+#' robust = TRUE, data = grav_small_zeros)
 #' }
 #' 
 #' @return
@@ -157,10 +164,10 @@
 #' 
 #' @export 
 
-ek_tobit <- function(dependent_variable, regressors, code_destination, vce_robust = TRUE, data, ...) {
+ek_tobit <- function(dependent_variable, regressors, code_destination, robust = TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.logical(vce_robust))
+  stopifnot(is.logical(robust))
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
   stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
   stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
@@ -214,7 +221,7 @@ ek_tobit <- function(dependent_variable, regressors, code_destination, vce_robus
   # Model -------------------------------------------------------------------
   vars           <- paste(c("dist_log", additional_regressors), collapse = " + ")
   form           <- stats::as.formula(paste("y_cens_log_ek", "~", vars))
-  model_ek_tobit <- survival::survreg(form, data = d, dist = "gaussian", robust = vce_robust)
+  model_ek_tobit <- survival::survreg(form, data = d, dist = "gaussian", robust = robust)
   
   # Return ------------------------------------------------------------------
   return_object      <- summary(model_ek_tobit)

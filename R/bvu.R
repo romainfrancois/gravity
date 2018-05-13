@@ -34,16 +34,18 @@
 #' \code{data} (i.e trade flows). 
 #' 
 #' This dependent variable is divided by the 
-#' product of unilateral incomes (named \code{inc_o} and \code{inc_d}, e.g. 
-#' GDPs or GNPs of the countries of interest) and logged afterwards.
+#' product of unilateral incomes (e.g. 
+#' GDPs or GNPs of the countries of interest, named \code{inc_o} and \code{inc_d} in the example datasets) 
+#' and logged afterwards.
 #' 
 #' The transformed variable is then used as the dependent variable in the 
 #' estimation.
 #' 
-#' @param regressors name (type: character) of the distance variable in the dataset 
-#' \code{data} containing a measure of distance between all pairs of bilateral
-#' partners and bilateral variables that should be taken as the independent variables 
-#' in the estimation. 
+#' @param regressors name (type: character) of the regressors to include in the model.
+#' 
+#' Include the distance variable in the dataset \code{data} containing a measure of 
+#' distance between all pairs of bilateral partners and bilateral variables that should 
+#' be taken as the independent variables in the estimation. 
 #' 
 #' The distance is logged automatically when the function is executed.
 #' 
@@ -72,10 +74,10 @@
 #' 
 #' Write this argument as \code{c(origin, destination)}.
 #' 
-#' @param vce_robust robust (type: logical) determines whether a robust 
+#' @param robust robust (type: logical) determines whether a robust 
 #' variance-covariance matrix should be used. By default is set to \code{TRUE}.
 #' 
-#' If \code{vce_robust = TRUE} the estimation results are consistent with the 
+#' If \code{robust = TRUE} the estimation results are consistent with the 
 #' Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 #' when choosing robust estimation.
 #' 
@@ -131,11 +133,11 @@
 #' 
 #' bvu(dependent_variable = "flow", regressors = c("distw", "rta"), 
 #' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
-#' vce_robust = TRUE, data = gravity_no_zeros)
+#' robust = TRUE, data = gravity_no_zeros)
 #' 
 #' bvu(dependent_variable = "flow", regressors = c("distw", "rta", "contig", "comcur"), 
 #' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
-#' vce_robust = TRUE, data = gravity_no_zeros)
+#' robust = TRUE, data = gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -149,7 +151,7 @@
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
 #' bvu(dependent_variable = "flow", regressors = c("distw", "rta"), 
 #' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
-#' vce_robust = TRUE, data = grav_small)
+#' robust = TRUE, data = grav_small)
 #' }
 #' 
 #' @return
@@ -161,10 +163,10 @@
 #' 
 #' @export
 
-bvu <- function(dependent_variable, regressors, incomes, codes, vce_robust = TRUE, data, ...) {
+bvu <- function(dependent_variable, regressors, incomes, codes, robust = TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.logical(vce_robust))
+  stopifnot(is.logical(robust))
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
   stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
   stopifnot(is.character(incomes) | all(incomes %in% colnames(data)) | length(incomes) == 2)
@@ -245,13 +247,13 @@ bvu <- function(dependent_variable, regressors, incomes, codes, vce_robust = TRU
   model_bvu <- stats::lm(y_log_bvu ~ ., data = dmodel)
   
   # Return ---------------------------------------------------------------------
-  if (vce_robust == TRUE) {
+  if (robust == TRUE) {
     return_object      <- robust_summary(model_bvu, robust = TRUE)
     return_object$call <- as.formula(model_bvu)
     return(return_object)
   }
   
-  if (vce_robust == FALSE) {
+  if (robust == FALSE) {
     return_object      <- robust_summary(model_bvu, robust = FALSE)
     return_object$call <- as.formula(model_bvu)
     return(return_object)
