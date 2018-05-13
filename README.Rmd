@@ -1,7 +1,7 @@
 ---
 title: "gravity"
 output: github_document
-bibliography: bibliography.bib
+bibliography: inst/REFERENCES.bib
 ---
 
 ```{r setup, include=FALSE}

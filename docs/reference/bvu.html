@@ -121,62 +121,63 @@
     <tr>
       <th>dependent_variable</th>
       <td><p>name (type: character) of the dependent variable in the dataset 
-<code>data</code> (i.e trade flows). This dependent variable is divided by the 
+<code>data</code> (i.e trade flows).</p>
+<p>This dependent variable is divided by the 
 product of unilateral incomes (named <code>inc_o</code> and <code>inc_d</code>, e.g. 
-GDPs or GNPs of the countries of interest) and logged afterwards.
-The transformed variable is then used as the dependent variable in the 
+GDPs or GNPs of the countries of interest) and logged afterwards.</p>
+<p>The transformed variable is then used as the dependent variable in the 
 estimation.</p></td>
     </tr>
     <tr>
       <th>regressors</th>
-      <td><p>name (type: character) of the distance variable () in the dataset 
+      <td><p>name (type: character) of the distance variable in the dataset 
 <code>data</code> containing a measure of distance between all pairs of bilateral
 partners and bilateral variables that should be taken as the independent variables 
-in the estimation. The distance is logged automatically when the function is executed. 
-If an independent variable is a dummy variable, it should be of type numeric (0/1) in the dataset. 
-If an independent variable is defined as a ratio, it should be logged. 
-Unilateral metric variables such as GDPs should be inserted via the argument <code>incomes</code> 
-As country specific effects are subdued due to demeaning, no further unilateral variables 
-equivalent to <code>c(gdp origin, gdp destination)</code> can be added.
-Write this argument as <code>c(distance, other variables)</code>.</p></td>
+in the estimation.</p>
+<p>The distance is logged automatically when the function is executed.</p>
+<p>If an independent variable is a dummy variable, it should be of type numeric (0/1) in the dataset.</p>
+<p>If an independent variable is defined as a ratio, it should be logged.</p>
+<p>Unilateral metric variables such as GDPs should be inserted via the argument <code>incomes</code>.</p>
+<p>As country specific effects are subdued due to demeaning, no further unilateral variables 
+equivalent to <code>c(gdp origin, gdp destination)</code> can be added.</p>
+<p>Write this argument as <code>c(distance, other variables)</code>.</p></td>
     </tr>
     <tr>
       <th>incomes</th>
       <td><p>variable name (type: character) of the income of the country of 
-origin (i.e <code>gdp_o</code>) and destination (i.e <code>gdp_d</code>) in the dataset <code>data</code>. 
-The dependent variable <code>dependent_variable</code> is divided by the product of the incomes.
-Write this argument as <code>c(origin, destination)</code>.</p></td>
+origin (i.e <code>gdp_o</code>) and destination (i.e <code>gdp_d</code>) in the dataset <code>data</code>.</p>
+<p>The dependent variable <code>dependent_variable</code> is divided by the product of the incomes.</p>
+<p>Write this argument as <code>c(origin, destination)</code>.</p></td>
     </tr>
     <tr>
       <th>codes</th>
       <td><p>variable name (type: character) of the code of the country 
-(i.e ISO-3 code) of origin (i.e <code>iso_o</code>) and destination (i.e <code>iso_d</code>) in the dataset <code>data</code>. 
-The variables are grouped by using <code>code_o</code> and <code>code_d</code> to obtain estimates.
-Write this argument as <code>c(origin, destination)</code>.</p></td>
+(i.e ISO-3 code) of origin (i.e <code>iso_o</code>) and destination (i.e <code>iso_d</code>) in the dataset <code>data</code>.</p>
+<p>The variables are grouped by using <code>code_o</code> and <code>code_d</code> to obtain estimates.</p>
+<p>Write this argument as <code>c(origin, destination)</code>.</p></td>
     </tr>
     <tr>
       <th>vce_robust</th>
       <td><p>robust (type: logical) determines whether a robust 
-variance-covariance matrix should be used. The default is set to <code>TRUE</code>. 
-If set <code>TRUE</code> the estimation results are consistent with the 
-Stata code provided at the website
-<a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
+variance-covariance matrix should be used. By default is set to <code>TRUE</code>.</p>
+<p>If <code>vce_robust = TRUE</code> the estimation results are consistent with the 
+Stata code provided at <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p></td>
     </tr>
     <tr>
       <th>data</th>
-      <td><p>name of the dataset to be used (type: character). 
-As an example, to estimate gravity equations you need a square dataset including bilateral 
+      <td><p>name of the dataset to be used (type: character).</p>
+<p>As an example, to estimate gravity equations you need a square dataset including bilateral 
 flows defined by the argument <code>dependent_variable</code>, ISO-codes of type character 
 (i.e. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
 destination country), a distance measure defined by the argument <code>distance</code> 
 and other potential influences (i.e. contiguity or common currency) given as a vector in 
-<code>regressors</code> are required. 
-All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
-null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates. 
-The user should perform some data cleaning beforehand to remove observations that contain entries that 
-can distort estimates.
-As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
+<code>regressors</code> are required.</p>
+<p>All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
+null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates.</p>
+<p>The user should perform some data cleaning beforehand to remove observations that contain entries that 
+can distort estimates.</p>
+<p>As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
 equation by <code>bvu</code> using panel data, cross-sectional data should be used.</p></td>
     </tr>
     <tr>
@@ -193,43 +194,76 @@ equation by <code>bvu</code> using panel data, cross-sectional data should be us
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p><code>Bonus vetus OLS</code> is an estimation method for gravity models 
-developed by Baier and Bergstrand (2009, 2010) using simple averages to center a
-Taylor-series (see the references for more information). 
-To execute the function a square gravity dataset with all pairs of 
+developed by Baier and Bergstrand (2009); Baier and Bergstrand (2010)
+ using simple averages to center a
+Taylor-series.</p>
+<p>To execute the function a square gravity dataset with all pairs of 
 countries, ISO-codes for the country of origin and destination, a measure of 
 distance between the bilateral partners as well as all 
 information that should be considered as dependent an independent 
-variables is needed. 
-Make sure the ISO-codes are of type "character".
-Missing bilateral flows as well as incomplete rows should be 
-excluded from the dataset. 
-Furthermore, flows equal to zero should be excluded as the gravity equation 
-is estimated in its additive form.  
-The <code>bvu</code> function considers Multilateral Resistance terms and allows to 
+variables is needed.</p>
+<p>Make sure the ISO-codes are of type "character".</p>
+<p>Missing bilateral flows and flows equal to zero are be excluded as the gravity equation 
+is estimated in its additive form.</p>
+<p>The <code>bvu</code> function considers Multilateral Resistance terms and allows to 
 conduct comparative statics. Country specific effects are subdued due 
 to demeaning. Hence, unilateral variables apart from <code>inc_o</code>
-and <code>inc_d</code> cannot be included in the estimation.
-<code>bvu</code> is designed to be consistent with the Stata code provided at
-the website
+and <code>inc_d</code> cannot be included in the estimation.</p>
+<p><code>bvu</code> is designed to be consistent with the Stata code provided at
 <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
-when choosing robust estimation.
-As, to our knowledge at the moment, there is no explicit literature covering 
+when choosing robust estimation.</p>
+<p>As, to our knowledge at the moment, there is no explicit literature covering 
 the estimation of a gravity equation by <code>bvu</code> using panel data, 
 we do not recommend to apply this method in this case.</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>For estimating gravity equations via Bonus Vetus OLS see</p>
-<p>Baier, S. L. and Bergstrand, J. H. (2009) &lt;DOI:10.1016/j.jinteco.2008.10.004&gt;</p>
-<p>Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., &amp; Brakman, S. (Eds.) (2010) chapter 4 &lt;DOI:10.1111/j.1467-9396.2011.01000.x&gt;</p>
+<p>Baier SL and Bergstrand JH (2009).
+&#8220;Bonus vetus OLS: A simple method for approximating international trade-cost effects using the gravity equation.&#8221;
+<em>Journal of International Economics</em>, <b>77</b>(1), pp. 77 - 85.
+ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2008.10.004'>https://doi.org/10.1016/j.jinteco.2008.10.004</a>
+.</p>
+<p>Baier SL and Bergstrand JH (2010).
+&#8220;The Gravity Model in International Trade: Advances and Applications.&#8221;
+In van
+Bergeijk PAG and Brakman S (eds.), chapter 4.
+Cambridge University Press.
+doi: <a href='http://doi.org/10.1017/CBO9780511762109'>10.1017/CBO9780511762109</a>
+.</p>
 <p>For more information on gravity models, theoretical foundations and
 estimation methods in general see</p>
-<p>Anderson, J. E. (1979) &lt;DOI:10.12691/wjssh-2-2-5&gt;</p>
-<p>Anderson, J. E. (2010) &lt;DOI:10.3386/w16576&gt;</p>
-<p>Anderson, J. E. and van Wincoop, E. (2003) &lt;DOI:10.3386/w8079&gt;</p>
-<p>Head, K., Mayer, T., &amp; Ries, J. (2010) &lt;DOI:10.1016/j.jinteco.2010.01.002&gt;</p>
-<p>Head, K. and Mayer, T. (2014) &lt;DOI:10.1016/B978-0-444-54314-1.00003-3&gt;</p>
-<p>[@Santos2006]</p>
+<p>Anderson JE (1979).
+&#8220;A Theoretical Foundation for the Gravity Equation.&#8221;
+<em>The American Economic Review</em>, <b>69</b>(1), pp. 106--116.
+ISSN 00028282, <a href='http://www.jstor.org/stable/1802501'>http://www.jstor.org/stable/1802501</a>.</p>
+<p>Anderson JE and van
+Wincoop E (2001).
+&#8220;Gravity with Gravitas: A Solution to the Border Puzzle.&#8221;
+Technical Report 8079, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w8079'>10.3386/w8079</a>
+.</p>
+<p>Anderson JE (2010).
+&#8220;The Gravity Model.&#8221;
+Technical Report 16576, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w16576'>10.3386/w16576</a>
+.</p>
+<p>Head K, Mayer T and Ries J (2010).
+&#8220;The erosion of colonial trade linkages after independence.&#8221;
+<em>Journal of International Economics</em>, <b>81</b>(1), pp. 1 - 14.
+ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002'>https://doi.org/10.1016/j.jinteco.2010.01.002</a>
+.</p>
+<p>Head K and Mayer T (2014).
+&#8220;Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.&#8221;
+In Gopinath G, Helpman E and Rogoff K (eds.), <em>Handbook of International Economics</em>, volume 4 series Handbook of International Economics, pp. 131 - 195.
+Elsevier.
+doi: <a href='http://doi.org/https://doi.org/10.1016/B978-0-444-54314-1.00003-3'>https://doi.org/10.1016/B978-0-444-54314-1.00003-3</a>
+.</p>
+<p>Silva JMCS and Tenreyro S (2006).
+&#8220;The Log of Gravity.&#8221;
+<em>The Review of Economics and Statistics</em>, <b>88</b>(4), pp. 641-658.
+doi: <a href='http://doi.org/10.1162/rest.88.4.641'>10.1162/rest.88.4.641</a>
+.</p>
 <p>and the citations therein.</p>
 <p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
     

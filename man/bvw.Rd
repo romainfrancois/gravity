@@ -9,44 +9,71 @@ bvw(dependent_variable, regressors, incomes, codes, vce_robust = TRUE, data,
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
-\code{data}, e.g. trade flows. This dependent variable is divided by the 
+\code{data} (i.e trade flows). 
+
+This dependent variable is divided by the 
 product of unilateral incomes (named \code{inc_o} and \code{inc_d}, e.g. 
 GDPs or GNPs of the countries of interest) and logged afterwards.
+
 The transformed variable is then used as the dependent variable in the 
 estimation.}
 
 \item{regressors}{name (type: character) of the distance variable in the dataset 
 \code{data} containing a measure of distance between all pairs of bilateral
-partners. It is logged automatically when the function is executed.}
+partners and bilateral variables that should be taken as the independent variables 
+in the estimation. 
+
+The distance is logged automatically when the function is executed.
+
+If an independent variable is a dummy variable, it should be of type numeric (0/1) in the dataset.
+
+If an independent variable is defined as a ratio, it should be logged.
+
+Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes}. 
+
+As country specific effects are subdued due to demeaning, no further unilateral variables 
+equivalent to \code{c(gdp origin, gdp destination)} can be added.
+
+Write this argument as \code{c(distance, other variables)}.}
 
 \item{incomes}{variable name (type: character) of the income of the country of 
-origin in the dataset \code{data}. The dependent variable \code{y} is
-divided by the product of the incomes \code{inc_d} and \code{inc_o}.}
+origin (i.e \code{gdp_o}) and destination (i.e \code{gdp_d}) in the dataset \code{data}. 
 
-\item{codes}{variable name (type: character) of the label of the country 
-(i.e ISO code) of origin in the dataset \code{data}. The variables 
-are grouped by using \code{code_o} and \code{code_d} to obtain estimates.}
+The dependent variable \code{dependent_variable} is divided by the product of the incomes.
 
-\item{vce_robust}{robust (type: logic) determines whether a robust 
-variance-covariance matrix should be used. The default is set to \code{TRUE}. 
-If set \code{TRUE} the estimation results are consistent with the 
-Stata code provided at the website
-\href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
+Write this argument as \code{c(origin, destination)}.}
+
+\item{codes}{variable name (type: character) of the code of the country 
+(i.e ISO-3 code) of origin (i.e \code{iso_o}) and destination (i.e \code{iso_d}) in the dataset \code{data}. 
+
+The variables are grouped by using \code{code_o} and \code{code_d} to obtain estimates.
+
+Write this argument as \code{c(origin, destination)}.}
+
+\item{vce_robust}{robust (type: logical) determines whether a robust 
+variance-covariance matrix should be used. By default is set to \code{TRUE}.
+
+If \code{vce_robust = TRUE} the estimation results are consistent with the 
+Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 when choosing robust estimation.}
 
-\item{data}{name of the dataset to be used (type: character). 
-To estimate gravity equations, a square gravity dataset including bilateral 
-flows defined by the argument \code{y}, ISO-codes of type character 
-(called \code{iso_o} for the country of origin and \code{iso_d} for the 
-destination country), a distance measure defined by the argument \code{dist} 
-and other potential influences given as a vector in \code{x} are required. 
-All dummy variables should be of type numeric (0/1). Missing trade flows as 
-well as incomplete rows should be excluded from the dataset. 
-Furthermore, flows equal to zero should be excluded as the gravity equation 
-is estimated in its additive form.
-As, to our knowledge at the moment, there is no explicit literature covering 
-the estimation of a gravity equation by \code{bvw} 
-using panel data, cross-sectional data should be used.}
+\item{data}{name of the dataset to be used (type: character).
+
+As an example, to estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument \code{dependent_variable}, ISO-codes of type character 
+(i.e. \code{iso_o} for the country of origin and \code{iso_d} for the 
+destination country), a distance measure defined by the argument \code{distance} 
+and other potential influences (i.e. contiguity or common currency) given as a vector in 
+\code{regressors} are required.
+
+All dummy variables should be of type numeric (0/1). Some of our functions remove observations with 
+null/missing trade flows or distances as those variables are converted to log scale before obtaining estimates. 
+
+The user should perform some data cleaning beforehand to remove observations that contain entries that 
+can distort estimates.
+
+As, to our knowledge at the moment, there is no explicit literature covering the estimation of a gravity 
+equation by \code{bvu} using panel data, cross-sectional data should be used.}
 
 \item{...}{additional arguments to be passed to \code{bvw}.}
 }
@@ -59,27 +86,33 @@ The function returns the summary of the estimated gravity model as an
 vetus OLS with GDP-weights.
 }
 \details{
-\code{Bonus vetus OLS} is an estimation method for gravity models 
-developed by Baier and Bergstrand (2009, 2010) using GDP-weights to center a
+Bonus vetus OLS is an estimation method for gravity models 
+developed by \insertCite{Baier2009,Baier2010;textual}{gravity} using GDP-weights to center a
 Taylor-series (see the references for more information). 
+
 To execute the function a square gravity dataset with all pairs of 
 countries, ISO-codes for the country of origin and destination, a measure of 
 distance between the bilateral partners as well as all 
 information that should be considered as dependent an independent 
 variables is needed. 
+
 Make sure the ISO-codes are of type "character".
+
 Missing bilateral flows as well as incomplete rows should be 
-excluded from the dataset. 
+excluded from the dataset.
+
 Furthermore, flows equal to zero should be excluded as the gravity equation 
-is estimated in its additive form.  
+is estimated in its additive form.
+
 The \code{bvw} function considers Multilateral Resistance terms and allows to 
 conduct comparative statics. Country specific effects are subdued due 
 to demeaning. Hence, unilateral variables apart from \code{inc_o}
 and \code{inc_d} cannot be included in the estimation.
-\code{bvw} is designed to be consistent with the Stata code provided at
-the website
+
+\code{bvw} is designed to be consistent with the Stata code provided at 
 \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 when choosing robust estimation.
+
 As, to our knowledge at the moment, there is no explicit literature covering 
 the estimation of a gravity equation by \code{bvw} using panel data, 
 we do not recommend to apply this method in this case.
@@ -115,24 +148,24 @@ vce_robust = TRUE, data = grav_small)
 \references{
 For estimating gravity equations via Bonus Vetus OLS see
 
-Baier, S. L. and Bergstrand, J. H. (2009) <DOI:10.1016/j.jinteco.2008.10.004>
+\insertRef{Baier2009}{gravity}
 
-Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., & Brakman, S. (Eds.) (2010) chapter 4 <DOI:10.1111/j.1467-9396.2011.01000.x>
+\insertRef{Baier2010}{gravity}
 
 For more information on gravity models, theoretical foundations and
 estimation methods in general see 
 
-Anderson, J. E. (1979) <DOI:10.12691/wjssh-2-2-5>
+\insertRef{Anderson1979}{gravity}
 
-Anderson, J. E. (2010) <DOI:10.3386/w16576>
+\insertRef{Anderson2001}{gravity}
 
-Anderson, J. E. and van Wincoop, E. (2003) <DOI:10.3386/w8079> 
+\insertRef{Anderson2010}{gravity}
 
-Head, K., Mayer, T., & Ries, J. (2010) <DOI:10.1016/j.jinteco.2010.01.002>
+\insertRef{Head2010}{gravity}
 
-Head, K. and Mayer, T. (2014) <DOI:10.1016/B978-0-444-54314-1.00003-3>
+\insertRef{Head2014}{gravity}
 
-Santos-Silva, J. M. C. and Tenreyro, S. (2006) <DOI:10.1162/rest.88.4.641> 
+\insertRef{Santos2006}{gravity}
 
 and the citations therein.
 

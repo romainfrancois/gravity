@@ -1,7 +1,7 @@
 Package: gravity
 Type: Package
 Title: Estimation Methods for Gravity Models
-Version: 0.7.24
+Version: 0.7.25
 Date: 2017-05-07 
 Authors@R: c(
   person("Anna-Lena", "Woelwer", role = c("aut", "cre"), email = "woelwer@uni-trier.de"),
@@ -10,7 +10,8 @@ Authors@R: c(
   person("Joshua", "Kunst", role = c("aut"), email = "jbkunst@gmail.com"),
   person("Mauricio", "Vargas", role = c("aut"), email = "mvargas@dcc.uchile.cl")
   )
-Description: A wrapper of different standard estimation methods for gravity models
+Description: A wrapper of different standard estimation methods for gravity models. 
+  This package provides estimation methods for log-log models and multiplicative models.
 Imports: lmtest,
   sandwich,
   multiwayvcov,
@@ -24,7 +25,9 @@ Imports: lmtest,
   dplyr,
   tidyr,
   purrr,
-  rlang
+  rlang,
+  Rdpack
+RdMacros: Rdpack
 Depends: R(>= 3.4.0)
 License: GPL-3 + file LICENSE
 Encoding: UTF-8

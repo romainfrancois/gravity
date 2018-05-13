@@ -11,5 +11,7 @@
 #' @importFrom survival Surv
 #' @importFrom stats lm as.formula glm
 #' @importFrom censReg censReg
+#' @importFrom Rdpack reprompt
 #' @name gravity-exports
+#' @keywords internal
 NULL
