@@ -34,7 +34,7 @@
 #' \code{\link[survival]{survreg}} function.
 #' 
 #' @param dependent_variable name (type: character) of the dependent variable in the dataset 
-#' \code{data} (i.e trade flows).
+#' \code{data} (e.g. trade flows).
 #' 
 #' This variable is logged and then used as the dependent variable in the estimation. 
 #' 

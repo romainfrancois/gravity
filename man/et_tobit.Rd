@@ -21,7 +21,7 @@ Include the distance variable in the dataset \code{data} containing a measure of
 distance between all pairs of bilateral partners and bilateral variables that should 
 be taken as the independent variables in the estimation.
 
-Unilateral metric variables such as GDPs can be added but those variables have to be legged first. 
+Unilateral metric variables such as GDPs can be added but those variables have to be logged first. 
 
 Interaction terms can be added.
 

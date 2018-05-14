@@ -38,11 +38,11 @@
 #' 
 #' Also, note that by including bilateral fixed effects such as country-pair 
 #' effects, the coefficients of time-invariant observables such as distance 
-#' can no longer be estimated. 
+#' can no longer be estimated.
 #' 
 #' Depending on the specific model, the code of the 
 #' respective function may has to be changed in order to exclude the distance 
-#' variable from the estimation. 
+#' variable from the estimation.
 #' 
 #' At the very least, the user should take special 
 #' care with respect to the meaning of the estimated coefficients and variances 
@@ -56,7 +56,7 @@
 #' \insertCite{Head2010;textual}{gravity} as well as the references therein. 
 #' 
 #' @param dependent_variable name (type: character) of the dependent variable in the dataset 
-#' \code{data} (i.e trade flows).
+#' \code{data} (e.g. trade flows).
 #' 
 #' This variable is logged and then used as the dependent variable in the estimation. 
 #' 
@@ -100,8 +100,6 @@
 #' The user should perform some data cleaning beforehand to remove observations that contain entries that 
 #' can distort estimates.
 #' 
-#' The function will remove zero flows and distances.
-#' 
 #' When using panel data, a variable for the time may be included in the 
 #' dataset. Note that the variable for the time dimension should be of 
 #' type factor.
@@ -109,6 +107,8 @@
 #' The time variable can be used as a single dependent variable or interaction 
 #' term with other variables such as country identifiers by inserting it into 
 #' \code{regressors} or as an optional parameter.
+#' 
+#' The function will remove zero flows and distances.
 #' 
 #' @param ... additional arguments to be passed to \code{fixed_effects}.
 #' 

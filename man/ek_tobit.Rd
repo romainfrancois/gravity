@@ -9,7 +9,7 @@ ek_tobit(dependent_variable, regressors, code_destination, robust = TRUE,
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
-\code{data} (i.e trade flows).
+\code{data} (e.g. trade flows).
 
 This variable is logged and then used as the dependent variable in the estimation. 
 
