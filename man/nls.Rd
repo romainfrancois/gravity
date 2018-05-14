@@ -145,6 +145,10 @@ estimation methods in general see
 
 \insertRef{Anderson2010}{gravity}
 
+\insertRef{Baier2009}{gravity}
+
+\insertRef{Baier2010}{gravity}
+
 \insertRef{Head2010}{gravity}
 
 \insertRef{Head2014}{gravity}

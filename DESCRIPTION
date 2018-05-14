@@ -1,7 +1,7 @@
 Package: gravity
 Type: Package
 Title: Estimation Methods for Gravity Models
-Version: 0.7.31
+Version: 0.7.32
 Date: 2017-05-07 
 Authors@R: c(
   person("Anna-Lena", "Woelwer", role = c("aut", "cre"), email = "woelwer@uni-trier.de"),
@@ -14,12 +14,12 @@ Description: A wrapper of different standard estimation methods for gravity mode
   This package provides estimation methods for log-log models and multiplicative models.
 Imports: lmtest,
   sandwich,
-  multiwayvcov,
   glm2,
   MASS,
   stats,
   censReg,
   survival,
+  multiwayvcov,
   tibble,
   magrittr,
   dplyr,

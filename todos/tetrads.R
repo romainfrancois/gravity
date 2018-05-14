@@ -4,29 +4,22 @@
 #' by taking the ratio of the ratio of flows.
 #' 
 #' @details \code{tetrads} is an estimation method for gravity models
-#' developed by Head et al. (2010) (see the references for
-#' more information). 
-#' To execute the function a square gravity dataset with all pairs of 
-#' countries, ISO-codes for the country of origin and destination, a measure of 
-#' distance between the bilateral partners as well as all 
-#' information that should be considered as dependent an independent 
-#' variables is needed. 
-#' Make sure the ISO-codes are of type "character".
-#' Missing bilateral flows as well as incomplete rows should be 
-#' excluded from the dataset. 
-#' Furthermore, flows equal to zero should be excluded as the gravity equation 
-#' is estimated in its additive form.  
+#' developed by \insertCite{Head2010;textual}{gravity}.
 #' 
 #' The function \code{tetrads} utilizes the multiplicative form of the
-#' gravity equation. After choosing a reference importer \code{k} and 
-#' exporter \code{ell} one can eliminate importer and exporter fixed effects 
-#' by taking the ratio of ratios. Only those exporters trading with the 
+#' gravity equation. After choosing a reference importer \code{K} and 
+#' exporter \code{L} one can eliminate importer and exporter fixed effects 
+#' by taking the ratio of ratios. 
+#' 
+#' Only those exporters trading with the 
 #' reference importer and importers trading with the reference exporter will 
 #' remain for the estimation. Therefore, reference countries should
 #' preferably be countries which trade with every other country in the dataset. 
-#' After restircting the data in this way, \code{tetrads} estimates the gravity 
+#' 
+#' After restricting the data in this way, \code{tetrads} estimates the gravity 
 #' equation in its additive form by OLS.
-#' As, by taking the ratio of ratios, all monadic effects diminish, no
+#' 
+#' By taking the ratio of ratios, all monadic effects diminish, hence no
 #' unilateral variables such as GDP can be included as independent variables.
 #' 
 #' \code{tetrads} estimation can be used for both, cross-sectional as well as 
@@ -34,49 +27,80 @@
 #' Stata code for cross-sectional data provided on the website
 #' \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 #' when choosing robust estimation.
+#' 
 #' The function \code{tetrads} was therefore tested for cross-sectional data.
+#' 
 #' If tetrads is used for panel data, the user may has to drop distance as an
 #' independent variable as time-invariant effects drop.
-#' For applying \code{tetrads} to panel data see Head, Mayer and Ries (2010).
 #' 
-#' @param y name (type: character) of the dependent variable in the dataset 
-#' \code{data}, e.g. trade flows. It is logged and
-#' taken as the dependent variable in the estimation.
+#' For applying \code{tetrads} to panel data see \insertCite{Head2010;textual}{gravity}.
 #' 
-#' @param dist name (type: character) of the distance variable in the dataset 
-#' \code{data} containing a measure of distance between all pairs of bilateral
-#' partners. It is logged automatically when the function is executed. 
+#' @param dependent_variable name (type: character) of the dependent variable in the dataset 
+#' \code{data} (e.g. trade flows).
 #' 
-#' @param x vector of names (type: character) of those bilateral variables in 
-#' the dataset \code{data} that should be taken as the independent variables 
-#' in the estimation. If an independent variable is a dummy variable,
-#' it should be of type numeric (0/1) in the dataset. If an independent variable 
-#' is defined as a ratio, it should be logged. 
+#' This variable is logged and then used as the dependent variable in the estimation. 
+#' 
+#' @param regressors name (type: character) of the regressors to include in the model.
+#' 
+#' Include the distance variable in the dataset \code{data} containing a measure of 
+#' distance between all pairs of bilateral partners and bilateral variables that should 
+#' be taken as the independent variables in the estimation. 
+#' 
+#' The distance is logged automatically when the function is executed.
+#' 
 #' Unilateral effects drop as the ratio of ratios is taken.
 #' 
-#' @param k reference importing country, default is set to \code{"USA"}.
+#' Write this argument as \code{c(distance, contiguity, common curreny, ...)}.
 #' 
-#' @param ell reference exporting country, default is set to \code{"JPN"}.
+#' @param codes variable name (type: character) of the code of the country 
+#' of origin and destination (e.g. ISO-3 codes from the variables \code{iso_o} and \code{iso_d}) in the 
+#' example datasets). 
 #' 
-#' @param multiway_vcov (type: logic) optional; determines whether a function
-#' implementing Cameron, Gelbach, & Miller (2011) multi-way clustering of 
-#' variance-covariance matrices in the package \code{multiway_vcov} is used
-#' for the estimation. In case \code{multiway_vcov=TRUE}, the 
-#' \code{cluster.vcov} function is used. The default value is set to \code{TRUE}.
+#' The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
+#' 
+#' Write this argument as \code{c(code origin, code destination)}.
+#' 
+#' @param reference_countries reference exporting and importing country, default is set to 
+#' \code{c("JPN", "USA")}
+#' 
+#' Write this argument as \code{c(importing country, exporting country)}.
+#' 
+#' @param multiway (type: logic) optional; determines whether a function
+#' implementing \insertCite{Cameron2011;textual}{gravity} multi-way clustering of 
+#' variance-covariance matrices in the package \code{\link[multiwayvcov]} is used
+#' for the estimation. 
+#' 
+#' In case \code{multiway = TRUE}, the \code{\link[multiwayvcov]{cluster.vcov}} \function is used. 
+#' 
+#' The default value is set to \code{TRUE}.
 #'  
-#' @param data name of the dataset to be used (type: character). 
-#' To estimate gravity equations, a square gravity dataset including bilateral 
-#' flows defined by the argument \code{y}, ISO-codes of type character 
-#' (called \code{iso_o} for the country of origin and \code{iso_d} for the 
-#' destination country), a distance measure defined by the argument \code{dist} 
-#' and other potential influences given as a vector in \code{x} are required. 
-#' All dummy variables should be of type numeric (0/1). Missing trade flows as 
-#' well as incomplete rows should be excluded from the dataset. 
-#' Furthermore, flows equal to zero should be excluded as the gravity equation 
-#' is estimated in its additive form.
+#' @param data name of the dataset to be used (type: character).
+#' 
+#' To estimate gravity equations you need a square dataset including bilateral 
+#' flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character 
+#' (e.g. \code{iso_o} for the country of origin and \code{iso_d} for the 
+#' destination country), a distance measure defined by the argument \code{distance} 
+#' and other potential influences (e.g. contiguity and common currency) given as a vector in 
+#' \code{regressors} are required.
+#' 
+#' All dummy variables should be of type numeric (0/1).
+#' 
+#' Make sure the ISO codes are of type "character".
+#' 
+#' If an independent variable is defined as a ratio, it should be logged.
+#' 
+#' The user should perform some data cleaning beforehand to remove observations that contain entries that 
+#' can distort estimates.
+#' 
 #' When using panel data, a variable for the time may be included in the 
 #' dataset. Note that the variable for the time dimension should be of 
-#' type: factor. See the references for more information on panel data.
+#' type factor.
+#' 
+#' The time variable can be used as a single dependent variable or interaction 
+#' term with other variables such as country identifiers by inserting it into 
+#' \code{regressors} or as an optional parameter.
+#' 
+#' The function will remove zero flows and distances.
 #' 
 #' @param ... additional arguments to be passed to functions used by 
 #' \code{tetrads}.
@@ -84,38 +108,34 @@
 #' @references 
 #' For information on \code{tetrads} see
 #' 
-#' Cameron, A. C., Gelbach, J. B., and Miller, D. L. (2011) <DOI:10.3386/t0327>
+#' \insertRef{Cameron2011}{gravity}
 #' 
-#' Head, K., Mayer, T., & Ries, J. (2010) <DOI:10.1016/j.jinteco.2010.01.002>
+#' \insertRef{Head2010}{gravity}
 #' 
 #' For more information on gravity models, theoretical foundations and
 #' estimation methods in general see 
 #' 
-#' Anderson, J. E. (1979) <DOI:10.12691/wjssh-2-2-5>
+#' \insertRef{Anderson1979}{gravity}
 #' 
-#' Anderson, J. E. (2010) <DOI:10.3386/w16576>
+#' \insertRef{Anderson2001}{gravity}
 #' 
-#' Anderson, J. E. and van Wincoop, E. (2003) <DOI:10.3386/w8079> 
+#' \insertRef{Anderson2010}{gravity}
 #' 
-#' Baier, S. L. and Bergstrand, J. H. (2009) <DOI:10.1016/j.jinteco.2008.10.004>
+#' \insertRef{Head2010}{gravity}
 #' 
-#' Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., & Brakman, S. (Eds.) (2010) chapter 4 <DOI:10.1111/j.1467-9396.2011.01000.x>
+#' \insertRef{Head2014}{gravity}
 #' 
-#' Head, K. and Mayer, T. (2014) <DOI:10.1016/B978-0-444-54314-1.00003-3>
-#' 
-#' Santos-Silva, J. M. C. and Tenreyro, S. (2006) <DOI:10.1162/rest.88.4.641> 
+#' \insertRef{Santos2006}{gravity}
 #' 
 #' and the citations therein.
 #' 
-#' 
 #' See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
-#' 
 #' 
 #' For estimating gravity equations using panel data see 
 #' 
-#' Egger, P., & Pfaffermayr, M. (2003) <DOI:10.1007/s001810200146>
+#' \insertRef{Egger2003}{gravity}
 #' 
-#' Gomez-Herrera, E. (2013) <DOI:10.1007/s00181-012-0576-2>
+#' \insertRef{Gomez-Herrera2013}{gravity}
 #' 
 #' and the references therein.
 #' 
@@ -123,11 +143,13 @@
 #' \dontrun{
 #' data(gravity_no_zeros)
 #' 
-#' tetrads(y="flow", dist="distw", x=c("rta"), k="USA", ell="JPN", 
-#' multiway_vcov=TRUE, data=gravity_no_zeros)
+#' tetrads(dependent_variable = "flow", regressors = c("distw", "rta"), 
+#' codes = c("iso_o", "iso_d"), reference_countries = c("JPN", "USA"), 
+#' multiway = TRUE, data = gravity_no_zeros)
 #' 
-#' tetrads(y="flow", dist="distw", x=c("rta", "comcur", "contig"), 
-#' k="USA", ell="JPN", multiway_vcov=FALSE, data=gravity_no_zeros)
+#' tetrads(dependent_variable = "flow", regressors = c("distw", "rta", "comcur", "contig"), 
+#' codes = c("iso_o", "iso_d"), reference_countries = c("JPN", "USA"), 
+#' multiway = FALSE, data = gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -139,7 +161,12 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' tetrads(y="flow", dist="distw", x=c("rta"), k=countries_chosen[1], ell=countries_chosen[2], multiway_vcov=FALSE, data=grav_small)
+#' tetrads(dependent_variable ="flow", 
+#' regressors = c("distw", "rta"), 
+#' codes = c("iso_o", "iso_d"), 
+#' reference_countries = c(countries_chosen[1], countries_chosen[2]), 
+#' multiway = FALSE, 
+#' data = grav_small)
 #' }
 #' 
 #' @return
@@ -151,36 +178,68 @@
 #' 
 #' @export 
 
-tetrads <- function(y, dist, x, k="USA", ell="JPN", multiway_vcov=TRUE, data, ...){
-  if (!is.data.frame(data))                                                   stop("'data' must be a 'data.frame'")
-  if (!is.character(y)    | !y %in% colnames(data)    | length(y) != 1)       stop("'y' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(dist) | !dist %in% colnames(data) | length(dist) != 1)    stop("'dist' must be a character of length 1 and a colname of 'data'")
-  if (!is.character(x)    | !all(x %in% colnames(data)))                      stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
- 
-  if ((multiway_vcov %in% c(TRUE, FALSE)) == FALSE)                           stop("'multiway_vcov' has to be either 'TRUE' or 'FALSE'")
-  if (!k %in% data$iso_d)                                                     stop("'k' must be in 'data$iso_d'")
-  if (!ell %in% data$iso_o)                                                   stop("'ell' must be in 'data$iso_o'")
+tetrads <- function(dependent_variable, regressors, codes, reference_countries = c("USA", "JPN"), 
+                    multiway = TRUE, data, ...) {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(multiway))
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.character(reference_countries) | all(reference_countries %in% colnames(data)) | length(reference_countries) == 2)
   
-  # Transforming data, log flows and distances ---------------------------------
+  # Split input vectors -----------------------------------------------------
+  code_o <- codes[1]
+  code_d <- codes[2]
   
-  d           <- data
-  d$dist_log  <- (log(d[dist][,1]))
-  d$y_log     <- log(d[y][,1])
+  filter_o <- reference_countries[1]
+  filter_d <- reference_countries[2]
+  
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
+  
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance)))) %>% 
+    
+    filter_at(vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0)) %>% 
+    filter_at(vars(!!sym(dependent_variable)), any_vars(is.finite(!!sym(dependent_variable))))
+  
+  # Transforming data, logging distances ---------------------------------------
+  d <- d %>% 
+    mutate(
+      dist_log = log(!!sym(distance))
+    )
+  
+  # Transforming data, logging flows -------------------------------------------
+  d <- d %>% 
+    mutate(
+      y_log_tetrads = log(!!sym(dependent_variable))
+    )
   
   # Truncating dataset to only those countries which trade with reference
   # importer and exporter ------------------------------------------------------
+  d2_filter_d <- d %>% 
+    filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) == filter_d)) %>% 
+    select(!!sym(code_o)) %>% 
+    distinct() %>% 
+    as_vector()
   
-  d_2a        <- d[d$iso_d == k,] # all iso_o which should stay in dataset
-  d_2b        <- d_2a$iso_o
-  d_2         <- d[d$iso_o %in% d_2b,] 
-  d_3a        <- d_2[d_2$iso_o == ell,] # all iso_d which should stay in dataset
-  d_3b        <- d_3a$iso_d
-  d_3         <- d_2[d_2$iso_d %in% d_3b,] 
-  num.ind.var <- length(x) #independent variables apart from distance
-  rm(data); rm(d); rm(d_2a);rm(d_2b); rm(d_2); rm(d_3a); rm(d_3b)
+  d2 <- d %>% 
+    filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) %in% d2_filter_d))
+  
+  d2_filter_o <- d2 %>% 
+    filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) == filter_o)) %>% 
+    select(!!sym(code_d)) %>% 
+    distinct() %>% 
+    as_vector()
+  
+  d2 <- d2 %>% 
+    filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) %in% d2_filter_o))
   
   # Taking ratios, ratk --------------------------------------------------------
   
+  # DESDE ACÁ NO SE COMO HACER UN "NESTED GROUP BY"
   d_3$lXinratk  <- NA
   d_3$ldistratk <- NA
   
@@ -263,16 +322,16 @@ tetrads <- function(y, dist, x, k="USA", ell="JPN", multiway_vcov=TRUE, data, ..
   
   # Return ---------------------------------------------------------------------
   
-  if (multiway_vcov == TRUE) {
-    summary.Ted.1              <- .robustsummary.lm(model.tetrads, robust = TRUE)
+  if (multiway == TRUE) {
+    summary.Ted.1              <- robust_summary(model.tetrads, robust = TRUE)
     summary.Ted.1$coefficients <- model.tetrads.robust[1:length(rownames(model.tetrads.robust)),]
     return.object.1            <- summary.Ted.1
     return.object.1$call       <- form2
     return(return.object.1)
   }
   
-  if (multiway_vcov == FALSE) {
-    return.object.1            <- .robustsummary.lm(model.tetrads, robust = FALSE)
+  if (multiway == FALSE) {
+    return.object.1            <- robust_summary(model.tetrads, robust = FALSE)
     return.object.1$call       <- form2
     return(return.object.1)}
 }

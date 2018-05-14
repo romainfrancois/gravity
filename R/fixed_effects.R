@@ -128,6 +128,10 @@
 #' 
 #' \insertRef{Anderson2010}{gravity}
 #' 
+#' \insertRef{Baier2009}{gravity}
+#' 
+#' \insertRef{Baier2010}{gravity}
+#' 
 #' \insertRef{Head2010}{gravity}
 #' 
 #' \insertRef{Head2014}{gravity}
@@ -187,7 +191,7 @@ fixed_effects <- function(dependent_variable, regressors, codes = c("iso_o", "is
   stopifnot(is.logical(robust))
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
   stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
-  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) <= 2)
+  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
   
   # Split input vectors -----------------------------------------------------
   distance <- regressors[1]

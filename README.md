@@ -2,7 +2,7 @@
 gravity <img src="http://pacha.hk/gravity/apple.svg" width=150 align="right" alt="sticker"/>
 ============================================================================================
 
-[![Travis-CI Build Status](https://travis-ci.org/pachamaltese/gravity.svg?branch=master)](https://travis-ci.org/pachamaltese/gravity)
+[![Travis-CI Build Status](https://travis-ci.org/pachamaltese/gravity.svg?branch=master)](https://travis-ci.org/pachamaltese/gravity) [![Build status](https://ci.appveyor.com/api/projects/status/tbpew2740yimjxl9?svg=true)](https://ci.appveyor.com/project/pachamaltese/gravity)
 
 About
 -----
