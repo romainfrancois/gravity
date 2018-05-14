@@ -12,6 +12,12 @@ gpml(dependent_variable, regressors, robust = TRUE, data, ...)
 
 \item{regressors}{name (type: character) of the regressors to include in the model.
 
+Include the distance variable in the dataset \code{data} containing a measure of 
+distance between all pairs of bilateral partners and bilateral variables that should 
+be taken as the independent variables in the estimation. 
+
+The distance is logged automatically when the function is executed.
+
 Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
 
 Interaction terms can be added.
@@ -38,8 +44,6 @@ If an independent variable is defined as a ratio, it should be logged.
 
 The user should perform some data cleaning beforehand to remove observations that contain entries that 
 can distort estimates.
-
-The function will remove zero flows and distances.
 
 When using panel data, a variable for the time may be included in the 
 dataset. Note that the variable for the time dimension should be of 

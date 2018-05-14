@@ -15,6 +15,12 @@ This variable is logged and then used as the dependent variable in the estimatio
 
 \item{regressors}{name (type: character) of the regressors to include in the model.
 
+Include the distance variable in the dataset \code{data} containing a measure of 
+distance between all pairs of bilateral partners and bilateral variables that should 
+be taken as the independent variables in the estimation. 
+
+The distance is logged automatically when the function is executed.
+
 Fixed effects catch all unilateral effects. Therefore, no other unilateral variables such as
 GDP can be included as independent variables in the estimation.
 

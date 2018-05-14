@@ -59,7 +59,7 @@ multiplicative form via Gamma Pseudo Maximum Likelihood." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.27</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.29</span>
       </span>
     </div>
 
@@ -114,7 +114,7 @@ multiplicative form via Gamma Pseudo Maximum Likelihood.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>gpml</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>gpml</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -122,38 +122,42 @@ multiplicative form via Gamma Pseudo Maximum Likelihood.</p>
     <tr>
       <th>dependent_variable</th>
       <td><p>name (type: character) of the dependent variable in the dataset 
-<code>data</code>, e.g. trade flows.</p></td>
+<code>data</code> (e.g. trade flows).</p></td>
     </tr>
     <tr>
       <th>regressors</th>
-      <td><p>name (type: character) of the distance variable in the dataset 
-<code>data</code> containing a measure of distance between all pairs of bilateral
-partners. It is logged automatically when the function is executed. 
-Unilateral variables such as country dummies or incomes can be added. 
-If unilateral metric variables such as GDPs should be used as independent 
-variables, those variables have to be logged first and the 
-logged variable can be used in <code>x</code>.</p></td>
+      <td><p>name (type: character) of the regressors to include in the model.</p>
+<p>Include the distance variable in the dataset <code>data</code> containing a measure of 
+distance between all pairs of bilateral partners and bilateral variables that should 
+be taken as the independent variables in the estimation.</p>
+<p>The distance is logged automatically when the function is executed.</p>
+<p>Unilateral metric variables such as GDPs can be added but those variables have to be logged first.</p>
+<p>Interaction terms can be added.</p>
+<p>Write this argument as <code>c(distance, contiguity, common curreny, ...)</code>.</p></td>
     </tr>
     <tr>
-      <th>vce_robust</th>
-      <td><p>robust (type: logic) determines whether a robust 
-variance-covariance matrix should be used. The default is set to <code>TRUE</code>.</p></td>
+      <th>robust</th>
+      <td><p>robust (type: logical) determines whether a robust 
+variance-covariance matrix should be used. By default is set to <code>TRUE</code>.</p></td>
     </tr>
     <tr>
       <th>data</th>
-      <td><p>name of the dataset to be used (type: character). 
-To estimate gravity equations, a square gravity dataset including bilateral 
-flows defined by the argument <code>y</code>, ISO-codes of type character 
-(called <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
-destination country), a distance measure defined by the argument <code>dist</code> 
-and other potential influences given as a vector in <code>x</code> are required. 
-All dummy variables should be of type numeric (0/1). Missing trade flows as 
-well as incomplete rows should be excluded from the dataset. 
-Flows equal to zero have to be excluded as the gamma distribution 
-is used. 
-When using panel data, a variable for the time may be included in the 
+      <td><p>name of the dataset to be used (type: character).</p>
+<p>To estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character 
+(e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
+destination country), a distance measure defined by the argument <code>distance</code> 
+and other potential influences (e.g. contiguity and common currency) given as a vector in 
+<code>regressors</code> are required.</p>
+<p>All dummy variables should be of type numeric (0/1).</p>
+<p>Make sure the ISO codes are of type "character".</p>
+<p>If an independent variable is defined as a ratio, it should be logged.</p>
+<p>The user should perform some data cleaning beforehand to remove observations that contain entries that 
+can distort estimates.</p>
+<p>When using panel data, a variable for the time may be included in the 
 dataset. Note that the variable for the time dimension should be of 
-type: factor. See the references for more information on panel data.</p></td>
+type factor.</p>
+<p>The function will remove zero flows and distances.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -170,40 +174,34 @@ type: factor. See the references for more information on panel data.</p></td>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p><code>gpml</code> is an estimation method for gravity models
-belonging to generalized linear models.
-It is estimated via <code><a href='http://www.rdocumentation.org/packages/glm2/topics/glm2'>glm2</a></code> using the gamma distribution and a log-link.
-To execute the function a square gravity dataset with all pairs of 
-countries, ISO-codes for the country of origin and destination, a measure of 
-distance between the bilateral partners as well as all 
-information that should be considered as dependent an independent 
-variables is needed. 
-Make sure the ISO-codes are of type "character".
-Missing bilateral flows as well as incomplete rows should be 
-excluded from the dataset.  
-Flows equal to zero have to be excluded as the gamma distribution is used. 
-For similar functions, utilizing the multiplicative form via the log-link, 
+belonging to generalized linear models.</p>
+<p>It is estimated via <code><a href='http://www.rdocumentation.org/packages/glm2/topics/glm2'>glm2</a></code> using the gamma distribution and a log-link.</p>
+<p>For similar functions, utilizing the multiplicative form via the log-link, 
 but different distributions, see <code><a href='ppml.html'>ppml</a></code>, <code><a href='nls.html'>nls</a></code>, and <code><a href='nbpml.html'>nbpml</a></code>.</p>
 <p><code>gpml</code> estimation can be used for both, cross-sectional as well as 
-panel data. 
-It is up to the user to ensure that the functions can be applied 
-to panel data. 
-Depending on the panel dataset and the variables - 
+panel data.</p>
+<p>It is up to the user to ensure that the functions can be applied 
+to panel data.</p>
+<p>Depending on the panel dataset and the variables - 
 specifically the type of fixed effects - 
-included in the model, it may easily occur that the model is not computable. 
-Also, note that by including bilateral fixed effects such as country-pair 
+included in the model, it may easily occur that the model is not computable.</p>
+<p>Also, note that by including bilateral fixed effects such as country-pair 
 effects, the coefficients of time-invariant observables such as distance 
-can no longer be estimated. 
-Depending on the specific model, the code of the 
+can no longer be estimated.</p>
+<p>Depending on the specific model, the code of the 
 respective function may has to be changed in order to exclude the distance 
-variable from the estimation. 
-At the very least, the user should take special 
+variable from the estimation.</p>
+<p>At the very least, the user should take special 
 care with respect to the meaning of the estimated coefficients and variances 
-as well as the decision about which effects to include in the estimation. 
-When using panel data, the parameter and variance estimation of the models 
-may have to be changed accordingly.
-For a comprehensive overview of gravity models for panel data 
-see Egger and Pfaffermayr (2003), Gomez-Herrera (2013) and Head, Mayer and 
-Ries (2010) as well as the references therein.</p>
+as well as the decision about which effects to include in the estimation.</p>
+<p>When using panel data, the parameter and variance estimation of the models 
+may have to be changed accordingly.</p>
+<p>For a comprehensive overview of gravity models for panel data 
+see Egger and Pfaffermayr (2003)
+, Gómez-Herrera (2013)
+ and 
+Head et al. (2010)
+ as well as the references therein.</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
@@ -212,18 +210,50 @@ Pseudo maximum Likelihood see</p>
 <p>Santos-Silva, J. M. C. and Tenreyro, S. (2006) &lt;DOI:10.1162/rest.88.4.641&gt;</p>
 <p>For more information on gravity models, theoretical foundations and
 estimation methods in general see</p>
-<p>Anderson, J. E. (1979) &lt;DOI:10.12691/wjssh-2-2-5&gt;</p>
-<p>Anderson, J. E. (2010) &lt;DOI:10.3386/w16576&gt;</p>
-<p>Anderson, J. E. and van Wincoop, E. (2003) &lt;DOI:10.3386/w8079&gt;</p>
-<p>Baier, S. L. and Bergstrand, J. H. (2009) &lt;DOI:10.1016/j.jinteco.2008.10.004&gt;</p>
-<p>Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., &amp; Brakman, S. (Eds.) (2010) chapter 4 &lt;DOI:10.1111/j.1467-9396.2011.01000.x&gt;</p>
-<p>Head, K., Mayer, T., &amp; Ries, J. (2010) &lt;DOI:10.1016/j.jinteco.2010.01.002&gt;</p>
-<p>Head, K. and Mayer, T. (2014) &lt;DOI:10.1016/B978-0-444-54314-1.00003-3&gt;</p>
+<p>Anderson JE (1979).
+&#8220;A Theoretical Foundation for the Gravity Equation.&#8221;
+<em>The American Economic Review</em>, <b>69</b>(1), pp. 106--116.
+ISSN 00028282, <a href='http://www.jstor.org/stable/1802501'>http://www.jstor.org/stable/1802501</a>.</p>
+<p>Anderson JE and van
+Wincoop E (2001).
+&#8220;Gravity with Gravitas: A Solution to the Border Puzzle.&#8221;
+Technical Report 8079, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w8079'>10.3386/w8079</a>
+.</p>
+<p>Anderson JE (2010).
+&#8220;The Gravity Model.&#8221;
+Technical Report 16576, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w16576'>10.3386/w16576</a>
+.</p>
+<p>Head K, Mayer T and Ries J (2010).
+&#8220;The erosion of colonial trade linkages after independence.&#8221;
+<em>Journal of International Economics</em>, <b>81</b>(1), pp. 1 - 14.
+ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002'>https://doi.org/10.1016/j.jinteco.2010.01.002</a>
+.</p>
+<p>Head K and Mayer T (2014).
+&#8220;Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.&#8221;
+In Gopinath G, Helpman E and Rogoff K (eds.), <em>Handbook of International Economics</em>, volume 4 series Handbook of International Economics, pp. 131 - 195.
+Elsevier.
+doi: <a href='http://doi.org/https://doi.org/10.1016/B978-0-444-54314-1.00003-3'>https://doi.org/10.1016/B978-0-444-54314-1.00003-3</a>
+.</p>
+<p>Silva JMCS and Tenreyro S (2006).
+&#8220;The Log of Gravity.&#8221;
+<em>The Review of Economics and Statistics</em>, <b>88</b>(4), pp. 641-658.
+doi: <a href='http://doi.org/10.1162/rest.88.4.641'>10.1162/rest.88.4.641</a>
+.</p>
 <p>and the citations therein.</p>
-    <p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
-    <p>For estimating gravity equations using panel data see</p>
-<p>Egger, P., &amp; Pfaffermayr, M. (2003) &lt;DOI:10.1007/s001810200146&gt;</p>
-<p>Gomez-Herrera, E. (2013) &lt;DOI:10.1007/s00181-012-0576-2&gt;</p>
+<p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
+<p>For estimating gravity equations using panel data see</p>
+<p>Egger P and Pfaffermayr M (2003).
+&#8220;The proper panel econometric specification of the gravity equation: A three-way model with bilateral interaction effects.&#8221;
+<em>Empirical Economics</em>, <b>28</b>(3), pp. 571--580.
+ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s001810200146'>10.1007/s001810200146</a>
+.</p>
+<p>Gómez-Herrera E (2013).
+&#8220;Comparing alternative methods to estimate gravity models of bilateral trade.&#8221;
+<em>Empirical Economics</em>, <b>44</b>(3), pp. 1087--1111.
+ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s00181-012-0576-2'>10.1007/s00181-012-0576-2</a>
+.</p>
 <p>and the references therein.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
@@ -240,7 +270,7 @@ estimation methods in general see</p>
 <span class='no'>gravity_no_zeros</span>$<span class='no'>lgdp_d</span> <span class='kw'>&lt;-</span> <span class='fu'>log</span>(<span class='no'>gravity_no_zeros</span>$<span class='no'>gdp_d</span>)
 
 <span class='fu'>gpml</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>, <span class='st'>"lgdp_o"</span>, <span class='st'>"lgdp_d"</span>),
-<span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
+<span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
 <span class='co'># }</span><div class='input'>
 </div><div class='input'>
 </div></pre>
