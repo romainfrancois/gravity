@@ -5,111 +5,117 @@
 #' 
 #' @details \code{ppml} is an estimation method for gravity models
 #' belonging to generalized linear models.
+#' 
 #' It is estimated via \code{\link[stats]{glm}} using the quasipoisson distribution and a log-link.
-#' \code{ppml} is presented
-#' in Santos-Silva and Tenreyro (2006) (see the references for more information).  
-#' To execute the function a square gravity dataset with all pairs of 
-#' countries, ISO-codes for the country of origin and destination, a measure of 
-#' distance between the bilateral partners as well as all 
-#' information that should be considered as dependent an independent 
-#' variables is needed. 
-#' Make sure the ISO-codes are of type "character".
-#' Missing bilateral flows as well as incomplete rows should be 
-#' excluded from the dataset.  
-#' Zero trade flows are allowed.
+#' \code{ppml} is presented in \insertCite{Santos2006;textual}{gravity}.
+#' 
 #' For similar functions, utilizing the multiplicative form via the log-link, 
-#' but different distributions, see \code{\link[gravity]{gpml}}, \code{\link[gravity]{nls}}, and \code{\link[gravity]{nbpml}}.
+#' but different distributions, see \code{\link[gravity]{gpml}}, \code{\link[gravity]{nls}}, 
+#' and \code{\link[gravity]{nbpml}}.
 #' 
 #' \code{ppml} estimation can be used for both, cross-sectional as well as 
 #' panel data. The function is designed to be consistent with the 
-#' results from the Stata function \code{ppml} written by J. M. C.Santos-Silva 
-#' and S. Tenreyro. 
-#' The function \code{ppml} was therefore tested for cross-sectional data.
-#' For the use with panel data no tests were performed. 
+#' results from the Stata function \code{ppml} written by \insertCite{Santos2006;textual}{gravity}.
+#' 
+#' The function \code{ols} was therefore tested for cross-sectional data. For the use with panel data 
+#' no tests were performed. 
+#' 
 #' Therefore, it is up to the user to ensure that the functions can be applied 
 #' to panel data. 
+#' 
 #' Depending on the panel dataset and the variables - 
 #' specifically the type of fixed effects - 
 #' included in the model, it may easily occur that the model is not computable. 
 #' Also, note that by including bilateral fixed effects such as country-pair 
 #' effects, the coefficients of time-invariant observables such as distance 
 #' can no longer be estimated. 
+#' 
 #' Depending on the specific model, the code of the 
 #' respective function may has to be changed in order to exclude the distance 
-#' variable from the estimation. 
+#' variable from the estimation.
+#' 
 #' At the very least, the user should take special 
 #' care with respect to the meaning of the estimated coefficients and variances 
 #' as well as the decision about which effects to include in the estimation. 
 #' When using panel data, the parameter and variance estimation of the models 
 #' may have to be changed accordingly.
+#' 
 #' For a comprehensive overview of gravity models for panel data 
-#' see Egger and Pfaffermayr (2003), Gomez-Herrera (2013) and Head, Mayer and 
-#' Ries (2010) as well as the references therein. 
+#' see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textual}{gravity} and 
+#' \insertCite{Head2010;textual}{gravity} as well as the references therein.
 #' 
 #' @param dependent_variable name (type: character) of the dependent variable in the dataset 
-#' \code{data}, e.g. trade flows. 
+#' \code{data} (e.g. trade flows)
 #' 
-#' @param regressors name (type: character) of the distance variable in the dataset 
-#' \code{data} containing a measure of distance between all pairs of bilateral
-#' partners. It is logged automatically when the function is executed.
+#' @param regressors name (type: character) of the regressors to include in the model.
 #' 
-#' @param vce_robust robust (type: logic) determines whether a robust 
-#' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
-#' If set \code{TRUE} the estimation results are consistent with the 
-#' Stata code provided at the website
-#' \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
+#' Include the distance variable in the dataset \code{data} containing a measure of 
+#' distance between all pairs of bilateral partners and bilateral variables that should 
+#' be taken as the independent variables in the estimation. 
+#' 
+#' The distance is logged automatically when the function is executed.
+#'  
+#' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
+#' 
+#' Interaction terms can be added.
+#' 
+#' Write this argument as \code{c(distance, contiguity, common curreny, ...)}.
+#' 
+#' @param robust robust (type: logical) determines whether a robust 
+#' variance-covariance matrix should be used. By default is set to \code{TRUE}.
+#' 
+#' If \code{robust = TRUE} the estimation results are consistent with the 
+#' Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 #' when choosing robust estimation.
 #' 
-#' @param data name of the dataset to be used (type: character). 
-#' To estimate gravity equations, a square gravity dataset including bilateral 
-#' flows defined by the argument \code{y}, ISO-codes of type character 
-#' (called \code{iso_o} for the country of origin and \code{iso_d} for the 
-#' destination country), a distance measure defined by the argument \code{dist} 
-#' and other potential influences given as a vector in \code{x} are required. 
-#' All dummy variables should be of type numeric (0/1). Missing trade flows as 
-#' well as incomplete rows should be excluded from the dataset. 
-#' Zero trade flows are allowed.
-#' When using panel data, a variable for the time may be included in the 
-#' dataset. Note that the variable for the time dimension should be of 
-#' type: factor. See the references for more information on panel data.
+#' @param data name of the dataset to be used (type: character).
+#' 
+#' To estimate gravity equations you need a square dataset including bilateral 
+#' flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character 
+#' (e.g. \code{iso_o} for the country of origin and \code{iso_d} for the 
+#' destination country), a distance measure defined by the argument \code{distance} 
+#' and other potential influences (e.g. contiguity and common currency) given as a vector in 
+#' \code{regressors} are required.
+#' 
+#' All dummy variables should be of type numeric (0/1).
+#' 
+#' Make sure the ISO codes are of type "character".
+#' 
+#' If an independent variable is defined as a ratio, it should be logged.
+#' 
+#' The user should perform some data cleaning beforehand to remove observations that contain entries that 
+#' can distort estimates.
+#' 
+#' The function allows zero flows but will remove zero distances.
 #' 
 #' @param ... additional arguments to be passed to functions used by 
 #' \code{ppml}.
 #' 
 #' @references 
-#' For more information on the estimation of gravity equations via Poisson
-#' Pseudo maximum Likelihood see
-#' 
-#' Santos-Silva, J. M. C. and Tenreyro, S. (2006) <DOI:10.1162/rest.88.4.641> 
-#' 
 #' For more information on gravity models, theoretical foundations and
 #' estimation methods in general see 
 #' 
-#' Anderson, J. E. (1979) <DOI:10.12691/wjssh-2-2-5>
+#' \insertRef{Anderson1979}{gravity}
 #' 
-#' Anderson, J. E. (2010) <DOI:10.3386/w16576>
+#' \insertRef{Anderson2001}{gravity}
 #' 
-#' Anderson, J. E. and van Wincoop, E. (2003) <DOI:10.3386/w8079> 
+#' \insertRef{Anderson2010}{gravity}
 #' 
-#' Baier, S. L. and Bergstrand, J. H. (2009) <DOI:10.1016/j.jinteco.2008.10.004>
+#' \insertRef{Head2010}{gravity}
 #' 
-#' Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., & Brakman, S. (Eds.) (2010) chapter 4 <DOI:10.1111/j.1467-9396.2011.01000.x>
+#' \insertRef{Head2014}{gravity}
 #' 
-#' Head, K., Mayer, T., & Ries, J. (2010) <DOI:10.1016/j.jinteco.2010.01.002>
-#' 
-#' Head, K. and Mayer, T. (2014) <DOI:10.1016/B978-0-444-54314-1.00003-3>
+#' \insertRef{Santos2006}{gravity}
 #' 
 #' and the citations therein.
 #' 
-#' 
 #' See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
-#' 
 #' 
 #' For estimating gravity equations using panel data see 
 #' 
-#' Egger, P., & Pfaffermayr, M. (2003) <DOI:10.1007/s001810200146>
+#' \insertRef{Egger2003}{gravity}
 #' 
-#' Gomez-Herrera, E. (2013) <DOI:10.1007/s00181-012-0576-2>
+#' \insertRef{Gomez-Herrera2013}{gravity}
 #' 
 #' and the references therein.
 #' 
@@ -119,7 +125,7 @@
 #' data(gravity_zeros)
 #' 
 #' ppml(dependent_variable = "flow", regressors = c("distw", "rta","iso_o","iso_d"), 
-#' vce_robust = TRUE, data = gravity_zeros)
+#' robust = TRUE, data = gravity_zeros)
 #' 
 #' # Example for data without zero trade flows
 #' data(gravity_no_zeros)
@@ -128,7 +134,7 @@
 #' gravity_no_zeros$lgdp_d <- log(gravity_no_zeros$gdp_d)
 #' 
 #' ppml(dependent_variable = "flow", regressors = c("distw","rta","lgdp_o","lgdp_d"), 
-#' vce_robust = TRUE, data = gravity_no_zeros)
+#' robust = TRUE, data = gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -144,7 +150,7 @@
 #' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
 #' ppml(dependent_variable = "flow", regressors = c("distw","rta","lgdp_o","lgdp_d"), 
-#' vce_robust = TRUE, data = grav_small_zeros)
+#' robust = TRUE, data = grav_small_zeros)
 #' }
 #' 
 #' @return
@@ -156,10 +162,10 @@
 #' 
 #' @export
 
-ppml <- function(dependent_variable, regressors, vce_robust = TRUE, data, ...) {
+ppml <- function(dependent_variable, regressors, robust = TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.logical(vce_robust))
+  stopifnot(is.logical(robust))
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)  
   stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
 
@@ -192,7 +198,7 @@ ppml <- function(dependent_variable, regressors, vce_robust = TRUE, data, ...) {
   
   # Return --------------------------------------------------------------------- 
   
-  if (vce_robust == TRUE) {
+  if (robust == TRUE) {
     summary_ppml                <- robust_summary(model_ppml, robust = TRUE)
     summary_ppml$coefficients   <- model_ppml_robust[1:length(rownames(model_ppml_robust)),]
     return_object               <- summary_ppml
@@ -203,7 +209,7 @@ ppml <- function(dependent_variable, regressors, vce_robust = TRUE, data, ...) {
     return(return_object)
   }
   
-  if (vce_robust == FALSE) {
+  if (robust == FALSE) {
     return_object               <- summary(model_ppml)
     return_object$call          <- form
     return(return_object)

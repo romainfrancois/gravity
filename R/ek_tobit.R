@@ -54,7 +54,7 @@
 #' Write this argument as \code{c(distance, contiguity, common curreny, ...)}. 
 #' 
 #' @param code_destination variable name (type: character) of the label of the country 
-#' (e.g. ISO-3 code) of destination in the dataset \code{data}. The variables 
+#' of destination (e.g. ISO-3 code from the \code{iso_d} variable in the example datasets). The variables 
 #' are grouped by using \code{iso_d} to obtain estimates.
 #' 
 #' @param robust robust (type: logical) determines whether a robust 

@@ -6,7 +6,7 @@ vignettes/*.rdata
 00-check.R
 todos/*
 docs/*
-bibliography.bib
 README.Rmd
 README.md
 _pkgdown.yml
+.travis.yml

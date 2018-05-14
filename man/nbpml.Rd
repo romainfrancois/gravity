@@ -70,7 +70,8 @@ It is estimated via \code{\link[MASS]{glm.nb}}
 using the negative binomial distribution and a log-link.
 
 For similar functions, utilizing the multiplicative form via the log-link,
-but different distributions, see \code{\link[gravity]{nbpml}}, \code{\link[gravity]{gpml}}, and \code{\link[gravity]{nls}}.
+but different distributions, see \code{\link[gravity]{nbpml}}, \code{\link[gravity]{gpml}}, 
+and \code{\link[gravity]{nls}}.
 
 \code{nbpml} estimation can be used for both, cross-sectional as well as
 panel data.

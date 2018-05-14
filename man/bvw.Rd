@@ -41,8 +41,8 @@ The dependent variable \code{dependent_variable} is divided by the product of th
 Write this argument as \code{c(income origin, income destination)}.}
 
 \item{codes}{variable name (type: character) of the code of the country 
-(e.g. ISO-3 code) of origin (e.g. \code{iso_o}) and destination (e.g. \code{iso_d}) in the dataset 
-\code{data}. 
+of origin and destination (e.g. ISO-3 codes from the variables \code{iso_o} and \code{iso_d}) in the 
+example datasets). 
 
 The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 

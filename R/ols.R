@@ -6,109 +6,133 @@
 #' 
 #' @details \code{ols} estimates gravity models in their traditional, additive, 
 #' form via Ordinary Least Squares using the \code{lm} function. 
-#' Multilateral Resistance terms are not considered by this function. 
-#' To execute the function a square gravity dataset with all pairs of 
-#' countries, ISO-codes for the country of origin and destination, a measure of 
-#' distance between the bilateral partners as well as all 
-#' information that should be considered as dependent an independent 
-#' variables is needed. 
-#' Make sure the ISO-codes are of type "character".
-#' Missing bilateral flows as well as incomplete rows should be 
-#' excluded from the dataset. 
-#' Furthermore, flows equal to zero should be excluded as the gravity equation 
-#' is estimated in its additive form. 
+#' Multilateral Resistance terms are not considered by this function.
+#' 
 #' As the coefficients for the country's incomes were often found to be close to 
 #' unitary and unitary income elasticities are in line with some theoretical 
 #' foundations on international trade, it is sometimes assumed that the income 
-#' elasticities are equal to unity. In order to allow for the estimation with 
+#' elasticities are equal to unity. 
+#' 
+#' In order to allow for the estimation with 
 #' and without the assumption of unitary income elasticities, the option 
-#' \code{uie} is built into \code{ols} with the default set to  \code{FALSE}. 
+#' \code{uie} is built into \code{ols} with the default set to \code{FALSE}. 
 #' 
 #' \code{ols} estimation can be used for both, cross-sectional and 
 #' panel data. Nonetheless, the function is designed to be consistent with the 
 #' Stata code for cross-sectional data provided at the website
 #' \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 #' when choosing robust estimation.
-#' The function \code{ols} was therefore tested for cross-sectional data.
-#' For the use with panel data no tests were performed. 
+#' 
+#' The function \code{ols} was therefore tested for cross-sectional data. For the use with panel data 
+#' no tests were performed. 
+#' 
 #' Therefore, it is up to the user to ensure that the functions can be applied 
 #' to panel data. 
+#' 
 #' Depending on the panel dataset and the variables - 
 #' specifically the type of fixed effects - 
 #' included in the model, it may easily occur that the model is not computable. 
 #' Also, note that by including bilateral fixed effects such as country-pair 
 #' effects, the coefficients of time-invariant observables such as distance 
 #' can no longer be estimated. 
+#' 
 #' Depending on the specific model, the code of the 
 #' respective function may has to be changed in order to exclude the distance 
-#' variable from the estimation. 
+#' variable from the estimation.
+#' 
 #' At the very least, the user should take special 
 #' care with respect to the meaning of the estimated coefficients and variances 
 #' as well as the decision about which effects to include in the estimation. 
 #' When using panel data, the parameter and variance estimation of the models 
 #' may have to be changed accordingly.
+#' 
 #' For a comprehensive overview of gravity models for panel data 
-#' see Egger and Pfaffermayr (2003), Gomez-Herrera (2013) and Head, Mayer and 
-#' Ries (2010) as well as the references therein. 
+#' see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textual}{gravity} and 
+#' \insertCite{Head2010;textual}{gravity} as well as the references therein.
 #' 
 #' @param dependent_variable name (type: character) of the dependent variable in the dataset 
-#' \code{data}, e.g. trade flows. This variable is logged and taken as the 
-#' dependent variable in the estimation.
-#' If \code{uie=TRUE} the dependent variable is divided by the product of
-#' unilateral incomes \code{code_o} and \code{code_d}, e.g. GDPs or GNPs of the 
+#' \code{data} (e.g. trade flows).
+#' 
+#' This variable is logged and then used as the dependent variable in the estimation. 
+#' 
+#' If \code{uie = TRUE} the dependent variable is divided by the product of
+#' unilateral incomes (e.g. GDP variables \code{inc_o} and \code{inc_d} in the example datasets) of the 
 #' countries of interest and logged afterwards.
-#' If \code{uie=FALSE} the dependent variable is logged directly. 
-#' The transformed variable is then used as the dependent variable and 
-#' the logged income variables are used as independent variables in the 
+#' 
+#' If \code{uie=FALSE} the dependent variable is logged directly. The transformed variable is then used as 
+#' the dependent variable and the logged income variables are used as independent variables in the 
 #' estimation.
 #' 
-#' @param regressors name (type: character) of the distance variable in the dataset 
-#' \code{data} containing a measure of distance between all pairs of bilateral
-#' partners. It is logged automatically when the function is executed. 
+#' @param regressors name (type: character) of the regressors to include in the model.
+#' 
+#' Include the distance variable in the dataset \code{data} containing a measure of 
+#' distance between all pairs of bilateral partners and bilateral variables that should 
+#' be taken as the independent variables in the estimation. 
+#' 
+#' The distance is logged automatically when the function is executed.
+#'  
+#' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
+#' 
+#' Interaction terms can be added.
+#' 
+#' Write this argument as \code{c(distance, contiguity, common curreny, ...)}.
 #' 
 #' @param incomes variable name (type: character) of the income of the country of 
-#' origin in the dataset \code{data}. If \code{uie=TRUE}, the dependent variable 
-#' \code{y} is divided by the product of the incomes \code{code_d} and \code{code_o}.
-#' If \code{uie=FALSE}, the incomes are logged and taken as independent 
-#' variables in the estimation. 
-#' If one wants to use more than one unilateral variable, 
-#' e.g. GDP and population, those variables have to be merged into one 
-#' variable, e.g. GDP per capita, which can be inserted into \code{code_o}.
+#' origin (e.g. \code{inc_o}) and destination (e.g. \code{inc_d}) in the dataset \code{data}. 
 #' 
-#' @param codes variable name (type: character) of the label of the country 
-#' (i.e ISO code) of origin in the dataset \code{data}. The variables 
-#' are grouped by using \code{lab_o} and \code{lab_d} to obtain estimates.
+#' The dependent variable \code{dependent_variable} is divided by the product of the incomes.
+#' 
+#' Write this argument as \code{c(income origin, income destination)}. 
+#' 
+#' @param codes variable name (type: character) of the code of the country 
+#' of origin and destination (e.g. ISO-3 codes from the variables \code{iso_o} and \code{iso_d}) in the 
+#' example datasets).  
+#' 
+#' The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
+#' 
+#' Write this argument as \code{c(code origin, code destination)}.
 #' 
 #' @param uie Unitary Income Elasticities (type: logic) determines whether the 
-#' parameters are to be estimated assuming unitary income elasticities. 
-#' The default value is set to \code{FALSE}. If \code{uie} is set \code{TRUE}, 
-#' the flows in the dependent variable \code{y} are divided by the product of 
-#' the country pairs' incomes before the estimation. If \code{uie} is set to
-#' \code{FALSE}, the income variables are logged and taken as independent
-#' variables in the estimation. The variable names for the 
-#' incomes should be inserted into \code{code_o} for the country of origin 
-#' and into \code{code_d} for destination country. 
+#' parameters are to be estimated assuming unitary income elasticities. The default value is set 
+#' to \code{FALSE}. 
 #' 
-#' @param vce_robust robust (type: logic) determines whether a robust 
-#' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
-#' If set \code{TRUE} the estimation results are consistent with the 
-#' Stata code provided at the website
-#' \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
+#' If \code{uie} is set \code{TRUE}, the flows in the dependent variable \code{y} are divided 
+#' by the product of the country pairs' incomes before the estimation. 
+#' 
+#' If \code{uie} is set to \code{FALSE}, the income variables are logged and taken as independent
+#' variables in the estimation. The variable names for the incomes should be included (e.g. \code{inc_o} 
+#' and \code{inc_d} in the example datasets). 
+#' 
+#' @param robust robust (type: logical) determines whether a robust 
+#' variance-covariance matrix should be used. By default is set to \code{TRUE}.
+#' 
+#' If \code{robust = TRUE} the estimation results are consistent with the 
+#' Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 #' when choosing robust estimation.
 #' 
-#' @param data name of the dataset to be used (type: character). 
-#' To estimate gravity equations, a square gravity dataset including bilateral 
-#' flows defined by the argument \code{y}, ISO-codes of type character 
-#' (called \code{iso_o} for the country of origin and \code{iso_d} for the 
-#' destination country), a distance measure defined by the argument \code{dist} 
-#' and other potential influences given as a vector in \code{x} are required. 
-#' All dummy variables should be of type numeric (0/1). Missing trade flows as 
-#' well as incomplete rows should be excluded from the dataset. 
-#' Furthermore, flows equal to zero should be excluded as the gravity equation 
-#' is estimated in its additive form.
+#' @param data name of the dataset to be used (type: character).
+#' 
+#' To estimate gravity equations you need a square dataset including bilateral 
+#' flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character 
+#' (e.g. \code{iso_o} for the country of origin and \code{iso_d} for the 
+#' destination country), a distance measure defined by the argument \code{distance} 
+#' and other potential influences (e.g. contiguity and common currency) given as a vector in 
+#' \code{regressors} are required.
+#' 
+#' All dummy variables should be of type numeric (0/1).
+#' 
+#' Make sure the ISO codes are of type "character".
+#' 
+#' If an independent variable is defined as a ratio, it should be logged.
+#' 
+#' The user should perform some data cleaning beforehand to remove observations that contain entries that 
+#' can distort estimates.
+#' 
 #' When using panel data, a variable for the time may be included in the 
 #' dataset. Note that the variable for the time dimension should be of 
-#' type: factor. See the references for more information on panel data.
+#' type factor.
+#' 
+#' The function will remove zero flows and distances.
 #' 
 #' @param ... additional arguments to be passed to \code{ols}.
 #' 
@@ -116,33 +140,27 @@
 #' For more information on gravity models, theoretical foundations and
 #' estimation methods in general see 
 #' 
-#' Anderson, J. E. (1979) <DOI:10.12691/wjssh-2-2-5>
+#' \insertRef{Anderson1979}{gravity}
 #' 
-#' Anderson, J. E. (2010) <DOI:10.3386/w16576>
+#' \insertRef{Anderson2001}{gravity}
 #' 
-#' Anderson, J. E. and van Wincoop, E. (2003) <DOI:10.3386/w8079> 
+#' \insertRef{Anderson2010}{gravity}
 #' 
-#' Baier, S. L. and Bergstrand, J. H. (2009) <DOI:10.1016/j.jinteco.2008.10.004>
+#' \insertRef{Head2010}{gravity}
 #' 
-#' Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., & Brakman, S. (Eds.) (2010) chapter 4 <DOI:10.1111/j.1467-9396.2011.01000.x>
+#' \insertRef{Head2014}{gravity}
 #' 
-#' Head, K., Mayer, T., & Ries, J. (2010) <DOI:10.1016/j.jinteco.2010.01.002>
-#' 
-#' Head, K. and Mayer, T. (2014) <DOI:10.1016/B978-0-444-54314-1.00003-3>
-#' 
-#' Santos-Silva, J. M. C. and Tenreyro, S. (2006) <DOI:10.1162/rest.88.4.641> 
+#' \insertRef{Santos2006}{gravity}
 #' 
 #' and the citations therein.
 #' 
-#' 
 #' See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
-#' 
 #' 
 #' For estimating gravity equations using panel data see 
 #' 
-#' Egger, P., & Pfaffermayr, M. (2003) <DOI:10.1007/s001810200146>
+#' \insertRef{Egger2003}{gravity}
 #' 
-#' Gomez-Herrera, E. (2013) <DOI:10.1007/s00181-012-0576-2>
+#' \insertRef{Gomez-Herrera2013}{gravity}
 #' 
 #' and the references therein.
 #' 
@@ -152,7 +170,7 @@
 #' 
 #' ols(dependent_variable = "flow", regressors = c("distw", "rta", "contig", "comcur"), 
 #' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
-#' uie = TRUE, vce_robust = TRUE, data = gravity_no_zeros)
+#' uie = TRUE, robust = TRUE, data = gravity_no_zeros)
 #' }
 #' 
 #' \dontshow{
@@ -166,7 +184,7 @@
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
 #' ols(dependent_variable = "flow", regressors = c("distw", "rta"),
 #' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
-#' uie = FALSE, vce_robust = TRUE, data = grav_small)
+#' uie = FALSE, robust = TRUE, data = grav_small)
 #' }
 #' 
 #' @return
@@ -178,11 +196,11 @@
 #' 
 #' @export
 
-ols <- function(dependent_variable, regressors, incomes, codes, uie = FALSE, vce_robust = TRUE, data, ...) {
+ols <- function(dependent_variable, regressors, incomes, codes, uie = FALSE, robust = TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(uie))
-  stopifnot(is.logical(vce_robust))
+  stopifnot(is.logical(robust))
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
   stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
   stopifnot(is.character(incomes) | all(incomes %in% colnames(data)) | length(incomes) == 2)
@@ -248,13 +266,13 @@ ols <- function(dependent_variable, regressors, incomes, codes, uie = FALSE, vce
   }
   
   # Return ---------------------------------------------------------------------
-  if (vce_robust == TRUE) {
+  if (robust == TRUE) {
     return_object_1      <- robust_summary(model_ols, robust = TRUE)
     return_object_1$call <- as.formula(model_ols)
     return(return_object_1)
   }
   
-  if (vce_robust == FALSE) {
+  if (robust == FALSE) {
     return_object_1      <- robust_summary(model_ols, robust = FALSE)
     return_object_1$call <- as.formula(model_ols)
     return(return_object_1)

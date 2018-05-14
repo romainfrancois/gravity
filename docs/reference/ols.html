@@ -60,7 +60,7 @@ Resistance terms." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.30</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.31</span>
       </span>
     </div>
 
@@ -117,7 +117,7 @@ Resistance terms.</p>
     </div>
 
     <pre class="usage"><span class='fu'>ols</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='no'>incomes</span>, <span class='no'>codes</span>, <span class='kw'>uie</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
+  <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -125,75 +125,78 @@ Resistance terms.</p>
     <tr>
       <th>dependent_variable</th>
       <td><p>name (type: character) of the dependent variable in the dataset 
-<code>data</code>, e.g. trade flows. This variable is logged and taken as the 
-dependent variable in the estimation.
-If <code>uie=TRUE</code> the dependent variable is divided by the product of
-unilateral incomes <code>code_o</code> and <code>code_d</code>, e.g. GDPs or GNPs of the 
-countries of interest and logged afterwards.
-If <code>uie=FALSE</code> the dependent variable is logged directly. 
-The transformed variable is then used as the dependent variable and 
-the logged income variables are used as independent variables in the 
+<code>data</code> (e.g. trade flows).</p>
+<p>This variable is logged and then used as the dependent variable in the estimation.</p>
+<p>If <code>uie = TRUE</code> the dependent variable is divided by the product of
+unilateral incomes (e.g. GDP variables <code>inc_o</code> and <code>inc_d</code> in the example datasets) of the 
+countries of interest and logged afterwards.</p>
+<p>If <code>uie=FALSE</code> the dependent variable is logged directly. The transformed variable is then used as 
+the dependent variable and the logged income variables are used as independent variables in the 
 estimation.</p></td>
     </tr>
     <tr>
       <th>regressors</th>
-      <td><p>name (type: character) of the distance variable in the dataset 
-<code>data</code> containing a measure of distance between all pairs of bilateral
-partners. It is logged automatically when the function is executed.</p></td>
+      <td><p>name (type: character) of the regressors to include in the model.</p>
+<p>Include the distance variable in the dataset <code>data</code> containing a measure of 
+distance between all pairs of bilateral partners and bilateral variables that should 
+be taken as the independent variables in the estimation.</p>
+<p>The distance is logged automatically when the function is executed.</p> 
+<p>Unilateral metric variables such as GDPs can be added but those variables have to be logged first.</p>
+<p>Interaction terms can be added.</p>
+<p>Write this argument as <code>c(distance, contiguity, common curreny, ...)</code>.</p></td>
     </tr>
     <tr>
       <th>incomes</th>
       <td><p>variable name (type: character) of the income of the country of 
-origin in the dataset <code>data</code>. If <code>uie=TRUE</code>, the dependent variable 
-<code>y</code> is divided by the product of the incomes <code>code_d</code> and <code>code_o</code>.
-If <code>uie=FALSE</code>, the incomes are logged and taken as independent 
-variables in the estimation. 
-If one wants to use more than one unilateral variable, 
-e.g. GDP and population, those variables have to be merged into one 
-variable, e.g. GDP per capita, which can be inserted into <code>code_o</code>.</p></td>
+origin (e.g. <code>inc_o</code>) and destination (e.g. <code>inc_d</code>) in the dataset <code>data</code>.</p>
+<p>The dependent variable <code>dependent_variable</code> is divided by the product of the incomes.</p>
+<p>Write this argument as <code>c(income origin, income destination)</code>.</p></td>
     </tr>
     <tr>
       <th>codes</th>
-      <td><p>variable name (type: character) of the label of the country 
-(i.e ISO code) of origin in the dataset <code>data</code>. The variables 
-are grouped by using <code>lab_o</code> and <code>lab_d</code> to obtain estimates.</p></td>
+      <td><p>variable name (type: character) of the code of the country 
+of origin and destination (e.g. ISO-3 codes from the variables <code>iso_o</code> and <code>iso_d</code>) in the 
+example datasets).</p>
+<p>The variables are grouped by using <code>iso_o</code> and <code>iso_d</code> to obtain estimates.</p>
+<p>Write this argument as <code>c(code origin, code destination)</code>.</p></td>
     </tr>
     <tr>
       <th>uie</th>
       <td><p>Unitary Income Elasticities (type: logic) determines whether the 
-parameters are to be estimated assuming unitary income elasticities. 
-The default value is set to <code>FALSE</code>. If <code>uie</code> is set <code>TRUE</code>, 
-the flows in the dependent variable <code>y</code> are divided by the product of 
-the country pairs' incomes before the estimation. If <code>uie</code> is set to
-<code>FALSE</code>, the income variables are logged and taken as independent
-variables in the estimation. The variable names for the 
-incomes should be inserted into <code>code_o</code> for the country of origin 
-and into <code>code_d</code> for destination country.</p></td>
+parameters are to be estimated assuming unitary income elasticities. The default value is set 
+to <code>FALSE</code>.</p>
+<p>If <code>uie</code> is set <code>TRUE</code>, the flows in the dependent variable <code>y</code> are divided 
+by the product of the country pairs' incomes before the estimation.</p>
+<p>If <code>uie</code> is set to <code>FALSE</code>, the income variables are logged and taken as independent
+variables in the estimation. The variable names for the incomes should be included (e.g. <code>inc_o</code> 
+and <code>inc_d</code> in the example datasets).</p></td>
     </tr>
     <tr>
-      <th>vce_robust</th>
-      <td><p>robust (type: logic) determines whether a robust 
-variance-covariance matrix should be used. The default is set to <code>TRUE</code>. 
-If set <code>TRUE</code> the estimation results are consistent with the 
-Stata code provided at the website
-<a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
+      <th>robust</th>
+      <td><p>robust (type: logical) determines whether a robust 
+variance-covariance matrix should be used. By default is set to <code>TRUE</code>.</p>
+<p>If <code>robust = TRUE</code> the estimation results are consistent with the 
+Stata code provided at <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p></td>
     </tr>
     <tr>
       <th>data</th>
-      <td><p>name of the dataset to be used (type: character). 
-To estimate gravity equations, a square gravity dataset including bilateral 
-flows defined by the argument <code>y</code>, ISO-codes of type character 
-(called <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
-destination country), a distance measure defined by the argument <code>dist</code> 
-and other potential influences given as a vector in <code>x</code> are required. 
-All dummy variables should be of type numeric (0/1). Missing trade flows as 
-well as incomplete rows should be excluded from the dataset. 
-Furthermore, flows equal to zero should be excluded as the gravity equation 
-is estimated in its additive form.
-When using panel data, a variable for the time may be included in the 
+      <td><p>name of the dataset to be used (type: character).</p>
+<p>To estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character 
+(e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
+destination country), a distance measure defined by the argument <code>distance</code> 
+and other potential influences (e.g. contiguity and common currency) given as a vector in 
+<code>regressors</code> are required.</p>
+<p>All dummy variables should be of type numeric (0/1).</p>
+<p>Make sure the ISO codes are of type "character".</p>
+<p>If an independent variable is defined as a ratio, it should be logged.</p>
+<p>The user should perform some data cleaning beforehand to remove observations that contain entries that 
+can distort estimates.</p>
+<p>When using panel data, a variable for the time may be included in the 
 dataset. Note that the variable for the time dimension should be of 
-type: factor. See the references for more information on panel data.</p></td>
+type factor.</p>
+<p>The function will remove zero flows and distances.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -210,67 +213,92 @@ type: factor. See the references for more information on panel data.</p></td>
 
     <p><code>ols</code> estimates gravity models in their traditional, additive, 
 form via Ordinary Least Squares using the <code>lm</code> function. 
-Multilateral Resistance terms are not considered by this function. 
-To execute the function a square gravity dataset with all pairs of 
-countries, ISO-codes for the country of origin and destination, a measure of 
-distance between the bilateral partners as well as all 
-information that should be considered as dependent an independent 
-variables is needed. 
-Make sure the ISO-codes are of type "character".
-Missing bilateral flows as well as incomplete rows should be 
-excluded from the dataset. 
-Furthermore, flows equal to zero should be excluded as the gravity equation 
-is estimated in its additive form. 
-As the coefficients for the country's incomes were often found to be close to 
+Multilateral Resistance terms are not considered by this function.</p>
+<p>As the coefficients for the country's incomes were often found to be close to 
 unitary and unitary income elasticities are in line with some theoretical 
 foundations on international trade, it is sometimes assumed that the income 
-elasticities are equal to unity. In order to allow for the estimation with 
+elasticities are equal to unity.</p>
+<p>In order to allow for the estimation with 
 and without the assumption of unitary income elasticities, the option 
-<code>uie</code> is built into <code>ols</code> with the default set to  <code>FALSE</code>.</p>
+<code>uie</code> is built into <code>ols</code> with the default set to <code>FALSE</code>.</p>
 <p><code>ols</code> estimation can be used for both, cross-sectional and 
 panel data. Nonetheless, the function is designed to be consistent with the 
 Stata code for cross-sectional data provided at the website
 <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
-when choosing robust estimation.
-The function <code>ols</code> was therefore tested for cross-sectional data.
-For the use with panel data no tests were performed. 
-Therefore, it is up to the user to ensure that the functions can be applied 
-to panel data. 
-Depending on the panel dataset and the variables - 
+when choosing robust estimation.</p>
+<p>The function <code>ols</code> was therefore tested for cross-sectional data. For the use with panel data 
+no tests were performed.</p>
+<p>Therefore, it is up to the user to ensure that the functions can be applied 
+to panel data.</p>
+<p>Depending on the panel dataset and the variables - 
 specifically the type of fixed effects - 
 included in the model, it may easily occur that the model is not computable. 
 Also, note that by including bilateral fixed effects such as country-pair 
 effects, the coefficients of time-invariant observables such as distance 
-can no longer be estimated. 
-Depending on the specific model, the code of the 
+can no longer be estimated.</p>
+<p>Depending on the specific model, the code of the 
 respective function may has to be changed in order to exclude the distance 
-variable from the estimation. 
-At the very least, the user should take special 
+variable from the estimation.</p>
+<p>At the very least, the user should take special 
 care with respect to the meaning of the estimated coefficients and variances 
 as well as the decision about which effects to include in the estimation. 
 When using panel data, the parameter and variance estimation of the models 
-may have to be changed accordingly.
-For a comprehensive overview of gravity models for panel data 
-see Egger and Pfaffermayr (2003), Gomez-Herrera (2013) and Head, Mayer and 
-Ries (2010) as well as the references therein.</p>
+may have to be changed accordingly.</p>
+<p>For a comprehensive overview of gravity models for panel data 
+see Egger and Pfaffermayr (2003)
+, Gómez-Herrera (2013)
+ and 
+Head et al. (2010)
+ as well as the references therein.</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>For more information on gravity models, theoretical foundations and
 estimation methods in general see</p>
-<p>Anderson, J. E. (1979) &lt;DOI:10.12691/wjssh-2-2-5&gt;</p>
-<p>Anderson, J. E. (2010) &lt;DOI:10.3386/w16576&gt;</p>
-<p>Anderson, J. E. and van Wincoop, E. (2003) &lt;DOI:10.3386/w8079&gt;</p>
-<p>Baier, S. L. and Bergstrand, J. H. (2009) &lt;DOI:10.1016/j.jinteco.2008.10.004&gt;</p>
-<p>Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., &amp; Brakman, S. (Eds.) (2010) chapter 4 &lt;DOI:10.1111/j.1467-9396.2011.01000.x&gt;</p>
-<p>Head, K., Mayer, T., &amp; Ries, J. (2010) &lt;DOI:10.1016/j.jinteco.2010.01.002&gt;</p>
-<p>Head, K. and Mayer, T. (2014) &lt;DOI:10.1016/B978-0-444-54314-1.00003-3&gt;</p>
-<p>Santos-Silva, J. M. C. and Tenreyro, S. (2006) &lt;DOI:10.1162/rest.88.4.641&gt;</p>
+<p>Anderson JE (1979).
+&#8220;A Theoretical Foundation for the Gravity Equation.&#8221;
+<em>The American Economic Review</em>, <b>69</b>(1), pp. 106--116.
+ISSN 00028282, <a href='http://www.jstor.org/stable/1802501'>http://www.jstor.org/stable/1802501</a>.</p>
+<p>Anderson JE and van
+Wincoop E (2001).
+&#8220;Gravity with Gravitas: A Solution to the Border Puzzle.&#8221;
+Technical Report 8079, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w8079'>10.3386/w8079</a>
+.</p>
+<p>Anderson JE (2010).
+&#8220;The Gravity Model.&#8221;
+Technical Report 16576, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w16576'>10.3386/w16576</a>
+.</p>
+<p>Head K, Mayer T and Ries J (2010).
+&#8220;The erosion of colonial trade linkages after independence.&#8221;
+<em>Journal of International Economics</em>, <b>81</b>(1), pp. 1 - 14.
+ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002'>https://doi.org/10.1016/j.jinteco.2010.01.002</a>
+.</p>
+<p>Head K and Mayer T (2014).
+&#8220;Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.&#8221;
+In Gopinath G, Helpman E and Rogoff K (eds.), <em>Handbook of International Economics</em>, volume 4 series Handbook of International Economics, pp. 131 - 195.
+Elsevier.
+doi: <a href='http://doi.org/https://doi.org/10.1016/B978-0-444-54314-1.00003-3'>https://doi.org/10.1016/B978-0-444-54314-1.00003-3</a>
+.</p>
+<p>Silva JMCS and Tenreyro S (2006).
+&#8220;The Log of Gravity.&#8221;
+<em>The Review of Economics and Statistics</em>, <b>88</b>(4), pp. 641-658.
+doi: <a href='http://doi.org/10.1162/rest.88.4.641'>10.1162/rest.88.4.641</a>
+.</p>
 <p>and the citations therein.</p>
-    <p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
-    <p>For estimating gravity equations using panel data see</p>
-<p>Egger, P., &amp; Pfaffermayr, M. (2003) &lt;DOI:10.1007/s001810200146&gt;</p>
-<p>Gomez-Herrera, E. (2013) &lt;DOI:10.1007/s00181-012-0576-2&gt;</p>
+<p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
+<p>For estimating gravity equations using panel data see</p>
+<p>Egger P and Pfaffermayr M (2003).
+&#8220;The proper panel econometric specification of the gravity equation: A three-way model with bilateral interaction effects.&#8221;
+<em>Empirical Economics</em>, <b>28</b>(3), pp. 571--580.
+ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s001810200146'>10.1007/s001810200146</a>
+.</p>
+<p>Gómez-Herrera E (2013).
+&#8220;Comparing alternative methods to estimate gravity models of bilateral trade.&#8221;
+<em>Empirical Economics</em>, <b>44</b>(3), pp. 1087--1111.
+ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s00181-012-0576-2'>10.1007/s00181-012-0576-2</a>
+.</p>
 <p>and the references therein.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
@@ -285,7 +313,7 @@ estimation methods in general see</p>
 
 <span class='fu'>ols</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>, <span class='st'>"contig"</span>, <span class='st'>"comcur"</span>),
 <span class='kw'>incomes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"gdp_o"</span>, <span class='st'>"gdp_d"</span>), <span class='kw'>codes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"iso_o"</span>, <span class='st'>"iso_d"</span>),
-<span class='kw'>uie</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
+<span class='kw'>uie</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
 <span class='co'># }</span><div class='input'>
 </div><div class='input'>
 </div></pre>

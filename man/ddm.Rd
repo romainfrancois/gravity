@@ -21,8 +21,8 @@ be taken as the independent variables in the estimation.
 Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
 
 \item{codes}{variable name (type: character) of the code of the country 
-(e.g. ISO-3 code) of origin (e.g. \code{iso_o}) and destination (e.g. \code{iso_d}) in the dataset 
-\code{data}. 
+of origin and destination (e.g. ISO-3 codes from the variables \code{iso_o} and \code{iso_d}) in the 
+example datasets).  
 
 The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 
