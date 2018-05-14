@@ -117,7 +117,7 @@ These effects catch country specific effects.</p>
     </div>
 
     <pre class="usage"><span class='fu'>fixed_effects</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='kw'>codes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"iso_o"</span>, <span class='st'>"iso_d"</span>),
-  <span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
+  <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -125,51 +125,53 @@ These effects catch country specific effects.</p>
     <tr>
       <th>dependent_variable</th>
       <td><p>name (type: character) of the dependent variable in the dataset 
-<code>data</code>, e.g. trade flows. This variable is logged and taken as the 
-dependent variable in the estimation.</p></td>
+<code>data</code> (i.e trade flows).</p>
+<p>This variable is logged and then used as the dependent variable in the estimation.</p></td>
     </tr>
     <tr>
       <th>regressors</th>
-      <td><p>name (type: character) of the distance variable in the dataset 
-<code>data</code> containing a measure of distance between all pairs of bilateral
-partners. It is logged automatically when the function is executed.</p></td>
+      <td><p>name (type: character) of the regressors to include in the model.</p>
+<p>Fixed effects catch all unilateral effects. Therefore, no other unilateral variables such as
+GDP can be included as independent variables in the estimation.</p>
+<p>Write this argument as <code>c(distance, contiguity, common curreny, ...)</code>.</p></td>
     </tr>
     <tr>
       <th>codes</th>
-      <td><p>vector of names (type: character) of fixed effects.
-The default is set to the unilateral identifiers
-<code>"iso_o"</code> and <code>"iso_d"</code> for cross-sectional data. 
-When using panel data, interaction terms of the iso-codes and time
-may be added in either <code>fe</code> or <code>x</code>.</p></td>
+      <td><p>variable name (type: character) of the code of the country 
+(e.g. ISO-3 code) of origin (e.g. <code>iso_o</code>) and destination (e.g. <code>iso_d</code>) in the dataset 
+<code>data</code>.</p>
+<p>The variables are grouped by using <code>iso_o</code> and <code>iso_d</code> to obtain estimates.</p>
+<p>Write this argument as <code>c(code origin, code destination)</code>.</p></td>
     </tr>
     <tr>
-      <th>vce_robust</th>
-      <td><p>robust (type: logic) determines whether a robust 
-variance-covariance matrix should be used. The default is set to <code>TRUE</code>. 
-If set <code>TRUE</code> the estimation results are consistent with the 
-Stata code provided at the website
-<a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
+      <th>robust</th>
+      <td><p>robust (type: logical) determines whether a robust 
+variance-covariance matrix should be used. By default is set to <code>TRUE</code>.</p>
+<p>If <code>robust = TRUE</code> the estimation results are consistent with the 
+Stata code provided at <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p></td>
     </tr>
     <tr>
       <th>data</th>
-      <td><p>name of the dataset to be used (type: character). 
-To estimate gravity equations, a square gravity dataset including bilateral 
-flows defined by the argument <code>y</code>, ISO-codes of type character 
-(called <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
-destination country), a distance measure defined by the argument <code>dist</code> 
-and other potential influences given as a vector in <code>x</code> are required. 
-All dummy variables should be of type numeric (0/1). Missing trade flows as 
-well as incomplete rows should be excluded from the dataset. 
-Furthermore, flows equal to zero should be excluded as the gravity equation 
-is estimated in its additive form.
-When using panel data, a variable for the time may be included in the 
+      <td><p>name of the dataset to be used (type: character).</p>
+<p>To estimate gravity equations you need a square dataset including bilateral 
+flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character 
+(e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
+destination country), a distance measure defined by the argument <code>distance</code> 
+and other potential influences (e.g. contiguity and common currency) given as a vector in 
+<code>regressors</code> are required.</p>
+<p>All dummy variables should be of type numeric (0/1).</p>
+<p>Make sure the ISO codes are of type "character".</p>
+<p>If an independent variable is defined as a ratio, it should be logged.</p>
+<p>The user should perform some data cleaning beforehand to remove observations that contain entries that 
+can distort estimates.</p>
+<p>The function will remove zero flows and distances.</p>
+<p>When using panel data, a variable for the time may be included in the 
 dataset. Note that the variable for the time dimension should be of 
-type: factor. 
-The time variable can be used as a single dependent variable or interaction 
+type factor.</p>
+<p>The time variable can be used as a single dependent variable or interaction 
 term with other variables such as country identifiers by inserting it into 
-<code>x</code> or <code>fe</code>.
-See the references for more information on panel data.</p></td>
+<code>regressors</code> or as an optional parameter.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -186,75 +188,96 @@ See the references for more information on panel data.</p></td>
 
     <p>To account for MR terms, Feenstra (2002) and Feenstra (2004) propose to use 
 importer and exporter fixed effects. Due to the use of these effects, all 
-unilateral influences such as GDPs can no longer be estimated. 
-A disadvantage of the use of <code>fixed_effects</code> is that, when applied to 
+unilateral influences such as GDPs can no longer be estimated.</p>
+<p>A disadvantage of the use of <code>fixed_effects</code> is that, when applied to 
 panel data, the number of country-year or country-pair fixed effects can be 
 too high for estimation. In addition, no comparative statistics are 
-possible with <code>fixed_effects</code> as the MR terms are not estimated 
-explicitly. Nevertheless, Head and Mayer (2014) highlight the importance of 
-the use of fixed effects. 
-To execute the function a square gravity dataset with all pairs of 
-countries, ISO-codes for the country of origin and destination, a measure of 
-distance between the bilateral partners as well as all 
-information that should be considered as dependent an independent 
-variables is needed. 
-Make sure the ISO-codes are of type "character".
-Missing bilateral flows as well as incomplete rows should be 
-excluded from the dataset. 
-Furthermore, flows equal to zero should be excluded as the gravity equation 
-is estimated in its additive form.  
-Country specific fixed effects are considered by incorporating
-<code>"iso_o"</code> and <code>"iso_d"</code> in <code>fe</code>. 
-By including country specific fixed effects, all monadic effects
+possible with <code>fixed_effects</code> as the Multilateral Resistance terms are not estimated 
+explicitly. Nevertheless, Head and Mayer (2014)
+ highlight the importance of 
+the use of fixed effects.</p>
+<p>By including country specific fixed effects, all monadic effects
 are captured, including Multilateral Resistance terms. 
 Therefore, no other unilateral variables such as GDP can be
 included as independent variables in the estimation.</p>
 <p><code>fixed_effects</code> estimation can be used for both, cross-sectional as well as 
-panel data. 
-Nonetheless, the function is designed to be consistent with the 
+panel data.</p>
+<p>Nonetheless, the function is designed to be consistent with the 
 Stata code for cross-sectional data provided at the website
 <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
-when choosing robust estimation.
-The function <code>fixed_effects</code> was therefore tested for 
-For the use with panel data no tests were performed. 
-Therefore, it is up to the user to ensure that the functions can be applied 
-to panel data. 
-Depending on the panel dataset and the variables - 
+when choosing robust estimation.</p>
+<p>The function <code>fixed_effects</code> was therefore tested for 
+cross-sectional data. Its up to the user to ensure that the functions can be applied 
+to panel data.</p>
+<p>Depending on the panel dataset and the variables - 
 specifically the type of fixed effects - 
-included in the model, it may easily occur that the model is not computable. 
-Also, note that by including bilateral fixed effects such as country-pair 
+included in the model, it may easily occur that the model is not computable.</p>
+<p>Also, note that by including bilateral fixed effects such as country-pair 
 effects, the coefficients of time-invariant observables such as distance 
-can no longer be estimated. 
-Depending on the specific model, the code of the 
+can no longer be estimated.</p>
+<p>Depending on the specific model, the code of the 
 respective function may has to be changed in order to exclude the distance 
-variable from the estimation. 
-At the very least, the user should take special 
+variable from the estimation.</p>
+<p>At the very least, the user should take special 
 care with respect to the meaning of the estimated coefficients and variances 
-as well as the decision about which effects to include in the estimation. 
-When using panel data, the parameter and variance estimation of the models 
-may have to be changed accordingly.
-For a comprehensive overview of gravity models for panel data 
-see Egger and Pfaffermayr (2003), Gomez-Herrera (2013) and Head, Mayer and 
-Ries (2010) as well as the references therein.</p>
+as well as the decision about which effects to include in the estimation.</p>
+<p>When using panel data, the parameter and variance estimation of the models 
+may have to be changed accordingly.</p>
+<p>For a comprehensive overview of gravity models for panel data 
+see Egger and Pfaffermayr (2003)
+, Gómez-Herrera (2013)
+ and 
+Head, Mayer, and Ries (2010)
+ as well as the references therein.</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>For more information on fixed effects as well as informaton on gravity models, 
 theoretical foundations and suitable estimation methods in general see</p>
-<p>Anderson, J. E. (2010) &lt;DOI:10.3386/w16576&gt;</p>
-<p>Head, K. and Mayer, T. (2014) &lt;DOI:10.1016/B978-0-444-54314-1.00003-3&gt;</p>
-<p>as well as</p>
-<p>Anderson, J. E. (1979) &lt;DOI:10.12691/wjssh-2-2-5&gt;</p>
-<p>Anderson, J. E. and van Wincoop, E. (2003) &lt;DOI:10.3386/w8079&gt;</p>
-<p>Baier, S. L. and Bergstrand, J. H. (2009) &lt;DOI:10.1016/j.jinteco.2008.10.004&gt;</p>
-<p>Baier, S. L. and Bergstrand, J. H. (2010) in Van Bergeijk, P. A., &amp; Brakman, S. (Eds.) (2010) chapter 4 &lt;DOI:10.1111/j.1467-9396.2011.01000.x&gt;</p>
-<p>Head, K., Mayer, T., &amp; Ries, J. (2010) &lt;DOI:10.1016/j.jinteco.2010.01.002&gt;</p>
-<p>Santos-Silva, J. M. C. and Tenreyro, S. (2006) &lt;DOI:10.1162/rest.88.4.641&gt;</p>
+<p>Anderson JE (1979).
+&#8220;A Theoretical Foundation for the Gravity Equation.&#8221;
+<em>The American Economic Review</em>, <b>69</b>(1), pp. 106--116.
+ISSN 00028282, <a href='http://www.jstor.org/stable/1802501'>http://www.jstor.org/stable/1802501</a>.</p>
+<p>Anderson JE and van
+Wincoop E (2001).
+&#8220;Gravity with Gravitas: A Solution to the Border Puzzle.&#8221;
+Technical Report 8079, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w8079'>10.3386/w8079</a>
+.</p>
+<p>Anderson JE (2010).
+&#8220;The Gravity Model.&#8221;
+Technical Report 16576, National Bureau of Economic Research.
+doi: <a href='http://doi.org/10.3386/w16576'>10.3386/w16576</a>
+.</p>
+<p>Head K, Mayer T and Ries J (2010).
+&#8220;The erosion of colonial trade linkages after independence.&#8221;
+<em>Journal of International Economics</em>, <b>81</b>(1), pp. 1 - 14.
+ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002'>https://doi.org/10.1016/j.jinteco.2010.01.002</a>
+.</p>
+<p>Head K and Mayer T (2014).
+&#8220;Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.&#8221;
+In Gopinath G, Helpman E and Rogoff K (eds.), <em>Handbook of International Economics</em>, volume 4 series Handbook of International Economics, pp. 131 - 195.
+Elsevier.
+doi: <a href='http://doi.org/https://doi.org/10.1016/B978-0-444-54314-1.00003-3'>https://doi.org/10.1016/B978-0-444-54314-1.00003-3</a>
+.</p>
+<p>Silva JMCS and Tenreyro S (2006).
+&#8220;The Log of Gravity.&#8221;
+<em>The Review of Economics and Statistics</em>, <b>88</b>(4), pp. 641-658.
+doi: <a href='http://doi.org/10.1162/rest.88.4.641'>10.1162/rest.88.4.641</a>
+.</p>
 <p>and the citations therein.</p>
-    <p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
+<p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
 <p>For estimating gravity equations using panel data see</p>
-<p>Egger, P., &amp; Pfaffermayr, M. (2003) &lt;DOI:10.1007/s001810200146&gt;</p>
-<p>Gomez-Herrera, E. (2013) &lt;DOI:10.1007/s00181-012-0576-2&gt;</p>
+<p>Egger P and Pfaffermayr M (2003).
+&#8220;The proper panel econometric specification of the gravity equation: A three-way model with bilateral interaction effects.&#8221;
+<em>Empirical Economics</em>, <b>28</b>(3), pp. 571--580.
+ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s001810200146'>10.1007/s001810200146</a>
+.</p>
+<p>Gómez-Herrera E (2013).
+&#8220;Comparing alternative methods to estimate gravity models of bilateral trade.&#8221;
+<em>Empirical Economics</em>, <b>44</b>(3), pp. 1087--1111.
+ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s00181-012-0576-2'>10.1007/s00181-012-0576-2</a>
+.</p>
 <p>and the references therein.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
@@ -269,11 +292,11 @@ theoretical foundations and suitable estimation methods in general see</p>
 
 <span class='fu'>fixed_effects</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>,
 <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>), <span class='kw'>codes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"iso_o"</span>, <span class='st'>"iso_d"</span>),
-<span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
+<span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
 
 <span class='fu'>fixed_effects</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>,
 <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>, <span class='st'>"comcur"</span>, <span class='st'>"contig"</span>),
-<span class='kw'>codes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"iso_o"</span>, <span class='st'>"iso_d"</span>), <span class='kw'>vce_robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
+<span class='kw'>codes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"iso_o"</span>, <span class='st'>"iso_d"</span>), <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
 <span class='co'># }</span><div class='input'>
 </div><div class='input'>
 </div></pre>

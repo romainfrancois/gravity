@@ -73,6 +73,8 @@
 #' 
 #' Interaction terms can be added.
 #' 
+#' Write this argument as \code{c(distance, contiguity, common curreny, ...)}. 
+#' 
 #' @param data name of the dataset to be used (type: character).
 #' 
 #' To estimate gravity equations you need a square dataset including bilateral 

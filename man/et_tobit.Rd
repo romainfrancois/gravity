@@ -23,7 +23,9 @@ be taken as the independent variables in the estimation.
 
 Unilateral metric variables such as GDPs can be added but those variables have to be legged first. 
 
-Interaction terms can be added.}
+Interaction terms can be added.
+
+Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
 
 \item{data}{name of the dataset to be used (type: character).
 

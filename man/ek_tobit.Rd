@@ -24,7 +24,9 @@ be taken as the independent variables in the estimation.
 
 Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes}. 
 
-Interaction terms can be added.}
+Interaction terms can be added.
+
+Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
 
 \item{code_destination}{variable name (type: character) of the label of the country 
 (e.g. ISO-3 code) of destination in the dataset \code{data}. The variables 

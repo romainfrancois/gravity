@@ -16,7 +16,9 @@ This variable is logged and then used as the dependent variable in the estimatio
 
 Include the distance variable in the dataset \code{data} containing a measure of 
 distance between all pairs of bilateral partners and bilateral variables that should 
-be taken as the independent variables in the estimation.}
+be taken as the independent variables in the estimation. 
+
+Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
 
 \item{codes}{variable name (type: character) of the code of the country 
 (e.g. ISO-3 code) of origin (e.g. \code{iso_o}) and destination (e.g. \code{iso_d}) in the dataset 
