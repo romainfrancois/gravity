@@ -240,16 +240,17 @@ tetrads <- function(dependent_variable, regressors, codes, reference_countries =
   # Taking ratios, ratk --------------------------------------------------------
   
   # DESDE ACÁ NO SE COMO HACER UN "NESTED GROUP BY"
+  d_3 <- d2
   d_3$lXinratk  <- NA
   d_3$ldistratk <- NA
   
   for (i in unique(d_3$iso_o)) {
-    d_3[d_3$iso_o == i,]$lXinratk <- d_3[d_3$iso_o == i,]$y_log - d_3[d_3$iso_o == i & d_3$iso_d == k,]$y_log
-    d_3[d_3$iso_o == i,]$ldistratk <- d_3[d_3$iso_o == i,]$dist_log - d_3[d_3$iso_o == i & d_3$iso_d == k,]$dist_log
+    d_3[d_3$iso_o == i,]$lXinratk <- d_3[d_3$iso_o == i,]$y_log_tetrads - d_3[d_3$iso_o == i & d_3$iso_d == filter_d,]$y_log_tetrads
+    d_3[d_3$iso_o == i,]$ldistratk <- d_3[d_3$iso_o == i,]$dist_log - d_3[d_3$iso_o == i & d_3$iso_d == filter_d,]$dist_log
   }
   
   # Taking ratios, ratk, for the other independent variables -------------------
-  
+  num.ind.var <- length(regressors)
   ind.var.ratk                    <- list(length = num.ind.var + 1)
   ind.var.ratk[[num.ind.var + 1]] <- d_3$iso_o
   
@@ -259,29 +260,27 @@ tetrads <- function(dependent_variable, regressors, codes, reference_countries =
   
   for (j in 1:num.ind.var) {
     for (i in unique(d_3$iso_o)) {
-      ind.var.ratk[[j]][ind.var.ratk[[num.ind.var + 1]] == i] <- ((d_3[d_3$iso_o == i,])[x[j]])[,1] - (d_3[d_3$iso_o == i & d_3$iso_d == k,])[x[j]][,1]
+      ind.var.ratk[[j]][ind.var.ratk[[num.ind.var + 1]] == i] <- ((d_3[d_3$iso_o == i,])[regressors[j]])[,1][[1]] - (d_3[d_3$iso_o == i & d_3$iso_d == filter_d,])[regressors[j]][,1][[1]]
     }
   }
   
-  for (j in 1:length(x)) {
-    d_3[x[j]]  <-  ind.var.ratk[[j]]
+  for (j in 1:length(regressors)) {
+    d_3[regressors[j]]  <-  ind.var.ratk[[j]]
   }
   
   # Taking the ratio of ratios, rat --------------------------------------------
-  
   d_3$lXinrat  <- NA
   d_3$ldistrat <- NA
   
   for (i in unique(d_3$iso_d)) {
-    d_3[d_3$iso_d == i,]$lXinrat  <- d_3[d_3$iso_d == i,]$lXinratk - d_3[d_3$iso_d == i & d_3$iso_o == ell,]$lXinratk
-    d_3[d_3$iso_d == i,]$ldistrat <- d_3[d_3$iso_d == i,]$ldistratk - d_3[d_3$iso_d == i & d_3$iso_o == ell,]$ldistratk
+    d_3[d_3$iso_d == i,]$lXinrat  <- d_3[d_3$iso_d == i,]$lXinratk - d_3[d_3$iso_d == i & d_3$iso_o == filter_o,]$lXinratk
+    d_3[d_3$iso_d == i,]$ldistrat <- d_3[d_3$iso_d == i,]$ldistratk - d_3[d_3$iso_d == i & d_3$iso_o == filter_o,]$ldistratk
   }
   
   d_3$y_log_rat    <- d_3$lXinrat
   d_3$dist_log_rat <- d_3$ldistrat
   
   # Taking the ratio of ratios, rat, for the other independent variables -------
-  
   ind.var.rat                  <- list(length = num.ind.var + 1)
   ind.var.rat[[num.ind.var + 1]] <- d_3$iso_d
   
@@ -291,24 +290,23 @@ tetrads <- function(dependent_variable, regressors, codes, reference_countries =
   
   for (j in 1:num.ind.var) {
     for (i in unique(d_3$iso_d)) {
-      ind.var.rat[[j]][ind.var.rat[[num.ind.var + 1]] == i] <- ((d_3[d_3$iso_d == i,])[x[j]])[,1] - (d_3[d_3$iso_d == i & d_3$iso_o == ell,])[x[j]][,1]
+      ind.var.rat[[j]][ind.var.rat[[num.ind.var + 1]] == i] <- ((d_3[d_3$iso_d == i,])[regressors[j]])[,1][[1]] - (d_3[d_3$iso_d == i & d_3$iso_o == filter_o,])[regressors[j]][,1][[1]]
     }
   }
   
-  for (j in 1:length(x)) {
-    d_3[x[j]]  <-  ind.var.rat[[j]]
+  for (j in 1:length(regressors)) {
+    d_3[regressors[j]]  <-  ind.var.rat[[j]]
   }
   
   # Model ----------------------------------------------------------------------
-  
-  x_rat <- paste0(x,"_rat")
+  x_rat <- paste0(regressors,"_rat")
   
   # new row in dataset for independent _rat variable
-  for (j in x) {
-    l        <- which(x == j)
+  for (j in regressors) {
+    l        <- which(regressors == j)
     rat      <- x_rat[l]
     d_3[rat] <- NA
-    d_3[rat] <- d_3[x[l]]
+    d_3[rat] <- d_3[regressors[l]]
   }
   
   vars  <- paste(c("dist_log_rat", x_rat), collapse = " + ")
@@ -321,7 +319,6 @@ tetrads <- function(dependent_variable, regressors, codes, reference_countries =
   model.tetrads.robust <- lmtest::coeftest(x = model.tetrads, vcov = model.tetrads_vcov)
   
   # Return ---------------------------------------------------------------------
-  
   if (multiway == TRUE) {
     summary.Ted.1              <- robust_summary(model.tetrads, robust = TRUE)
     summary.Ted.1$coefficients <- model.tetrads.robust[1:length(rownames(model.tetrads.robust)),]
