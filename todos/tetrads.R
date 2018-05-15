@@ -241,6 +241,17 @@ tetrads <- function(dependent_variable, regressors, codes, reference_countries =
   
   # DESDE ACÁ NO SE COMO HACER UN "NESTED GROUP BY"
   d_3 <- d2
+  
+  d2 <- d2 %>% 
+    filter(iso_d == filter_d) %>% 
+    select(iso_o, y_log_tetrads_d = y_log_tetrads, dist_log_d = dist_log) %>% 
+    left_join(d2, .) %>% 
+    mutate(
+      lXinratk = y_log_tetrads - y_log_tetrads_d,
+      ldistratk = dist_log - dist_log_d
+    ) %>% 
+    select(-y_log_tetrads_d, -dist_log_d)
+  
   d_3$lXinratk  <- NA
   d_3$ldistratk <- NA
   
