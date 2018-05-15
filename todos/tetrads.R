@@ -240,94 +240,142 @@ tetrads <- function(dependent_variable, regressors, codes, reference_countries =
   # Taking ratios, ratk --------------------------------------------------------
   
   # DESDE ACÁ NO SE COMO HACER UN "NESTED GROUP BY"
-  d_3 <- d2
+  # d_3 <- d2
   
   d2 <- d2 %>% 
     filter(iso_d == filter_d) %>% 
     select(iso_o, y_log_tetrads_d = y_log_tetrads, dist_log_d = dist_log) %>% 
-    left_join(d2, .) %>% 
+    left_join(d2, ., by = "iso_o") %>% 
     mutate(
       lXinratk = y_log_tetrads - y_log_tetrads_d,
       ldistratk = dist_log - dist_log_d
     ) %>% 
     select(-y_log_tetrads_d, -dist_log_d)
-  
-  d_3$lXinratk  <- NA
-  d_3$ldistratk <- NA
-  
-  for (i in unique(d_3$iso_o)) {
-    d_3[d_3$iso_o == i,]$lXinratk <- d_3[d_3$iso_o == i,]$y_log_tetrads - d_3[d_3$iso_o == i & d_3$iso_d == filter_d,]$y_log_tetrads
-    d_3[d_3$iso_o == i,]$ldistratk <- d_3[d_3$iso_o == i,]$dist_log - d_3[d_3$iso_o == i & d_3$iso_d == filter_d,]$dist_log
-  }
+
+  # d_3$lXinratk  <- NA
+  # d_3$ldistratk <- NA
+  # 
+  # for (i in unique(d_3$iso_o)) {
+  #   d_3[d_3$iso_o == i,]$lXinratk <- d_3[d_3$iso_o == i,]$y_log_tetrads - d_3[d_3$iso_o == i & d_3$iso_d == filter_d,]$y_log_tetrads
+  #   d_3[d_3$iso_o == i,]$ldistratk <- d_3[d_3$iso_o == i,]$dist_log - d_3[d_3$iso_o == i & d_3$iso_d == filter_d,]$dist_log
+  # }
   
   # Taking ratios, ratk, for the other independent variables -------------------
-  num.ind.var <- length(regressors)
-  ind.var.ratk                    <- list(length = num.ind.var + 1)
-  ind.var.ratk[[num.ind.var + 1]] <- d_3$iso_o
+  d2 <- d2 %>% 
+    select(c("iso_o", "iso_d", regressors)) %>% 
+    gather(key, value, -iso_o, -iso_d) %>% 
+    left_join(
+      d2 %>% 
+        filter(iso_d == filter_d) %>% 
+        select(c("iso_o", regressors)) %>% 
+        gather(key, value, -iso_o)    ,
+      by = c("iso_o", "key")
+    ) %>% 
+    mutate(value = value.x - value.y) %>% 
+    select(c("iso_o", "iso_d", "key", "value")) %>% 
+    spread(key, value) %>% 
+    left_join(d2 %>% select(-one_of(regressors)), by = c("iso_o", "iso_d"))
   
-  for (j in 1:num.ind.var) {
-    ind.var.ratk[[j]] <- rep(NA, times = nrow(d_3))
-  }
-  
-  for (j in 1:num.ind.var) {
-    for (i in unique(d_3$iso_o)) {
-      ind.var.ratk[[j]][ind.var.ratk[[num.ind.var + 1]] == i] <- ((d_3[d_3$iso_o == i,])[regressors[j]])[,1][[1]] - (d_3[d_3$iso_o == i & d_3$iso_d == filter_d,])[regressors[j]][,1][[1]]
-    }
-  }
-  
-  for (j in 1:length(regressors)) {
-    d_3[regressors[j]]  <-  ind.var.ratk[[j]]
-  }
+  # num.ind.var <- length(regressors)
+  # ind.var.ratk <- list(length = num.ind.var + 1)
+  # ind.var.ratk[[num.ind.var + 1]] <- d_3$iso_o
+  # 
+  # for (j in 1:num.ind.var) {
+  #   ind.var.ratk[[j]] <- rep(NA, times = nrow(d_3))
+  # }
+  # 
+  # for (j in 1:num.ind.var) {
+  #   for (i in unique(d_3$iso_o)) {
+  #     ind.var.ratk[[j]][ind.var.ratk[[num.ind.var + 1]] == i] <- ((d_3[d_3$iso_o == i,])[regressors[j]])[,1][[1]] - (d_3[d_3$iso_o == i & d_3$iso_d == filter_d,])[regressors[j]][,1][[1]]
+  #   }
+  # }
+  # 
+  # for (j in 1:length(regressors)) {
+  #   d_3[regressors[j]]  <-  ind.var.ratk[[j]]
+  # }
   
   # Taking the ratio of ratios, rat --------------------------------------------
-  d_3$lXinrat  <- NA
-  d_3$ldistrat <- NA
+  d2 <- d2 %>% 
+    filter(iso_o == filter_o) %>% 
+    select(iso_d, lXinratk_o = lXinratk, ldistratk_o = ldistratk) %>% 
+    left_join(d2, ., by = "iso_d") %>% 
+    mutate(
+      lXinrat = lXinratk - lXinratk_o,
+      ldistrat = ldistratk - ldistratk_o
+    ) %>% 
+    select(-lXinratk_o, -ldistratk_o) %>% 
+    mutate(
+      y_log_rat = lXinrat,
+      dist_log_rat = ldistrat
+    )
   
-  for (i in unique(d_3$iso_d)) {
-    d_3[d_3$iso_d == i,]$lXinrat  <- d_3[d_3$iso_d == i,]$lXinratk - d_3[d_3$iso_d == i & d_3$iso_o == filter_o,]$lXinratk
-    d_3[d_3$iso_d == i,]$ldistrat <- d_3[d_3$iso_d == i,]$ldistratk - d_3[d_3$iso_d == i & d_3$iso_o == filter_o,]$ldistratk
-  }
-  
-  d_3$y_log_rat    <- d_3$lXinrat
-  d_3$dist_log_rat <- d_3$ldistrat
+  # d_3$lXinrat  <- NA
+  # d_3$ldistrat <- NA
+  # 
+  # for (i in unique(d_3$iso_d)) {
+  #   d_3[d_3$iso_d == i,]$lXinrat  <- d_3[d_3$iso_d == i,]$lXinratk - d_3[d_3$iso_d == i & d_3$iso_o == filter_o,]$lXinratk
+  #   d_3[d_3$iso_d == i,]$ldistrat <- d_3[d_3$iso_d == i,]$ldistratk - d_3[d_3$iso_d == i & d_3$iso_o == filter_o,]$ldistratk
+  # }
+  # 
+  # d_3$y_log_rat    <- d_3$lXinrat
+  # d_3$dist_log_rat <- d_3$ldistrat
   
   # Taking the ratio of ratios, rat, for the other independent variables -------
-  ind.var.rat                  <- list(length = num.ind.var + 1)
-  ind.var.rat[[num.ind.var + 1]] <- d_3$iso_d
+  # ind.var.rat <- list(length = num.ind.var + 1)
+  # ind.var.rat[[num.ind.var + 1]] <- d_3$iso_d
+  # 
+  # for (j in 1:num.ind.var) {
+  #   ind.var.rat[[j]] <- rep(NA, times = nrow(d_3))
+  # }
+  # 
+  # for (j in 1:num.ind.var) {
+  #   for (i in unique(d_3$iso_d)) {
+  #     ind.var.rat[[j]][ind.var.rat[[num.ind.var + 1]] == i] <- ((d_3[d_3$iso_d == i,])[regressors[j]])[,1][[1]] - (d_3[d_3$iso_d == i & d_3$iso_o == filter_o,])[regressors[j]][,1][[1]]
+  #   }
+  # }
+  # 
+  # for (j in 1:length(regressors)) {
+  #   d_3[regressors[j]]  <-  ind.var.rat[[j]]
+  # }
   
-  for (j in 1:num.ind.var) {
-    ind.var.rat[[j]] <- rep(NA, times = nrow(d_3))
-  }
-  
-  for (j in 1:num.ind.var) {
-    for (i in unique(d_3$iso_d)) {
-      ind.var.rat[[j]][ind.var.rat[[num.ind.var + 1]] == i] <- ((d_3[d_3$iso_d == i,])[regressors[j]])[,1][[1]] - (d_3[d_3$iso_d == i & d_3$iso_o == filter_o,])[regressors[j]][,1][[1]]
-    }
-  }
-  
-  for (j in 1:length(regressors)) {
-    d_3[regressors[j]]  <-  ind.var.rat[[j]]
-  }
+  d2 <- d2 %>% 
+    select(c("iso_o", "iso_d", regressors)) %>% 
+    gather(key, value, -iso_o, -iso_d) %>% 
+    left_join(
+      d2 %>% 
+        filter(iso_o == filter_o) %>% 
+        select(c("iso_d", regressors)) %>% 
+        gather(key, value, -iso_d)    ,
+      by = c("iso_d", "key")
+    ) %>% 
+    mutate(value = value.x - value.y) %>% 
+    select(c("iso_o", "iso_d", "key", "value")) %>% 
+    spread(key, value) %>% 
+    left_join(d2 %>% select(-one_of(regressors)), by = c("iso_o", "iso_d"))
   
   # Model ----------------------------------------------------------------------
-  x_rat <- paste0(regressors,"_rat")
+  # x_rat <- paste0(regressors,"_rat")
+  # 
+  # # new row in dataset for independent _rat variable
+  # for (j in regressors) {
+  #   l        <- which(regressors == j)
+  #   rat      <- x_rat[l]
+  #   d_3[rat] <- NA
+  #   d_3[rat] <- d_3[regressors[l]]
+  # }
   
-  # new row in dataset for independent _rat variable
-  for (j in regressors) {
-    l        <- which(regressors == j)
-    rat      <- x_rat[l]
-    d_3[rat] <- NA
-    d_3[rat] <- d_3[regressors[l]]
-  }
-  
-  vars  <- paste(c("dist_log_rat", x_rat), collapse = " + ")
-  form  <- paste("y_log_rat","~", vars)
-  form2 <- stats::as.formula(form)
-  
-  model.tetrads        <- stats::lm(form2, data = d_3)
-  cluster.formula      <- ~ iso_o + iso_d
-  model.tetrads_vcov   <- multiwayvcov::cluster.vcov(model = model.tetrads, cluster = cluster.formula)
+  model.tetrads <- stats::lm(as.formula(paste("y_log_rat ~ dist_log_rat + ", paste(regressors, collapse = " + "))), data = d2)
+  model.tetrads_vcov <- multiwayvcov::cluster.vcov(model = model.tetrads, cluster = ~ iso_o + iso_d)
   model.tetrads.robust <- lmtest::coeftest(x = model.tetrads, vcov = model.tetrads_vcov)
+  
+  # vars  <- paste(c("dist_log_rat", x_rat), collapse = " + ")
+  # form  <- paste("y_log_rat","~", vars)
+  # form2 <- stats::as.formula(form)
+  # 
+  # model.tetrads        <- stats::lm(form2, data = d_3)
+  # cluster.formula      <- ~ iso_o + iso_d
+  # model.tetrads_vcov   <- multiwayvcov::cluster.vcov(model = model.tetrads, cluster = cluster.formula)
+  # model.tetrads.robust <- lmtest::coeftest(x = model.tetrads, vcov = model.tetrads_vcov)
   
   # Return ---------------------------------------------------------------------
   if (multiway == TRUE) {
