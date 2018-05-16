@@ -370,8 +370,9 @@ tetrads <- function(dependent_variable, regressors, codes, reference_countries =
   
   additional_regressors <- paste0(additional_regressors, "_rat")
   form <- stats::as.formula(paste("y_log_rat", "~ dist_log_rat +", paste(additional_regressors, collapse = " + ")))
+  form2 <- as.formula(sprintf("~ %s + %s", code_o, code_d))
   model_tetrads <- stats::lm(form, data = d2)
-  model_tetrads_vcov <- multiwayvcov::cluster.vcov(model = model_tetrads, cluster = ~ iso_o + iso_d)
+  model_tetrads_vcov <- multiwayvcov::cluster.vcov(model = model_tetrads, cluster = form2)
   model_tetrads_robust <- lmtest::coeftest(x = model_tetrads, vcov = model_tetrads_vcov)
   
   # vars  <- paste(c("dist_log_rat", x_rat), collapse = " + ")
