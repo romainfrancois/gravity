@@ -446,31 +446,31 @@ Tetrads <- function(){
   form  <- paste("y_log_rat","~",vars)
   form2 <- stats::as.formula(form)
   
-  model.Tetrads        <- stats::lm(form2, data = d_3)
+  model_tetrads        <- stats::lm(form2, data = d_3)
   cluster.formula      <- ~ iso_o + iso_d
-  model.Tetrads_vcov   <- multiwayvcov::cluster.vcov(model=model.Tetrads, cluster = cluster.formula)
-  model.Tetrads.robust <- lmtest::coeftest(x=model.Tetrads, vcov=model.Tetrads_vcov)
+  model_tetrads_vcov   <- multiwayvcov::cluster.vcov(model=model_tetrads, cluster = cluster.formula)
+  model_tetrads_robust <- lmtest::coeftest(x=model_tetrads, vcov=model_tetrads_vcov)
   
   # Return ---------------------------------------------------------------------
   
   if(multiway_vcov == TRUE){
-    summary.Ted.1              <- .robustsummary.lm(model.Tetrads, robust=TRUE)
-    summary.Ted.1$coefficients <- model.Tetrads.robust[1:length(rownames(model.Tetrads.robust)),]
-    return.object.1            <- summary.Ted.1
-    return.object.1$call       <- form2
-    return(return.object.1)}
+    summary_ted              <- .robustsummary.lm(model_tetrads, robust=TRUE)
+    summary_ted$coefficients <- model_tetrads_robust[1:length(rownames(model_tetrads_robust)),]
+    return_object            <- summary_ted
+    return_object$call       <- form2
+    return(return_object)}
   
   if(multiway_vcov == FALSE){
-    return.object.1            <- .robustsummary.lm(model.Tetrads, robust=FALSE)
-    return.object.1$call       <- form2
-    return(return.object.1)}
+    return_object            <- .robustsummary.lm(model_tetrads, robust=FALSE)
+    return_object$call       <- form2
+    return(return_object)}
   
 }
 Tetrads()
 
 # tetrads nueva -----------------------------------------------------------
 
-reference_countries = c("USA", "JPN")
+reference_countries = c("JPN", "USA")
 multiway = TRUE
 #comente 679 y 685 sino da error pq no encuentra form2
 tetrads <- function() {
@@ -633,19 +633,23 @@ tetrads <- function() {
   # }
   
   d2 <- d2 %>% 
-    select(c("iso_o", "iso_d", regressors)) %>% 
+    select(c("iso_o", "iso_d", additional_regressors)) %>% 
     gather(key, value, -iso_o, -iso_d) %>% 
     left_join(
       d2 %>% 
         filter(iso_o == filter_o) %>% 
-        select(c("iso_d", regressors)) %>% 
+        select(c("iso_d", additional_regressors)) %>% 
         gather(key, value, -iso_d)    ,
       by = c("iso_d", "key")
     ) %>% 
-    mutate(value = value.x - value.y) %>% 
+    mutate(
+      key = paste0(key, "_rat"),
+      value = value.x - value.y
+    ) %>% 
     select(c("iso_o", "iso_d", "key", "value")) %>% 
     spread(key, value) %>% 
-    left_join(d2 %>% select(-one_of(regressors)), by = c("iso_o", "iso_d"))
+    left_join(d2 %>% select(-one_of(regressors)), by = c("iso_o", "iso_d")) %>% 
+    select(ends_with("_rat"), codes)
   
   # Model ----------------------------------------------------------------------
   # x_rat <- paste0(regressors,"_rat")
@@ -658,31 +662,33 @@ tetrads <- function() {
   #   d_3[rat] <- d_3[regressors[l]]
   # }
   
-  model.tetrads <- stats::lm(as.formula(paste("y_log_rat ~ dist_log_rat + ", paste(regressors, collapse = " + "))), data = d2)
-  model.tetrads_vcov <- multiwayvcov::cluster.vcov(model = model.tetrads, cluster = ~ iso_o + iso_d)
-  model.tetrads.robust <- lmtest::coeftest(x = model.tetrads, vcov = model.tetrads_vcov)
+  additional_regressors <- paste0(additional_regressors, "_rat")
+  form <- stats::as.formula(paste("y_log_rat", "~ dist_log_rat +", paste(additional_regressors, collapse = " + ")))
+  model_tetrads <- stats::lm(form, data = d2)
+  model_tetrads_vcov <- multiwayvcov::cluster.vcov(model = model_tetrads, cluster = ~ iso_o + iso_d)
+  model_tetrads_robust <- lmtest::coeftest(x = model_tetrads, vcov = model_tetrads_vcov)
   
   # vars  <- paste(c("dist_log_rat", x_rat), collapse = " + ")
   # form  <- paste("y_log_rat","~", vars)
   # form2 <- stats::as.formula(form)
   # 
-  # model.tetrads        <- stats::lm(form2, data = d_3)
+  # model_tetrads        <- stats::lm(form2, data = d_3)
   # cluster.formula      <- ~ iso_o + iso_d
-  # model.tetrads_vcov   <- multiwayvcov::cluster.vcov(model = model.tetrads, cluster = cluster.formula)
-  # model.tetrads.robust <- lmtest::coeftest(x = model.tetrads, vcov = model.tetrads_vcov)
+  # model_tetrads_vcov   <- multiwayvcov::cluster.vcov(model = model_tetrads, cluster = cluster.formula)
+  # model_tetrads_robust <- lmtest::coeftest(x = model_tetrads, vcov = model_tetrads_vcov)
   
   # Return ---------------------------------------------------------------------
   if (multiway == TRUE) {
-    summary.Ted.1              <- robust_summary(model.tetrads, robust = TRUE)
-    summary.Ted.1$coefficients <- model.tetrads.robust[1:length(rownames(model.tetrads.robust)),]
-    return.object.1            <- summary.Ted.1
-    #return.object.1$call       <- form2
-    return(return.object.1)
+    summary_ted              <- robust_summary(model_tetrads, robust = TRUE)
+    summary_ted$coefficients <- model_tetrads_robust[1:length(rownames(model_tetrads_robust)),]
+    return_object            <- summary_ted
+    #return_object$call       <- form2
+    return(return_object)
   }
   
   if (multiway == FALSE) {
-    return.object.1            <- robust_summary(model.tetrads, robust = FALSE)
-    #return.object.1$call       <- form2
-    return(return.object.1)}
+    return_object            <- robust_summary(model_tetrads, robust = FALSE)
+    #return_object$call       <- form2
+    return(return_object)}
 }
 tetrads()
