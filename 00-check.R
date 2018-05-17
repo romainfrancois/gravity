@@ -1685,3 +1685,290 @@ femod <- function() {
   return(return_object)
 }
 femod()
+
+# tetrads original --------------------------------------------------------
+
+multiway_vcov = F
+k = "USA"
+ell = "JPN"
+Tetrads <- function(){
+  
+  if(!is.data.frame(data))                                                stop("'data' must be a 'data.frame'")
+  if(!is.character(y)     | !y%in%colnames(data)     | length(y)!=1)      stop("'y' must be a character of length 1 and a colname of 'data'")
+  if(!is.character(dist)  | !dist%in%colnames(data)  | length(dist)!=1)   stop("'dist' must be a character of length 1 and a colname of 'data'")
+  if(!is.character(x)     | !all(x%in%colnames(data)))                    stop("'x' must be a character vector and all x's have to be colnames of 'data'")  
+  
+  if((multiway_vcov %in% c(TRUE, FALSE)) == FALSE)                        stop("'multiway_vcov' has to be either 'TRUE' or 'FALSE'")
+  if(!k%in%data$iso_d)                                                    stop("'k' must be in 'data$iso_d'")
+  if(!ell%in%data$iso_o)                                                  stop("'ell' must be in 'data$iso_o'")
+  
+  # Transforming data, log flows and distances ---------------------------------
+  
+  d           <- data
+  d$dist_log  <- (log(d[dist][,1]))
+  d$y_log     <- log(d[y][,1])
+  
+  # Truncating dataset to only those countries which trade with reference
+  # importer and exporter ------------------------------------------------------
+  
+  d_2a        <- d[d$iso_d == k,] # all iso_o which should stay in dataset
+  d_2b        <- d_2a$iso_o
+  d_2         <- d[d$iso_o %in% d_2b,] 
+  d_3a        <- d_2[d_2$iso_o == ell,] # all iso_d which should stay in dataset
+  d_3b        <- d_3a$iso_d
+  d_3         <- d_2[d_2$iso_d %in% d_3b,] 
+  num.ind.var <- length(x) #independent variables apart from distance
+  rm(data); rm(d); rm(d_2a);rm(d_2b); rm(d_2); rm(d_3a); rm(d_3b)
+  
+  # Taking ratios, ratk --------------------------------------------------------
+  
+  d_3$lXinratk  <- NA
+  d_3$ldistratk <- NA
+  
+  for(i in unique(d_3$iso_o)){
+    
+    d_3[d_3$iso_o==i,]$lXinratk <- d_3[d_3$iso_o==i,]$y_log - d_3[d_3$iso_o==i & d_3$iso_d==k,]$y_log
+    d_3[d_3$iso_o==i,]$ldistratk <- d_3[d_3$iso_o==i,]$dist_log - d_3[d_3$iso_o==i & d_3$iso_d==k,]$dist_log
+  }
+  
+  # Taking ratios, ratk, for the other independent variables -------------------
+  
+  ind.var.ratk                  <- list(length=num.ind.var+1)
+  ind.var.ratk[[num.ind.var+1]] <- d_3$iso_o
+  
+  for(j in 1:num.ind.var){
+    ind.var.ratk[[j]] <- rep(NA, times=nrow(d_3))
+  }
+  
+  for(j in 1:num.ind.var){
+    for(i in unique(d_3$iso_o)){
+      ind.var.ratk[[j]][ind.var.ratk[[num.ind.var+1]]==i] <- ((d_3[d_3$iso_o==i,])[x[j]])[,1] - (d_3[d_3$iso_o==i & d_3$iso_d==k,])[x[j]][,1]
+    }
+  }
+  
+  for(j in 1:length(x)){
+    d_3[x[j]]  <-  ind.var.ratk[[j]]
+  }
+  
+  # Taking the ratio of ratios, rat --------------------------------------------
+  
+  d_3$lXinrat  <- NA
+  d_3$ldistrat <- NA
+  
+  for(i in unique(d_3$iso_d)){
+    
+    d_3[d_3$iso_d==i,]$lXinrat  <- d_3[d_3$iso_d==i,]$lXinratk - d_3[d_3$iso_d==i & d_3$iso_o==ell,]$lXinratk
+    d_3[d_3$iso_d==i,]$ldistrat <- d_3[d_3$iso_d==i,]$ldistratk - d_3[d_3$iso_d==i & d_3$iso_o==ell,]$ldistratk
+  }
+  
+  d_3$y_log_rat    <- d_3$lXinrat
+  d_3$dist_log_rat <- d_3$ldistrat
+  
+  # Taking the ratio of ratios, rat, for the other independent variables -------
+  
+  ind.var.rat                  <- list(length=num.ind.var+1)
+  ind.var.rat[[num.ind.var+1]] <- d_3$iso_d
+  
+  for(j in 1:num.ind.var){
+    ind.var.rat[[j]] <- rep(NA, times=nrow(d_3))
+  }
+  
+  for(j in 1:num.ind.var){
+    for(i in unique(d_3$iso_d)){
+      
+      ind.var.rat[[j]][ind.var.rat[[num.ind.var+1]]==i] <- ((d_3[d_3$iso_d==i,])[x[j]])[,1] - (d_3[d_3$iso_d==i & d_3$iso_o==ell,])[x[j]][,1]
+    }
+  }
+  
+  for(j in 1:length(x)){
+    d_3[x[j]]  <-  ind.var.rat[[j]]
+  }
+  
+  # Model ----------------------------------------------------------------------
+  
+  x_rat <- paste0(x,"_rat")
+  
+  # new row in dataset for independent _rat variable
+  for(j in x){
+    l        <- which(x == j)
+    rat      <- x_rat[l]
+    d_3[rat] <- NA
+    d_3[rat] <- d_3[x[l]]
+  }
+  
+  vars  <- paste(c("dist_log_rat", x_rat), collapse=" + ")
+  form  <- paste("y_log_rat","~",vars)
+  form2 <- stats::as.formula(form)
+  
+  model_tetrads        <- stats::lm(form2, data = d_3)
+  cluster.formula      <- ~ iso_o + iso_d
+  model_tetrads_vcov   <- multiwayvcov::cluster.vcov(model=model_tetrads, cluster = cluster.formula)
+  model_tetrads_robust <- lmtest::coeftest(x=model_tetrads, vcov=model_tetrads_vcov)
+  
+  # Return ---------------------------------------------------------------------
+  
+  if(multiway_vcov == TRUE){
+    summary_ted              <- .robustsummary.lm(model_tetrads, robust=TRUE)
+    summary_ted$coefficients <- model_tetrads_robust[1:length(rownames(model_tetrads_robust)),]
+    return_object            <- summary_ted
+    return_object$call       <- form2
+    return(return_object)}
+  
+  if(multiway_vcov == FALSE){
+    return_object            <- .robustsummary.lm(model_tetrads, robust=FALSE)
+    return_object$call       <- form2
+    return(return_object)}
+  
+}
+Tetrads()
+
+# tetrads nueva -----------------------------------------------------------
+
+reference_countries = c("JPN", "USA")
+multiway = FALSE
+#comente 679 y 685 sino da error pq no encuentra form2
+tetrads <- function() {
+  # Checks ------------------------------------------------------------------
+  stopifnot(is.data.frame(data))
+  stopifnot(is.logical(multiway))
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  stopifnot(is.character(reference_countries) | all(reference_countries %in% colnames(data)) | length(reference_countries) == 2)
+  
+  # Split input vectors -----------------------------------------------------
+  code_o <- codes[1]
+  code_d <- codes[2]
+  
+  filter_o <- reference_countries[1]
+  filter_d <- reference_countries[2]
+  
+  distance <- regressors[1]
+  additional_regressors <- regressors[-1]
+  
+  # Discarding unusable observations ----------------------------------------
+  d <- data %>% 
+    filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>% 
+    filter_at(vars(!!sym(distance)), any_vars(is.finite(!!sym(distance)))) %>% 
+    
+    filter_at(vars(!!sym(dependent_variable)), any_vars(!!sym(dependent_variable) > 0)) %>% 
+    filter_at(vars(!!sym(dependent_variable)), any_vars(is.finite(!!sym(dependent_variable))))
+  
+  # Transforming data, logging distances ---------------------------------------
+  d <- d %>% 
+    mutate(
+      dist_log = log(!!sym(distance))
+    )
+  
+  # Transforming data, logging flows -------------------------------------------
+  d <- d %>% 
+    mutate(
+      y_log_tetrads = log(!!sym(dependent_variable))
+    )
+  
+  # Truncating dataset to only those countries which trade with reference
+  # importer and exporter ------------------------------------------------------
+  d2_filter_d <- d %>% 
+    filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) == filter_d)) %>% 
+    select(!!sym(code_o)) %>% 
+    distinct() %>% 
+    as_vector()
+  
+  d2 <- d %>% 
+    filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) %in% d2_filter_d))
+  
+  d2_filter_o <- d2 %>% 
+    filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) == filter_o)) %>% 
+    select(!!sym(code_d)) %>% 
+    distinct() %>% 
+    as_vector()
+  
+  d2 <- d2 %>% 
+    filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) %in% d2_filter_o))
+  
+  # Taking ratios, ratk --------------------------------------------------------
+  d2 <- d2 %>% 
+    filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) == filter_d)) %>% 
+    select(!!sym("code_o"), y_log_tetrads_d = y_log_tetrads, dist_log_d = dist_log) %>% 
+    left_join(d2, ., by = code_o) %>% 
+    mutate(
+      lXinratk = y_log_tetrads - y_log_tetrads_d,
+      ldistratk = dist_log - dist_log_d
+    ) %>% 
+    select(-y_log_tetrads_d, -dist_log_d)
+  
+  # Taking ratios, ratk, for the other independent variables -------------------
+  d2 <- d2 %>% 
+    select(c(!!sym("code_o"), !!sym("code_d"), regressors)) %>% 
+    gather(key, value, -!!sym("code_o"), -!!sym("code_d")) %>% 
+    left_join(
+      d2 %>% 
+        filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) == filter_d)) %>% 
+        select(c(!!sym("code_o"), regressors)) %>% 
+        gather(key, value, -!!sym("code_o")), by = c(code_o, "key")
+    ) %>% 
+    mutate(value = value.x - value.y) %>% 
+    select(c(!!sym("code_o"), !!sym("code_d"), "key", "value")) %>% 
+    spread(key, value) %>% 
+    left_join(d2 %>% select(-one_of(regressors)), by = c(code_o, code_d))
+  
+  # Taking the ratio of ratios, rat --------------------------------------------
+  d2 <- d2 %>% 
+    filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) == filter_o)) %>% 
+    select(!!sym("code_d"), lXinratk_o = lXinratk, ldistratk_o = ldistratk) %>% 
+    left_join(d2, ., by = code_d) %>% 
+    mutate(
+      lXinrat = lXinratk - lXinratk_o,
+      ldistrat = ldistratk - ldistratk_o
+    ) %>% 
+    select(-lXinratk_o, -ldistratk_o) %>% 
+    mutate(
+      y_log_rat = lXinrat,
+      dist_log_rat = ldistrat
+    )
+  
+  # Taking the ratio of ratios, rat, for the other independent variables -------
+  d2 <- d2 %>% 
+    select(c(!!sym("code_o"), !!sym("code_d"), additional_regressors)) %>% 
+    gather(key, value, -!!sym("code_o"), -!!sym("code_d")) %>% 
+    left_join(
+      d2 %>% 
+        filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) == filter_o)) %>% 
+        select(c(!!sym("code_d"), additional_regressors)) %>% 
+        gather(key, value, -!!sym("code_d"))    ,
+      by = c(code_d, "key")
+    ) %>% 
+    mutate(
+      key = paste0(key, "_rat"),
+      value = value.x - value.y
+    ) %>% 
+    select(c(!!sym("code_o"), !!sym("code_d"), "key", "value")) %>% 
+    spread(key, value) %>% 
+    left_join(d2 %>% select(-one_of(regressors)), by = c(code_o, code_d)) %>% 
+    select(ends_with("_rat"), codes)
+  
+  # Model ----------------------------------------------------------------------
+  additional_regressors <- paste0(additional_regressors, "_rat")
+  form <- stats::as.formula(
+    sprintf("y_log_rat ~ dist_log_rat + %s", paste(additional_regressors, collapse = " + "))
+  )
+  form2 <- as.formula(sprintf("~ %s + %s", code_o, code_d))
+  model_tetrads <- stats::lm(form, data = d2)
+  model_tetrads_vcov <- multiwayvcov::cluster.vcov(model = model_tetrads, cluster = form2)
+  model_tetrads_robust <- lmtest::coeftest(x = model_tetrads, vcov = model_tetrads_vcov)
+  
+  # Return ---------------------------------------------------------------------
+  if (multiway == TRUE) {
+    summary_ted              <- robust_summary(model_tetrads, robust = TRUE)
+    summary_ted$coefficients <- model_tetrads_robust[1:length(rownames(model_tetrads_robust)),]
+    return_object            <- summary_ted
+    return_object$call       <- form
+    return(return_object)
+  }
+  
+  if (multiway == FALSE) {
+    return_object            <- robust_summary(model_tetrads, robust = FALSE)
+    return_object$call       <- form
+    return(return_object)
+  }
+}
+tetrads()
