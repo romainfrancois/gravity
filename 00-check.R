@@ -1865,8 +1865,7 @@ tetrads <- function() {
       y_log_tetrads = log(!!sym(dependent_variable))
     )
   
-  # Truncating dataset to only those countries which trade with reference
-  # importer and exporter ------------------------------------------------------
+  # Truncating dataset to reference importer and exporter partners -------------
   d2_filter_d <- d %>% 
     filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) == filter_d)) %>% 
     select(!!sym(code_o)) %>% 
@@ -1886,63 +1885,64 @@ tetrads <- function() {
     filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) %in% d2_filter_o))
   
   # Taking ratios, ratk --------------------------------------------------------
-  d2 <- d2 %>% 
-    filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) == filter_d)) %>% 
-    select(!!sym("code_o"), y_log_tetrads_d = y_log_tetrads, dist_log_d = dist_log) %>% 
-    left_join(d2, ., by = code_o) %>% 
+  d2 <- left_join(
+    d2,
+    d2 %>% 
+      filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) == filter_d)) %>% 
+      select(!!sym("code_o"), y_log_tetrads_d = !!sym("y_log_tetrads"), dist_log_d = !!sym("dist_log")),
+    by = code_o
+  ) %>% 
     mutate(
-      lXinratk = y_log_tetrads - y_log_tetrads_d,
-      ldistratk = dist_log - dist_log_d
+      lXinratk = !!sym("y_log_tetrads") - !!sym("y_log_tetrads_d"),
+      ldistratk = !!sym("dist_log") - !!sym("dist_log_d")
     ) %>% 
-    select(-y_log_tetrads_d, -dist_log_d)
+    select(-!!sym("y_log_tetrads_d"), -!!sym("dist_log_d"))
   
   # Taking ratios, ratk, for the other independent variables -------------------
   d2 <- d2 %>% 
     select(c(!!sym("code_o"), !!sym("code_d"), regressors)) %>% 
-    gather(key, value, -!!sym("code_o"), -!!sym("code_d")) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym("code_o"), -!!sym("code_d")) %>% 
     left_join(
       d2 %>% 
         filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) == filter_d)) %>% 
         select(c(!!sym("code_o"), regressors)) %>% 
-        gather(key, value, -!!sym("code_o")), by = c(code_o, "key")
+        gather(!!sym("key"), !!sym("value"), -!!sym("code_o")), by = c(code_o, "key")
     ) %>% 
-    mutate(value = value.x - value.y) %>% 
+    mutate(value = !!sym("value.x") - !!sym("value.y")) %>% 
     select(c(!!sym("code_o"), !!sym("code_d"), "key", "value")) %>% 
-    spread(key, value) %>% 
+    spread(!!sym("key"), !!sym("value")) %>% 
     left_join(d2 %>% select(-one_of(regressors)), by = c(code_o, code_d))
   
   # Taking the ratio of ratios, rat --------------------------------------------
-  d2 <- d2 %>% 
-    filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) == filter_o)) %>% 
-    select(!!sym("code_d"), lXinratk_o = lXinratk, ldistratk_o = ldistratk) %>% 
-    left_join(d2, ., by = code_d) %>% 
+  d2 <- left_join(
+    d2,
+    d2 %>% 
+      filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) == filter_o)) %>% 
+      select(!!sym("code_d"), lXinratk_o = !!sym("lXinratk"), ldistratk_o = !!sym("ldistratk")),
+    by = code_d
+  ) %>% 
     mutate(
-      lXinrat = lXinratk - lXinratk_o,
-      ldistrat = ldistratk - ldistratk_o
+      y_log_rat = !!sym("lXinratk") - !!sym("lXinratk_o"),
+      dist_log_rat = !!sym("ldistratk") - !!sym("ldistratk_o")
     ) %>% 
-    select(-lXinratk_o, -ldistratk_o) %>% 
-    mutate(
-      y_log_rat = lXinrat,
-      dist_log_rat = ldistrat
-    )
+    select(-!!sym("lXinratk_o"), -!!sym("ldistratk_o"))
   
   # Taking the ratio of ratios, rat, for the other independent variables -------
   d2 <- d2 %>% 
     select(c(!!sym("code_o"), !!sym("code_d"), additional_regressors)) %>% 
-    gather(key, value, -!!sym("code_o"), -!!sym("code_d")) %>% 
+    gather(!!sym("key"), !!sym("value"), -!!sym("code_o"), -!!sym("code_d")) %>% 
     left_join(
       d2 %>% 
         filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) == filter_o)) %>% 
         select(c(!!sym("code_d"), additional_regressors)) %>% 
-        gather(key, value, -!!sym("code_d"))    ,
-      by = c(code_d, "key")
+        gather(!!sym("key"), !!sym("value"), -!!sym("code_d")), by = c(code_d, "key")
     ) %>% 
     mutate(
-      key = paste0(key, "_rat"),
-      value = value.x - value.y
+      key = paste0(!!sym("key"), "_rat"),
+      value = !!sym("value.x") - !!sym("value.y")
     ) %>% 
     select(c(!!sym("code_o"), !!sym("code_d"), "key", "value")) %>% 
-    spread(key, value) %>% 
+    spread(!!sym("key"), !!sym("value")) %>% 
     left_join(d2 %>% select(-one_of(regressors)), by = c(code_o, code_d)) %>% 
     select(ends_with("_rat"), codes)
   
