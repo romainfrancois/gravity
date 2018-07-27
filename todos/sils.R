@@ -61,7 +61,8 @@
 #' iteration for the estimation to stop. The default is set to 4. 
 #' 
 #' @param robust robust (type: logic) determines whether a robust 
-#' variance-covariance matrix should be used. The default is set to \code{TRUE}. 
+#' variance-covariance matrix should be used. The default is set to \code{TRUE}.
+#' 
 #' If set \code{TRUE} the estimation results are consistent with the 
 #' Stata code provided at the website
 #' \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
@@ -158,7 +159,6 @@
 #' @seealso \code{\link[stats]{lm}}, \code{\link[lmtest]{coeftest}}, 
 #' \code{\link[sandwich]{vcovHC}}
 #' 
-#' 
 #' @export 
 #' 
 sils <- function(dependent_variable, regressors, incomes, maxloop = 100, dec_places = 4, robust = TRUE, verbose = FALSE, data, ...) {
@@ -168,7 +168,6 @@ sils <- function(dependent_variable, regressors, incomes, maxloop = 100, dec_pla
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
   stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
   stopifnot(is.character(incomes) | all(incomes %in% colnames(data)) | length(incomes) == 2)
-  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
   stopifnot(maxloop > 0)
   stopifnot(dec_places >= 1)
   
@@ -220,65 +219,69 @@ sils <- function(dependent_variable, regressors, incomes, maxloop = 100, dec_pla
   coef_additional_regressors <- matrix(beta)
   
   # Begin iterations -----------------------------------------------------------
-  while (loop <= maxloop & abs(beta_distance - beta_distance_old) > dec.point & prod(abs(beta - beta_old) > dec.point) == 1) {
+  while (loop <= maxloop & 
+         abs(beta_distance - beta_distance_old) > dec.point & 
+         prod(abs(beta - beta_old) > dec.point) == 1) {
     # Updating betas -----------------------------------------------------------
     beta_distance_old <- beta_distance
     beta_old <- beta
     
     # Updating transaction costs -----------------------------------------------
-    costs_a <- data.frame(matrix(nrow = length(d[y][,1]), ncol = length(additional_regressors)))
+    costs_a <- data.frame(matrix(nrow = nrow(d), ncol = length(additional_regressors)))
     for (j in 1:length(additional_regressors)) {costs_a[,j] <- beta[j] * d[additional_regressors[j]][,1]}
+    Q = costs_a
+    #W <- map_df(1:length(additional_regressors), function(j) beta[j] * select(d, additional_regressors[j]))
+    W <- beta * select(d, additional_regressors)
+    
     costs_b <- apply(X = costs_a, MARGIN = 1, FUN = sum)
+    # DIVIDIR EN DOS VECTORES Y SUMAR CON MAP2
     d$t_ij  <- exp(beta_distance * d$dist_log + costs_b) 
     
     # Contraction mapping ------------------------------------------------------
-    
     d$P_j_old <- 0
     d$P_i_old <- 0
     j         <- 1
     
     while (j <= maxloop & 
-          sum(abs(d$P_j - d$P_j_old)) > dec.point & 
-          sum(abs(d$P_i - d$P_i_old)) > dec.point) {
-      
+           sum(abs(d$P_j - d$P_j_old)) > dec.point & 
+           sum(abs(d$P_i - d$P_i_old)) > dec.point) {
       d$P_j_old <- d$P_j
       d$P_i_old <- d$P_i
       
       # Inward MR --------------------------------------------------------------
-      
       for (i in unique(d$iso_d)) {
         d$P_j[d$iso_d == i] <- sum(d$t_ij[d$iso_d == i] * 
-                                   d[inc_o][,1][d$iso_d == i] / 
-                                   d$P_i[d$iso_d == i])
+                                     d[inc_o][,1][d$iso_d == i] / 
+                                     d$P_i[d$iso_d == i])
       }
       
-      # Outwad MR --------------------------------------------------------------
-      
+      # Outward MR -------------------------------------------------------------
       for (i in unique(d$iso_o)) {
         d$P_i[d$iso_o == i] <- sum(d$t_ij[d$iso_o == i] * 
-                                   d[inc_d][,1][d$iso_o == i] / 
-                                   d$P_j[d$iso_o == i])
+                                     d[inc_d][,1][d$iso_o == i] / 
+                                     d$P_j[d$iso_o == i])
       }
       
       j <- j + 1
       
       if (j == maxloop) {
-        warning("The inner iteration did not converge before the inner loop reached maxloop=",maxloop," iterations")
+        warning(
+          "The inner iteration did not converge before the inner loop reached maxloop=", 
+          maxloop, 
+          " iterations"
+        )
       }
-      
     }
     
     # Model --------------------------------------------------------------------
-    
     vars       <- paste(c("dist_log", additional_regressors), collapse = " + ")
     form       <- paste("log(d[y][,1]) - log((d[inc_o][,1] * d[inc_d][,1]) /
-                    (d$P_i * d$P_j))","~",vars)
+                        (d$P_i * d$P_j))","~",vars)
     form2      <- stats::as.formula(form)
     
     model_sils <- stats::lm(form2, data = d)
     
     # Updating coefficients ----------------------------------------------------
-    
     beta_distance <- stats::coef(model_sils)[2]
     for (j in 1:length(additional_regressors)) {beta[j] <- stats::coef(model_sils)[j + 2]}
     
@@ -287,13 +290,12 @@ sils <- function(dependent_variable, regressors, incomes, maxloop = 100, dec_pla
     for (j in 1:length(additional_regressors)) {coef_additional_regressors[additional_regressors[j]][loop + 2,] <- beta[j]}
     
     # Coefficients -------------------------------------------------------------
-    
     coef.sils <- cbind(loop = c(1:loop), dist = as.numeric(coef.dist)[2:(loop + 1)], 
                        coef_additional_regressors[2:(loop + 1),])
     
     if (verbose == TRUE) {
-      cat("This is round",loop,"\n")
-      cat("The coefficients are",beta_distance,beta,"\n")
+      cat("This is round", loop, "\n")
+      cat("The coefficients are", beta_distance,beta, "\n")
     }
     
     loop <- loop + 1 
@@ -304,14 +306,13 @@ sils <- function(dependent_variable, regressors, incomes, maxloop = 100, dec_pla
   }
   
   # Return --------------------------------------------------------------------- 
-  
   if (robust == TRUE) {
-    return_object      <- .robustsummary.lm(model_sils, robust = TRUE)
+    return_object      <- robust_summary(model_sils, robust = TRUE)
     return_object$call <- form2
     return(return_object)}
   
   if (robust == FALSE) {
-    return_object      <- .robustsummary.lm(model_sils, robust = FALSE)
+    return_object      <- robust_summary(model_sils, robust = FALSE)
     return_object$call <- form2
     return(return_object)
   }
