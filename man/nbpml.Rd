@@ -7,33 +7,33 @@
 nbpml(dependent_variable, regressors, robust = TRUE, data, ...)
 }
 \arguments{
-\item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
+\item{dependent_variable}{name (type: character) of the dependent variable in the dataset
 \code{data} (e.g. trade flows).}
 
 \item{regressors}{name (type: character) of the regressors to include in the model.
 
-Include the distance variable in the dataset \code{data} containing a measure of 
-distance between all pairs of bilateral partners and bilateral variables that should 
-be taken as the independent variables in the estimation. 
+Include the distance variable in the dataset \code{data} containing a measure of
+distance between all pairs of bilateral partners and bilateral variables that should
+be taken as the independent variables in the estimation.
 
 The distance is logged automatically when the function is executed.
- 
+
 Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
 
 Interaction terms can be added.
 
 Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
 
-\item{robust}{robust (type: logical) determines whether a robust 
+\item{robust}{robust (type: logical) determines whether a robust
 variance-covariance matrix should be used. By default is set to \code{TRUE}.}
 
 \item{data}{name of the dataset to be used (type: character).
 
-To estimate gravity equations you need a square dataset including bilateral 
-flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character 
-(e.g. \code{iso_o} for the country of origin and \code{iso_d} for the 
-destination country), a distance measure defined by the argument \code{distance} 
-and other potential influences (e.g. contiguity and common currency) given as a vector in 
+To estimate gravity equations you need a square dataset including bilateral
+flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
+(e.g. \code{iso_o} for the country of origin and \code{iso_d} for the
+destination country), a distance measure defined by the argument \code{distance}
+and other potential influences (e.g. contiguity and common currency) given as a vector in
 \code{regressors} are required.
 
 All dummy variables should be of type numeric (0/1).
@@ -42,11 +42,11 @@ Make sure the ISO codes are of type "character".
 
 If an independent variable is defined as a ratio, it should be logged.
 
-The user should perform some data cleaning beforehand to remove observations that contain entries that 
+The user should perform some data cleaning beforehand to remove observations that contain entries that
 can distort estimates.
 
-When using panel data, a variable for the time may be included in the 
-dataset. Note that the variable for the time dimension should be of 
+When using panel data, a variable for the time may be included in the
+dataset. Note that the variable for the time dimension should be of
 type factor.
 
 The function allows zero flows but will remove zero distances.}
@@ -70,7 +70,7 @@ It is estimated via \code{\link[MASS]{glm.nb}}
 using the negative binomial distribution and a log-link.
 
 For similar functions, utilizing the multiplicative form via the log-link,
-but different distributions, see \code{\link[gravity]{nbpml}}, \code{\link[gravity]{gpml}}, 
+but different distributions, see \code{\link[gravity]{nbpml}}, \code{\link[gravity]{gpml}},
 and \code{\link[gravity]{nls}}.
 
 \code{nbpml} estimation can be used for both, cross-sectional as well as
@@ -97,8 +97,8 @@ as well as the decision about which effects to include in the estimation.
 When using panel data, the parameter and variance estimation of the models
 may have to be changed accordingly.
 
-For a comprehensive overview of gravity models for panel data 
-see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textual}{gravity} and 
+For a comprehensive overview of gravity models for panel data
+see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textual}{gravity} and
 \insertCite{Head2010;textual}{gravity} as well as the references therein.
 }
 \examples{
@@ -106,7 +106,7 @@ see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textu
 # Example for data with zero trade flows
 data(gravity_zeros)
 
-nbpml(dependent_variable = "flow", regressors = c("distw", "rta","iso_o","iso_d"), 
+nbpml(dependent_variable = "flow", regressors = c("distw", "rta","iso_o","iso_d"),
 robust = TRUE, data = gravity_zeros)
 
 # Example for data without zero trade flows
@@ -115,7 +115,7 @@ data(gravity_no_zeros)
 gravity_no_zeros$lgdp_o <- log(gravity_no_zeros$gdp_o)
 gravity_no_zeros$lgdp_d <- log(gravity_no_zeros$gdp_d)
 
-nbpml(dependent_variable = "flow", regressors = c("distw","rta","lgdp_o","lgdp_d"), 
+nbpml(dependent_variable = "flow", regressors = c("distw","rta","lgdp_o","lgdp_d"),
 robust = TRUE, data = gravity_no_zeros)
 }
 
@@ -131,7 +131,7 @@ gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o \%in\% countries_chosen_zeros,]
-nbpml(dependent_variable = "flow", regressors = c("distw","rta","lgdp_o","lgdp_d"), 
+nbpml(dependent_variable = "flow", regressors = c("distw","rta","lgdp_o","lgdp_d"),
 robust = TRUE, data = grav_small_zeros)
 }
 

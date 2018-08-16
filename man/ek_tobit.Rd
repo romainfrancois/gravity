@@ -8,44 +8,44 @@ ek_tobit(dependent_variable, regressors, code_destination, robust = TRUE,
   data, ...)
 }
 \arguments{
-\item{dependent_variable}{name (type: character) of the dependent variable in the dataset 
+\item{dependent_variable}{name (type: character) of the dependent variable in the dataset
 \code{data} (e.g. trade flows).
 
-This variable is logged and then used as the dependent variable in the estimation. 
+This variable is logged and then used as the dependent variable in the estimation.
 
-As the log of zero is not defined, all flows equal to zero are replaced by a left open interval 
+As the log of zero is not defined, all flows equal to zero are replaced by a left open interval
 with the logged minimum trade flow of the respective importing country as right border.}
 
 \item{regressors}{name (type: character) of the regressors to include in the model.
 
-Include the distance variable in the dataset \code{data} containing a measure of 
-distance between all pairs of bilateral partners and bilateral variables that should 
+Include the distance variable in the dataset \code{data} containing a measure of
+distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.
 
-Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes}. 
+Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes}.
 
 Interaction terms can be added.
 
 Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
 
-\item{code_destination}{variable name (type: character) of the label of the country 
-of destination (e.g. ISO-3 code from the \code{iso_d} variable in the example datasets). The variables 
+\item{code_destination}{variable name (type: character) of the label of the country
+of destination (e.g. ISO-3 code from the \code{iso_d} variable in the example datasets). The variables
 are grouped by using \code{iso_d} to obtain estimates.}
 
-\item{robust}{robust (type: logical) determines whether a robust 
+\item{robust}{robust (type: logical) determines whether a robust
 variance-covariance matrix should be used. By default is set to \code{TRUE}.
 
-If \code{robust = TRUE} the estimation results are consistent with the 
+If \code{robust = TRUE} the estimation results are consistent with the
 Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 when choosing robust estimation.}
 
 \item{data}{name of the dataset to be used (type: character).
 
-To estimate gravity equations you need a square dataset including bilateral 
-flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character 
-(e.g. \code{iso_o} for the country of origin and \code{iso_d} for the 
-destination country), a distance measure defined by the argument \code{distance} 
-and other potential influences (e.g. contiguity and common currency) given as a vector in 
+To estimate gravity equations you need a square dataset including bilateral
+flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
+(e.g. \code{iso_o} for the country of origin and \code{iso_d} for the
+destination country), a distance measure defined by the argument \code{distance}
+and other potential influences (e.g. contiguity and common currency) given as a vector in
 \code{regressors} are required.
 
 All dummy variables should be of type numeric (0/1).
@@ -54,7 +54,7 @@ Make sure the ISO codes are of type "character".
 
 If an independent variable is defined as a ratio, it should be logged.
 
-The user should perform some data cleaning beforehand to remove observations that contain entries that 
+The user should perform some data cleaning beforehand to remove observations that contain entries that
 can distort estimates.
 
 The function allows zero flows but will remove zero distances.}
@@ -62,29 +62,29 @@ The function allows zero flows but will remove zero distances.}
 \item{...}{additional arguments to be passed to \code{ek_tobit}.}
 }
 \value{
-The function returns the summary of the estimated gravity model as a 
+The function returns the summary of the estimated gravity model as a
 \code{\link[survival]{survreg}}-object.
 }
 \description{
 \code{ek_tobit} estimates gravity models in their additive form
 by conducting a censored regression.
 
-It follows the \insertCite{Eaton2001;textual}{gravity} Tobit model where each country 
+It follows the \insertCite{Eaton2001;textual}{gravity} Tobit model where each country
 is assigned specific censoring bounds.
 }
 \details{
 \code{ek_tobit} represents the \insertCite{Eaton2001;textual}{gravity} Tobit model.
 
 When taking the log of the gravity equation flows equal to zero
-constitute a problem as their log is not defined. Therefore, in \code{ek_tobit} all values of 
+constitute a problem as their log is not defined. Therefore, in \code{ek_tobit} all values of
 the dependent variable are redefined as intervals.
 
-The positive observations have both interval bounds equal to their original value. 
+The positive observations have both interval bounds equal to their original value.
 
-For zero flows the interval is left open. The right border of the interval is set to the 
+For zero flows the interval is left open. The right border of the interval is set to the
 log of the minimum positive trade flow of the respective importing country.
 
-The defined data object of class \code{\link[survival]{Surv}} is then inserted 
+The defined data object of class \code{\link[survival]{Surv}} is then inserted
 in \code{\link[survival]{survreg}} for the parameter estimation.
 
 \code{ek_tobit} is designed to be consistent with the Stata code provided at
@@ -93,11 +93,11 @@ when choosing robust estimation.
 
 For other Tobit functions, see \code{\link[gravity]{tobit}}
 for a simple Tobit model where number \code{1} is added to all observations
-and \code{\link[gravity]{et_tobit}} for the Eaton and Tamura (1994) 
-threshold Tobit model where instead of simply adding number \code{1} 
+and \code{\link[gravity]{et_tobit}} for the Eaton and Tamura (1994)
+threshold Tobit model where instead of simply adding number \code{1}
 to the data the threshold is estimated.
 
-The function is designed for cross-sectional data, but can be extended to panel data using the 
+The function is designed for cross-sectional data, but can be extended to panel data using the
 \code{\link[survival]{survreg}} function.
 }
 \examples{
@@ -111,7 +111,7 @@ gravity_zeros <- gravity_zeros \%>\%
         lgdp_d = log(gdp_d)
     )
 
-ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"), 
+ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
 code_destination = "iso_d",
 robust = TRUE, data = gravity_zeros)
 }
@@ -128,7 +128,7 @@ gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o \%in\% countries_chosen_zeros,]
-ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"), 
+ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
 code_destination = "iso_d",
 robust = TRUE, data = grav_small_zeros)
 }
@@ -136,7 +136,7 @@ robust = TRUE, data = grav_small_zeros)
 }
 \references{
 For more information on gravity models, theoretical foundations and
-estimation methods in general see 
+estimation methods in general see
 
 \insertRef{Anderson1979}{gravity}
 
