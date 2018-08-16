@@ -211,7 +211,7 @@ tobit <- function(dependent_variable, regressors, added_constant = 1, data, ...)
     right = Inf,
     data = d,
     start = rep(0, 2 + length(regressors)),
-    method = "SANN"
+    method = "BHHH"
   )
 
   # Return ---------------------------------------------------------------------
