@@ -221,7 +221,7 @@ et_tobit <- function(dependent_variable, regressors, data, ...) {
     right = Inf,
     data = d,
     start = rep(0, 2 + length(regressors)),
-    method = "SANN"
+    method = "BHHH"
   )
 
   # Return ------------------------------------------------------------------
