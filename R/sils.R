@@ -284,7 +284,7 @@ sils <- function(dependent_variable, regressors, incomes, maxloop = 100, dec_pla
     d <- d %>%
       mutate(
         y_sils = log(!!sym(dependent_variable)) -
-          log(!!sym(inc_o) * !!sym(inc_d)) / (!!sym("P_i") * !!sym("P_j"))
+          log((!!sym(inc_o) * !!sym(inc_d)) / (!!sym("P_i") * !!sym("P_j")))
       )
 
     vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
