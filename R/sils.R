@@ -57,7 +57,7 @@
 #' The default is set to 100. There will be a warning if the iterations
 #' did not converge.
 #'
-#' @param dec_places number of decimal places that should not change after a new
+#' @param decimal_places number of decimal places that should not change after a new
 #' iteration for the estimation to stop. The default is set to 4.
 #'
 #' @param robust robust (type: logic) determines whether a robust
@@ -161,7 +161,7 @@
 #'
 #' @export
 #'
-sils <- function(dependent_variable, regressors, incomes, maxloop = 100, dec_places = 4, robust = TRUE, verbose = FALSE, data, ...) {
+sils <- function(dependent_variable, regressors, incomes, maxloop=50, decimal_places=4, robust=TRUE, verbose=FALSE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(robust))
@@ -169,7 +169,7 @@ sils <- function(dependent_variable, regressors, incomes, maxloop = 100, dec_pla
   stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
   stopifnot(is.character(incomes) | all(incomes %in% colnames(data)) | length(incomes) == 2)
   stopifnot(maxloop > 0)
-  stopifnot(dec_places >= 1)
+  stopifnot(decimal_places >= 1)
 
   # Split input vectors -----------------------------------------------------
   inc_o <- incomes[1]
@@ -199,41 +199,50 @@ sils <- function(dependent_variable, regressors, incomes, maxloop = 100, dec_pla
     )
 
   loop <- 0
-  dec_point <- 10^(-dec_places)
-
+  dec.point <- 1 * 10^-decimal_places
   beta_distance <- 1
   beta_distance_old <- 0
-  coef_dist <- 1
+  coef.dist <- 1
 
-  beta <- rep(1, length(additional_regressors))
+  beta <- vector(length = length(additional_regressors))
   names(beta) <- additional_regressors
-
-  beta_old <- rep(0, length(additional_regressors))
+  for (j in 1:length(additional_regressors)) {
+    beta[j] <- 1
+  }
+  beta_old <- vector(length = length(additional_regressors))
   names(beta_old) <- additional_regressors
 
-  coef_x <- matrix(rbind(rep(1, length(additional_regressors))))
+  for (j in 1:length(additional_regressors)) {
+    beta_old[j] <- 0
+  }
 
-  coef_additional_regressors <- matrix(beta)
+  coef_additional_regressors <- data.frame(matrix(nrow = 1, ncol = length(additional_regressors)))
+  coef_additional_regressors[1, ] <- 1
+  names(coef_additional_regressors) <- additional_regressors
 
   # Begin iterations -----------------------------------------------------------
   while (loop <= maxloop &
-    abs(beta_distance - beta_distance_old) > dec_places &
-    prod(abs(beta - beta_old) > dec_places) == 1) {
+    abs(beta_distance - beta_distance_old) > dec.point &
+    prod(abs(beta - beta_old) > dec.point) == 1) {
+
     # Updating betas -----------------------------------------------------------
     beta_distance_old <- beta_distance
-    beta_old <- beta
-
-    # Updating transaction costs -----------------------------------------------
-    costs <- matrix(nrow = nrow(d), ncol = length(additional_regressors))
-
     for (j in 1:length(additional_regressors)) {
-      costs[, j] <- beta[j] * as_vector(select(d, !!sym(additional_regressors[j])))
+      beta_old[j] <- beta[j]
     }
 
+    # Updating transaction costs -----------------------------------------------
+    costs <- data.frame(matrix(nrow = nrow(d), ncol = length(additional_regressors)))
+    for (j in 1:length(additional_regressors)) {
+      costs[, j] <- beta[j] * d[additional_regressors[j]][, 1]
+    }
+    costs <- apply(X = costs, MARGIN = 1, FUN = sum)
+
     d <- d %>%
+      ungroup() %>%
       mutate(
         bd = beta_distance,
-        co = rowSums(costs),
+        co = costs,
         t_ij = exp(!!sym("bd") * !!sym("dist_log") + !!sym("co"))
       )
 
@@ -247,8 +256,8 @@ sils <- function(dependent_variable, regressors, incomes, maxloop = 100, dec_pla
     j <- 1
 
     while (j <= maxloop &
-      sum(abs(d$P_j - d$P_j_old)) > dec_places &
-      sum(abs(d$P_i - d$P_i_old)) > dec_places) {
+      sum(abs(d$P_j - d$P_j_old)) > dec.point &
+      sum(abs(d$P_i - d$P_i_old)) > dec.point) {
       d <- d %>%
         mutate(
           P_j_old = !!sym("P_j"),
@@ -272,49 +281,37 @@ sils <- function(dependent_variable, regressors, incomes, maxloop = 100, dec_pla
       j <- j + 1
 
       if (j == maxloop) {
-        warning(
-          "The inner iteration did not converge before the inner loop reached maxloop=",
-          maxloop,
-          " iterations"
-        )
+        warning("The inner iteration did not converge before the inner loop reached maxloop=", maxloop, " iterations")
       }
     }
 
     # Model --------------------------------------------------------------------
     d <- d %>%
       mutate(
-        y_sils = log(!!sym(dependent_variable)) -
+        y_log_sils = log(!!sym(dependent_variable)) -
           log((!!sym(inc_o) * !!sym(inc_d)) / (!!sym("P_i") * !!sym("P_j")))
       )
 
     vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
-    form <- stats::as.formula(paste("y_sils", "~", vars))
+    form <- stats::as.formula(paste("y_log_sils", "~", vars))
 
     model_sils <- stats::lm(form, data = d)
 
     # Updating coefficients ----------------------------------------------------
     beta_distance <- stats::coef(model_sils)[2]
-
     for (j in 1:length(additional_regressors)) {
       beta[j] <- stats::coef(model_sils)[j + 2]
     }
 
-    coef_dist <- c(coef_dist, beta_distance)
-
-    coef_additional_regressors <- rbind(
-      as.numeric(coef_additional_regressors),
-      rep(0, times = length(additional_regressors))
-    )
-
-    colnames(coef_additional_regressors) <- additional_regressors
-
+    coef.dist <- c(coef.dist, beta_distance)
+    coef_additional_regressors <- rbind(coef_additional_regressors, rep(0, times = length(additional_regressors)))
     for (j in 1:length(additional_regressors)) {
-      coef_additional_regressors[loop + 2, j] <- beta[j]
+      coef_additional_regressors[additional_regressors[j]][loop + 2, ] <- beta[j]
     }
 
     # Coefficients -------------------------------------------------------------
-    coef_sils <- cbind(
-      loop = c(1:loop), dist = as.numeric(coef_dist)[2:(loop + 1)],
+    coef.SILS <- cbind(
+      loop = c(1:loop), dist = as.numeric(coef.dist)[2:(loop + 1)],
       coef_additional_regressors[2:(loop + 1), ]
     )
 

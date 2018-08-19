@@ -4,8 +4,8 @@
 \alias{sils}
 \title{Structural Iterated Least Squares (SILS)}
 \usage{
-sils(dependent_variable, regressors, incomes, maxloop = 100, dec_places = 4,
-  robust = TRUE, verbose = FALSE, data, ...)
+sils(dependent_variable, regressors, incomes, maxloop = 50,
+  decimal_places = 4, robust = TRUE, verbose = FALSE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset
@@ -45,7 +45,7 @@ Write this argument as \code{c(income origin, income destination)}.}
 The default is set to 100. There will be a warning if the iterations
 did not converge.}
 
-\item{dec_places}{number of decimal places that should not change after a new
+\item{decimal_places}{number of decimal places that should not change after a new
 iteration for the estimation to stop. The default is set to 4.}
 
 \item{robust}{robust (type: logic) determines whether a robust

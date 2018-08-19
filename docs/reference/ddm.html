@@ -30,7 +30,7 @@
 
 <meta property="og:title" content="Double Demeaning (DDM) — ddm" />
 
-<meta property="og:description" content="ddm estimates gravity models via double demeaning the 
+<meta property="og:description" content="ddm estimates gravity models via double demeaning the
 left hand side and right hand side of the gravity equation." />
 <meta name="twitter:card" content="summary" />
 
@@ -59,7 +59,7 @@ left hand side and right hand side of the gravity equation." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.31</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.1</span>
       </span>
     </div>
 
@@ -109,7 +109,7 @@ left hand side and right hand side of the gravity equation." />
 
     <div class="ref-description">
     
-    <p><code>ddm</code> estimates gravity models via double demeaning the 
+    <p><code>ddm</code> estimates gravity models via double demeaning the
 left hand side and right hand side of the gravity equation.</p>
     
     </div>
@@ -121,47 +121,47 @@ left hand side and right hand side of the gravity equation.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>dependent_variable</th>
-      <td><p>name (type: character) of the dependent variable in the dataset 
+      <td><p>name (type: character) of the dependent variable in the dataset
 <code>data</code> (e.g. trade flows).</p>
 <p>This variable is logged and then used as the dependent variable in the estimation.</p></td>
     </tr>
     <tr>
       <th>regressors</th>
       <td><p>name (type: character) of the regressors to include in the model.</p>
-<p>Include the distance variable in the dataset <code>data</code> containing a measure of 
-distance between all pairs of bilateral partners and bilateral variables that should 
+<p>Include the distance variable in the dataset <code>data</code> containing a measure of
+distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.</p>
 <p>Write this argument as <code>c(distance, contiguity, common curreny, ...)</code>.</p></td>
     </tr>
     <tr>
       <th>codes</th>
-      <td><p>variable name (type: character) of the code of the country 
-of origin and destination (e.g. ISO-3 codes from the variables <code>iso_o</code> and <code>iso_d</code>) in the 
+      <td><p>variable name (type: character) of the code of the country
+of origin and destination (e.g. ISO-3 codes from the variables <code>iso_o</code> and <code>iso_d</code>) in the
 example datasets).</p>
 <p>The variables are grouped by using <code>iso_o</code> and <code>iso_d</code> to obtain estimates.</p>
 <p>Write this argument as <code>c(code origin, code destination)</code>.</p></td>
     </tr>
     <tr>
       <th>robust</th>
-      <td><p>robust (type: logical) determines whether a robust 
+      <td><p>robust (type: logical) determines whether a robust
 variance-covariance matrix should be used. By default is set to <code>TRUE</code>.</p>
-<p>If <code>robust = TRUE</code> the estimation results are consistent with the 
+<p>If <code>robust = TRUE</code> the estimation results are consistent with the
 Stata code provided at <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p></td>
     </tr>
     <tr>
       <th>data</th>
       <td><p>name of the dataset to be used (type: character).</p>
-<p>To estimate gravity equations you need a square dataset including bilateral 
-flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character 
-(e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
-destination country), a distance measure defined by the argument <code>distance</code> 
-and other potential influences (e.g. contiguity and common currency) given as a vector in 
+<p>To estimate gravity equations you need a square dataset including bilateral
+flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character
+(e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the
+destination country), a distance measure defined by the argument <code>distance</code>
+and other potential influences (e.g. contiguity and common currency) given as a vector in
 <code>regressors</code> are required.</p>
 <p>All dummy variables should be of type numeric (0/1).</p>
 <p>Make sure the ISO codes are of type "character".</p>
 <p>If an independent variable is defined as a ratio, it should be logged.</p>
-<p>The user should perform some data cleaning beforehand to remove observations that contain entries that 
+<p>The user should perform some data cleaning beforehand to remove observations that contain entries that
 can distort estimates.</p>
 <p>The function will remove zero flows and distances.</p></td>
     </tr>
@@ -173,7 +173,7 @@ can distort estimates.</p>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The function returns the summary of the estimated gravity model as an 
+    <p>The function returns the summary of the estimated gravity model as an
 <code><a href='http://www.rdocumentation.org/packages/stats/topics/lm'>lm</a></code>-object.</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
@@ -181,32 +181,32 @@ can distort estimates.</p>
     <p><code>ddm</code> is an estimation method for gravity models presented
 in Head and Mayer (2014)
 .</p>
-<p>Country specific effects are subdued due double demeaning. Hence, unilateral income 
+<p>Country specific effects are subdued due double demeaning. Hence, unilateral income
 proxies such as GDP cannot be considered as exogenous variables.</p>
 <p>Unilateral effect drop out due to double demeaning and therefore cannot be estimated.</p>
 <p><code>ddm</code> is designed to be consistent with the Stata code provided at
 <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p>
-<p>As, to our knowledge at the moment, there is no explicit literature covering 
-the estimation of a gravity equation by <code>ddm</code> using panel data, 
+<p>As, to our knowledge at the moment, there is no explicit literature covering
+the estimation of a gravity equation by <code>ddm</code> using panel data,
 we do not recommend to apply this method in this case.</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>For more information on Double Demeaning as well as information on gravity 
+    <p>For more information on Double Demeaning as well as information on gravity
 models, theoretical foundations and estimation methods in general see</p>
-<p>Head K and Mayer T (2014).
+<p>Head K, Mayer T (2014).
 &#8220;Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.&#8221;
-In Gopinath G, Helpman E and Rogoff K (eds.), <em>Handbook of International Economics</em>, volume 4 series Handbook of International Economics, pp. 131 - 195.
+In Gopinath G, Helpman E, Rogoff K (eds.), <em>Handbook of International Economics</em>, volume 4 series Handbook of International Economics, 131 - 195.
 Elsevier.
 doi: <a href='http://doi.org/https://doi.org/10.1016/B978-0-444-54314-1.00003-3'>https://doi.org/10.1016/B978-0-444-54314-1.00003-3</a>
 .</p>
 <p>as well as</p>
 <p>Anderson JE (1979).
 &#8220;A Theoretical Foundation for the Gravity Equation.&#8221;
-<em>The American Economic Review</em>, <b>69</b>(1), pp. 106--116.
+<em>The American Economic Review</em>, <b>69</b>(1), 106--116.
 ISSN 00028282, <a href='http://www.jstor.org/stable/1802501'>http://www.jstor.org/stable/1802501</a>.</p>
-<p>Anderson JE and van
+<p>Anderson JE, van
 Wincoop E (2001).
 &#8220;Gravity with Gravitas: A Solution to the Border Puzzle.&#8221;
 Technical Report 8079, National Bureau of Economic Research.
@@ -217,26 +217,26 @@ doi: <a href='http://doi.org/10.3386/w8079'>10.3386/w8079</a>
 Technical Report 16576, National Bureau of Economic Research.
 doi: <a href='http://doi.org/10.3386/w16576'>10.3386/w16576</a>
 .</p>
-<p>Baier SL and Bergstrand JH (2009).
+<p>Baier SL, Bergstrand JH (2009).
 &#8220;Bonus vetus OLS: A simple method for approximating international trade-cost effects using the gravity equation.&#8221;
-<em>Journal of International Economics</em>, <b>77</b>(1), pp. 77 - 85.
+<em>Journal of International Economics</em>, <b>77</b>(1), 77 - 85.
 ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2008.10.004'>https://doi.org/10.1016/j.jinteco.2008.10.004</a>
 .</p>
-<p>Baier SL and Bergstrand JH (2010).
+<p>Baier SL, Bergstrand JH (2010).
 &#8220;The Gravity Model in International Trade: Advances and Applications.&#8221;
 In van
-Bergeijk PAG and Brakman S (eds.), chapter 4.
+Bergeijk PAG, Brakman S (eds.), chapter 4.
 Cambridge University Press.
 doi: <a href='http://doi.org/10.1017/CBO9780511762109'>10.1017/CBO9780511762109</a>
 .</p>
-<p>Head K, Mayer T and Ries J (2010).
+<p>Head K, Mayer T, Ries J (2010).
 &#8220;The erosion of colonial trade linkages after independence.&#8221;
-<em>Journal of International Economics</em>, <b>81</b>(1), pp. 1 - 14.
+<em>Journal of International Economics</em>, <b>81</b>(1), 1 - 14.
 ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002'>https://doi.org/10.1016/j.jinteco.2010.01.002</a>
 .</p>
-<p>Silva JMCS and Tenreyro S (2006).
+<p>Silva JMCS, Tenreyro S (2006).
 &#8220;The Log of Gravity.&#8221;
-<em>The Review of Economics and Statistics</em>, <b>88</b>(4), pp. 641-658.
+<em>The Review of Economics and Statistics</em>, <b>88</b>(4), 641-658.
 doi: <a href='http://doi.org/10.1162/rest.88.4.641'>10.1162/rest.88.4.641</a>
 .</p>
 <p>and the citations therein.</p>
@@ -244,7 +244,7 @@ doi: <a href='http://doi.org/10.1162/rest.88.4.641'>10.1162/rest.88.4.641</a>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='http://www.rdocumentation.org/packages/stats/topics/lm'>lm</a></code>, <code><a href='http://www.rdocumentation.org/packages/lmtest/topics/coeftest'>coeftest</a></code>, 
+    <div class='dont-index'><p><code><a href='http://www.rdocumentation.org/packages/stats/topics/lm'>lm</a></code>, <code><a href='http://www.rdocumentation.org/packages/lmtest/topics/coeftest'>coeftest</a></code>,
 <code><a href='http://www.rdocumentation.org/packages/sandwich/topics/vcovHC'>vcovHC</a></code></p></div>
     
 

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Ordinary Least Squares (OLS) — ols • gravity</title>
+<title>Tetrads — tetrads • gravity</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -28,11 +28,10 @@
 
 
 
-<meta property="og:title" content="Ordinary Least Squares (OLS) — ols" />
+<meta property="og:title" content="Tetrads — tetrads" />
 
-<meta property="og:description" content="ols estimates gravity models in their traditional form
-via Ordinary Least Squares (ols). It does not consider Multilateral
-Resistance terms." />
+<meta property="og:description" content="tetrads estimates gravity models
+by taking the ratio of the ratio of flows." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -103,21 +102,20 @@ Resistance terms." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Ordinary Least Squares (OLS)</h1>
+    <h1>Tetrads</h1>
     
-    <div class="hidden name"><code>ols.Rd</code></div>
+    <div class="hidden name"><code>tetrads.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p><code>ols</code> estimates gravity models in their traditional form
-via Ordinary Least Squares (ols). It does not consider Multilateral
-Resistance terms.</p>
+    <p><code>tetrads</code> estimates gravity models
+by taking the ratio of the ratio of flows.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>ols</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='no'>incomes</span>, <span class='no'>codes</span>, <span class='kw'>uie</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>tetrads</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='no'>codes</span>, <span class='kw'>reference_countries</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"JPN"</span>,
+  <span class='st'>"USA"</span>), <span class='kw'>multiway</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -126,13 +124,7 @@ Resistance terms.</p>
       <th>dependent_variable</th>
       <td><p>name (type: character) of the dependent variable in the dataset
 <code>data</code> (e.g. trade flows).</p>
-<p>This variable is logged and then used as the dependent variable in the estimation.</p>
-<p>If <code>uie = TRUE</code> the dependent variable is divided by the product of
-unilateral incomes (e.g. GDP variables <code>inc_o</code> and <code>inc_d</code> in the example datasets) of the
-countries of interest and logged afterwards.</p>
-<p>If <code>uie=FALSE</code> the dependent variable is logged directly. The transformed variable is then used as
-the dependent variable and the logged income variables are used as independent variables in the
-estimation.</p></td>
+<p>This variable is logged and then used as the dependent variable in the estimation.</p></td>
     </tr>
     <tr>
       <th>regressors</th>
@@ -141,16 +133,8 @@ estimation.</p></td>
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.</p>
 <p>The distance is logged automatically when the function is executed.</p>
-<p>Unilateral metric variables such as GDPs can be added but those variables have to be logged first.</p>
-<p>Interaction terms can be added.</p>
+<p>Unilateral effects drop as the ratio of ratios is taken.</p>
 <p>Write this argument as <code>c(distance, contiguity, common curreny, ...)</code>.</p></td>
-    </tr>
-    <tr>
-      <th>incomes</th>
-      <td><p>variable name (type: character) of the income of the country of
-origin (e.g. <code>inc_o</code>) and destination (e.g. <code>inc_d</code>) in the dataset <code>data</code>.</p>
-<p>The dependent variable <code>dependent_variable</code> is divided by the product of the incomes.</p>
-<p>Write this argument as <code>c(income origin, income destination)</code>.</p></td>
     </tr>
     <tr>
       <th>codes</th>
@@ -161,23 +145,19 @@ example datasets).</p>
 <p>Write this argument as <code>c(code origin, code destination)</code>.</p></td>
     </tr>
     <tr>
-      <th>uie</th>
-      <td><p>Unitary Income Elasticities (type: logic) determines whether the
-parameters are to be estimated assuming unitary income elasticities. The default value is set
-to <code>FALSE</code>.</p>
-<p>If <code>uie</code> is set <code>TRUE</code>, the flows in the dependent variable <code>y</code> are divided
-by the product of the country pairs' incomes before the estimation.</p>
-<p>If <code>uie</code> is set to <code>FALSE</code>, the income variables are logged and taken as independent
-variables in the estimation. The variable names for the incomes should be included (e.g. <code>inc_o</code>
-and <code>inc_d</code> in the example datasets).</p></td>
+      <th>reference_countries</th>
+      <td><p>reference exporting and importing country, default is set to
+<code>c("JPN", "USA")</code></p>
+<p>Write this argument as <code>c(importing country, exporting country)</code>.</p></td>
     </tr>
     <tr>
-      <th>robust</th>
-      <td><p>robust (type: logical) determines whether a robust
-variance-covariance matrix should be used. By default is set to <code>TRUE</code>.</p>
-<p>If <code>robust = TRUE</code> the estimation results are consistent with the
-Stata code provided at <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
-when choosing robust estimation.</p></td>
+      <th>multiway</th>
+      <td><p>(type: logic) In case <code>multiway = TRUE</code>, the
+<code><a href='http://www.rdocumentation.org/packages/multiwayvcov/topics/cluster.vcov'>cluster.vcov</a></code> function is used for estimation following
+Cameron et al. (2011)
+ multi-way clustering of
+variance-covariance matrices.</p>
+<p>The default value is set to <code>TRUE</code>.</p></td>
     </tr>
     <tr>
       <th>data</th>
@@ -196,11 +176,15 @@ can distort estimates.</p>
 <p>When using panel data, a variable for the time may be included in the
 dataset. Note that the variable for the time dimension should be of
 type factor.</p>
+<p>The time variable can be used as a single dependent variable or interaction
+term with other variables such as country identifiers by inserting it into
+<code>regressors</code> or as an optional parameter.</p>
 <p>The function will remove zero flows and distances.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>additional arguments to be passed to <code>ols</code>.</p></td>
+      <td><p>additional arguments to be passed to functions used by
+<code>tetrads</code>.</p></td>
     </tr>
     </table>
     
@@ -211,49 +195,45 @@ type factor.</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p><code>ols</code> estimates gravity models in their traditional, additive,
-form via Ordinary Least Squares using the <code>lm</code> function.
-Multilateral Resistance terms are not considered by this function.</p>
-<p>As the coefficients for the country's incomes were often found to be close to
-unitary and unitary income elasticities are in line with some theoretical
-foundations on international trade, it is sometimes assumed that the income
-elasticities are equal to unity.</p>
-<p>In order to allow for the estimation with
-and without the assumption of unitary income elasticities, the option
-<code>uie</code> is built into <code>ols</code> with the default set to <code>FALSE</code>.</p>
-<p><code>ols</code> estimation can be used for both, cross-sectional and
+    <p><code>tetrads</code> is an estimation method for gravity models
+developed by Head et al. (2010)
+.</p>
+<p>The function <code>tetrads</code> utilizes the multiplicative form of the
+gravity equation. After choosing a reference exporter <code>A</code> and
+importer <code>B</code> one can eliminate importer and exporter fixed effects
+by taking the ratio of ratios.</p>
+<p>Only those exporters trading with the
+reference importer and importers trading with the reference exporter will
+remain for the estimation. Therefore, reference countries should
+preferably be countries which trade with every other country in the dataset.</p>
+<p>After restricting the data in this way, <code>tetrads</code> estimates the gravity
+equation in its additive form by OLS.</p>
+<p>By taking the ratio of ratios, all monadic effects diminish, hence no
+unilateral variables such as GDP can be included as independent variables.</p>
+<p><code>tetrads</code> estimation can be used for both, cross-sectional as well as
 panel data. Nonetheless, the function is designed to be consistent with the
-Stata code for cross-sectional data provided at the website
+Stata code for cross-sectional data provided on the website
 <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p>
-<p>The function <code>ols</code> was therefore tested for cross-sectional data. For the use with panel data
-no tests were performed.</p>
-<p>Therefore, it is up to the user to ensure that the functions can be applied
-to panel data.</p>
-<p>Depending on the panel dataset and the variables -
-specifically the type of fixed effects -
-included in the model, it may easily occur that the model is not computable.
-Also, note that by including bilateral fixed effects such as country-pair
-effects, the coefficients of time-invariant observables such as distance
-can no longer be estimated.</p>
-<p>Depending on the specific model, the code of the
-respective function may has to be changed in order to exclude the distance
-variable from the estimation.</p>
-<p>At the very least, the user should take special
-care with respect to the meaning of the estimated coefficients and variances
-as well as the decision about which effects to include in the estimation.
-When using panel data, the parameter and variance estimation of the models
-may have to be changed accordingly.</p>
-<p>For a comprehensive overview of gravity models for panel data
-see Egger and Pfaffermayr (2003)
-, G昼㸳mez-Herrera (2013)
- and
-Head et al. (2010)
- as well as the references therein.</p>
+<p>The function <code>tetrads</code> was therefore tested for cross-sectional data.</p>
+<p>If tetrads is used for panel data, the user may have to drop distance as an
+independent variable as time-invariant effects drop.</p>
+<p>For applying <code>tetrads</code> to panel data see Head et al. (2010)
+.</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>For more information on gravity models, theoretical foundations and
+    <p>For information on <code>tetrads</code> see</p>
+<p>Cameron AC, Gelbach JB, Miller DL (2011).
+&#8220;Robust Inference With Multiway Clustering.&#8221;
+<em>Journal of Business &amp; Economic Statistics</em>, <b>29</b>(2), 238--249.
+ISSN 07350015, <a href='http://www.jstor.org/stable/25800796'>http://www.jstor.org/stable/25800796</a>.</p>
+<p>Head K, Mayer T, Ries J (2010).
+&#8220;The erosion of colonial trade linkages after independence.&#8221;
+<em>Journal of International Economics</em>, <b>81</b>(1), 1 - 14.
+ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002'>https://doi.org/10.1016/j.jinteco.2010.01.002</a>
+.</p>
+<p>For more information on gravity models, theoretical foundations and
 estimation methods in general see</p>
 <p>Anderson JE (1979).
 &#8220;A Theoretical Foundation for the Gravity Equation.&#8221;
@@ -269,18 +249,6 @@ doi: <a href='http://doi.org/10.3386/w8079'>10.3386/w8079</a>
 &#8220;The Gravity Model.&#8221;
 Technical Report 16576, National Bureau of Economic Research.
 doi: <a href='http://doi.org/10.3386/w16576'>10.3386/w16576</a>
-.</p>
-<p>Baier SL, Bergstrand JH (2009).
-&#8220;Bonus vetus OLS: A simple method for approximating international trade-cost effects using the gravity equation.&#8221;
-<em>Journal of International Economics</em>, <b>77</b>(1), 77 - 85.
-ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2008.10.004'>https://doi.org/10.1016/j.jinteco.2008.10.004</a>
-.</p>
-<p>Baier SL, Bergstrand JH (2010).
-&#8220;The Gravity Model in International Trade: Advances and Applications.&#8221;
-In van
-Bergeijk PAG, Brakman S (eds.), chapter 4.
-Cambridge University Press.
-doi: <a href='http://doi.org/10.1017/CBO9780511762109'>10.1017/CBO9780511762109</a>
 .</p>
 <p>Head K, Mayer T, Ries J (2010).
 &#8220;The erosion of colonial trade linkages after independence.&#8221;
@@ -316,16 +284,20 @@ ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s00181-012-0576-2'>10.1007/
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='http://www.rdocumentation.org/packages/stats/topics/lm'>lm</a></code>, <code><a href='http://www.rdocumentation.org/packages/lmtest/topics/coeftest'>coeftest</a></code>,
-<code><a href='http://www.rdocumentation.org/packages/sandwich/topics/vcovHC'>vcovHC</a></code></p></div>
+<code><a href='http://www.rdocumentation.org/packages/multiwayvcov/topics/cluster.vcov'>cluster.vcov</a></code></p></div>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
 <span class='fu'>data</span>(<span class='no'>gravity_no_zeros</span>)
 
-<span class='fu'>ols</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>, <span class='st'>"contig"</span>, <span class='st'>"comcur"</span>),
-<span class='kw'>incomes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"gdp_o"</span>, <span class='st'>"gdp_d"</span>), <span class='kw'>codes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"iso_o"</span>, <span class='st'>"iso_d"</span>),
-<span class='kw'>uie</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
+<span class='fu'>tetrads</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>),
+<span class='kw'>codes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"iso_o"</span>, <span class='st'>"iso_d"</span>), <span class='kw'>reference_countries</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"JPN"</span>, <span class='st'>"USA"</span>),
+<span class='kw'>multiway</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
+
+<span class='fu'>tetrads</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>, <span class='st'>"comcur"</span>, <span class='st'>"contig"</span>),
+<span class='kw'>codes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"iso_o"</span>, <span class='st'>"iso_d"</span>), <span class='kw'>reference_countries</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"JPN"</span>, <span class='st'>"USA"</span>),
+<span class='kw'>multiway</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
 <span class='co'># }</span><div class='input'>
 </div><div class='input'>
 </div></pre>

@@ -35,7 +35,7 @@
 <meta property="og:description" content="ek_tobit estimates gravity models in their additive form
 by conducting a censored regression.
 It follows the Eaton and Kortum (2001)
- Tobit model where each country 
+ Tobit model where each country
 is assigned specific censoring bounds." />
 <meta name="twitter:card" content="summary" />
 
@@ -64,7 +64,7 @@ is assigned specific censoring bounds." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.31</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.1</span>
       </span>
     </div>
 
@@ -118,7 +118,7 @@ is assigned specific censoring bounds." />
     <p><code>ek_tobit</code> estimates gravity models in their additive form
 by conducting a censored regression.</p>
 <p>It follows the Eaton and Kortum (2001)
- Tobit model where each country 
+ Tobit model where each country
 is assigned specific censoring bounds.</p>
     
     </div>
@@ -131,17 +131,17 @@ is assigned specific censoring bounds.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>dependent_variable</th>
-      <td><p>name (type: character) of the dependent variable in the dataset 
+      <td><p>name (type: character) of the dependent variable in the dataset
 <code>data</code> (e.g. trade flows).</p>
 <p>This variable is logged and then used as the dependent variable in the estimation.</p>
-<p>As the log of zero is not defined, all flows equal to zero are replaced by a left open interval 
+<p>As the log of zero is not defined, all flows equal to zero are replaced by a left open interval
 with the logged minimum trade flow of the respective importing country as right border.</p></td>
     </tr>
     <tr>
       <th>regressors</th>
       <td><p>name (type: character) of the regressors to include in the model.</p>
-<p>Include the distance variable in the dataset <code>data</code> containing a measure of 
-distance between all pairs of bilateral partners and bilateral variables that should 
+<p>Include the distance variable in the dataset <code>data</code> containing a measure of
+distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.</p>
 <p>Unilateral metric variables such as GDPs should be inserted via the argument <code>incomes</code>.</p>
 <p>Interaction terms can be added.</p>
@@ -149,31 +149,31 @@ be taken as the independent variables in the estimation.</p>
     </tr>
     <tr>
       <th>code_destination</th>
-      <td><p>variable name (type: character) of the label of the country 
-of destination (e.g. ISO-3 code from the <code>iso_d</code> variable in the example datasets). The variables 
+      <td><p>variable name (type: character) of the label of the country
+of destination (e.g. ISO-3 code from the <code>iso_d</code> variable in the example datasets). The variables
 are grouped by using <code>iso_d</code> to obtain estimates.</p></td>
     </tr>
     <tr>
       <th>robust</th>
-      <td><p>robust (type: logical) determines whether a robust 
+      <td><p>robust (type: logical) determines whether a robust
 variance-covariance matrix should be used. By default is set to <code>TRUE</code>.</p>
-<p>If <code>robust = TRUE</code> the estimation results are consistent with the 
+<p>If <code>robust = TRUE</code> the estimation results are consistent with the
 Stata code provided at <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p></td>
     </tr>
     <tr>
       <th>data</th>
       <td><p>name of the dataset to be used (type: character).</p>
-<p>To estimate gravity equations you need a square dataset including bilateral 
-flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character 
-(e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the 
-destination country), a distance measure defined by the argument <code>distance</code> 
-and other potential influences (e.g. contiguity and common currency) given as a vector in 
+<p>To estimate gravity equations you need a square dataset including bilateral
+flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character
+(e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the
+destination country), a distance measure defined by the argument <code>distance</code>
+and other potential influences (e.g. contiguity and common currency) given as a vector in
 <code>regressors</code> are required.</p>
 <p>All dummy variables should be of type numeric (0/1).</p>
 <p>Make sure the ISO codes are of type "character".</p>
 <p>If an independent variable is defined as a ratio, it should be logged.</p>
-<p>The user should perform some data cleaning beforehand to remove observations that contain entries that 
+<p>The user should perform some data cleaning beforehand to remove observations that contain entries that
 can distort estimates.</p>
 <p>The function allows zero flows but will remove zero distances.</p></td>
     </tr>
@@ -185,7 +185,7 @@ can distort estimates.</p>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The function returns the summary of the estimated gravity model as a 
+    <p>The function returns the summary of the estimated gravity model as a
 <code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code>-object.</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
@@ -193,22 +193,22 @@ can distort estimates.</p>
     <p><code>ek_tobit</code> represents the Eaton and Kortum (2001)
  Tobit model.</p>
 <p>When taking the log of the gravity equation flows equal to zero
-constitute a problem as their log is not defined. Therefore, in <code>ek_tobit</code> all values of 
+constitute a problem as their log is not defined. Therefore, in <code>ek_tobit</code> all values of
 the dependent variable are redefined as intervals.</p>
 <p>The positive observations have both interval bounds equal to their original value.</p>
-<p>For zero flows the interval is left open. The right border of the interval is set to the 
+<p>For zero flows the interval is left open. The right border of the interval is set to the
 log of the minimum positive trade flow of the respective importing country.</p>
-<p>The defined data object of class <code><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></code> is then inserted 
+<p>The defined data object of class <code><a href='http://www.rdocumentation.org/packages/survival/topics/Surv'>Surv</a></code> is then inserted
 in <code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code> for the parameter estimation.</p>
 <p><code>ek_tobit</code> is designed to be consistent with the Stata code provided at
 <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
 when choosing robust estimation.</p>
 <p>For other Tobit functions, see <code><a href='tobit.html'>tobit</a></code>
 for a simple Tobit model where number <code>1</code> is added to all observations
-and <code><a href='et_tobit.html'>et_tobit</a></code> for the Eaton and Tamura (1994) 
-threshold Tobit model where instead of simply adding number <code>1</code> 
+and <code><a href='et_tobit.html'>et_tobit</a></code> for the Eaton and Tamura (1994)
+threshold Tobit model where instead of simply adding number <code>1</code>
 to the data the threshold is estimated.</p>
-<p>The function is designed for cross-sectional data, but can be extended to panel data using the 
+<p>The function is designed for cross-sectional data, but can be extended to panel data using the
 <code><a href='http://www.rdocumentation.org/packages/survival/topics/survreg'>survreg</a></code> function.</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
@@ -217,9 +217,9 @@ to the data the threshold is estimated.</p>
 estimation methods in general see</p>
 <p>Anderson JE (1979).
 &#8220;A Theoretical Foundation for the Gravity Equation.&#8221;
-<em>The American Economic Review</em>, <b>69</b>(1), pp. 106--116.
+<em>The American Economic Review</em>, <b>69</b>(1), 106--116.
 ISSN 00028282, <a href='http://www.jstor.org/stable/1802501'>http://www.jstor.org/stable/1802501</a>.</p>
-<p>Anderson JE and van
+<p>Anderson JE, van
 Wincoop E (2001).
 &#8220;Gravity with Gravitas: A Solution to the Border Puzzle.&#8221;
 Technical Report 8079, National Bureau of Economic Research.
@@ -230,48 +230,48 @@ doi: <a href='http://doi.org/10.3386/w8079'>10.3386/w8079</a>
 Technical Report 16576, National Bureau of Economic Research.
 doi: <a href='http://doi.org/10.3386/w16576'>10.3386/w16576</a>
 .</p>
-<p>Baier SL and Bergstrand JH (2009).
+<p>Baier SL, Bergstrand JH (2009).
 &#8220;Bonus vetus OLS: A simple method for approximating international trade-cost effects using the gravity equation.&#8221;
-<em>Journal of International Economics</em>, <b>77</b>(1), pp. 77 - 85.
+<em>Journal of International Economics</em>, <b>77</b>(1), 77 - 85.
 ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2008.10.004'>https://doi.org/10.1016/j.jinteco.2008.10.004</a>
 .</p>
-<p>Baier SL and Bergstrand JH (2010).
+<p>Baier SL, Bergstrand JH (2010).
 &#8220;The Gravity Model in International Trade: Advances and Applications.&#8221;
 In van
-Bergeijk PAG and Brakman S (eds.), chapter 4.
+Bergeijk PAG, Brakman S (eds.), chapter 4.
 Cambridge University Press.
 doi: <a href='http://doi.org/10.1017/CBO9780511762109'>10.1017/CBO9780511762109</a>
 .</p>
-<p>Head K, Mayer T and Ries J (2010).
+<p>Head K, Mayer T, Ries J (2010).
 &#8220;The erosion of colonial trade linkages after independence.&#8221;
-<em>Journal of International Economics</em>, <b>81</b>(1), pp. 1 - 14.
+<em>Journal of International Economics</em>, <b>81</b>(1), 1 - 14.
 ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002'>https://doi.org/10.1016/j.jinteco.2010.01.002</a>
 .</p>
-<p>Silva JMCS and Tenreyro S (2006).
+<p>Silva JMCS, Tenreyro S (2006).
 &#8220;The Log of Gravity.&#8221;
-<em>The Review of Economics and Statistics</em>, <b>88</b>(4), pp. 641-658.
+<em>The Review of Economics and Statistics</em>, <b>88</b>(4), 641-658.
 doi: <a href='http://doi.org/10.1162/rest.88.4.641'>10.1162/rest.88.4.641</a>
 .</p>
 <p>and the citations therein.</p>
 <p>Especially for Tobit models see</p>
 <p>Tobin J (1958).
 &#8220;Estimation of Relationships for Limited Dependent Variables.&#8221;
-<em>Econometrica</em>, <b>26</b>(1), pp. 24--36.
+<em>Econometrica</em>, <b>26</b>(1), 24--36.
 ISSN 14680262, doi: <a href='http://doi.org/10.2307/1907382'>10.2307/1907382</a>
 .</p>
-<p>Eaton J and Tamura A (1995).
+<p>Eaton J, Tamura A (1995).
 &#8220;Bilateralism and Regionalism in Japanese and U.S. Trade and Direct Foreign Investment Patterns.&#8221;
 Technical Report 4758, National Bureau of Economic Research.
 doi: <a href='http://doi.org/10.3386/w4758'>10.3386/w4758</a>
 .</p>
-<p>Eaton J and Kortum S (2001).
+<p>Eaton J, Kortum S (2001).
 &#8220;Trade in Capital Goods.&#8221;
 Technical Report 8070, National Bureau of Economic Research.
 doi: <a href='http://doi.org/10.3386/w8070'>10.3386/w8070</a>
 , <a href='http://www.nber.org/papers/w8070'>http://www.nber.org/papers/w8070</a>.</p>
-<p>Carson RT and Sun Y (2007).
+<p>Carson RT, Sun Y (2007).
 &#8220;The Tobit model with a non‐zero threshold.&#8221;
-<em>The Econometrics Journal</em>, <b>10</b>(3), pp. 488-502.
+<em>The Econometrics Journal</em>, <b>10</b>(3), 488-502.
 doi: <a href='http://doi.org/10.1111/j.1368-423X.2007.00218.x'>10.1111/j.1368-423X.2007.00218.x</a>
 .</p>
 <p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>

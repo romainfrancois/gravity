@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Left-censored Tobit model with known threshold — tobit • gravity</title>
+<title>Structural Iterated Least Squares (SILS) — sils • gravity</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -28,12 +28,11 @@
 
 
 
-<meta property="og:title" content="Left-censored Tobit model with known threshold — tobit" />
+<meta property="og:title" content="Structural Iterated Least Squares (SILS) — sils" />
 
-<meta property="og:description" content="tobit estimates gravity models in their additive form
-by conducting a left-censored regression, which, after adding the
-constant 1 to the dependent variable, utilizes log(1) = 0
-as the censoring value." />
+<meta property="og:description" content="sils estimates gravity models via
+Structural Iterated Least Squares and an explicit inclusion
+of the Multilateral Resistance terms." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -104,21 +103,21 @@ as the censoring value." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Left-censored Tobit model with known threshold</h1>
+    <h1>Structural Iterated Least Squares (SILS)</h1>
     
-    <div class="hidden name"><code>tobit.Rd</code></div>
+    <div class="hidden name"><code>sils.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p><code>tobit</code> estimates gravity models in their additive form
-by conducting a left-censored regression, which, after adding the
-constant <code>1</code> to the dependent variable, utilizes <code>log(1) = 0</code>
-as the censoring value.</p>
+    <p><code>sils</code> estimates gravity models via
+Structural Iterated Least Squares and an explicit inclusion
+of the Multilateral Resistance terms.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>tobit</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='kw'>added_constant</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>sils</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='no'>incomes</span>, <span class='kw'>maxloop</span> <span class='kw'>=</span> <span class='fl'>50</span>,
+  <span class='kw'>decimal_places</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -127,10 +126,12 @@ as the censoring value.</p>
       <th>dependent_variable</th>
       <td><p>name (type: character) of the dependent variable in the dataset
 <code>data</code> (e.g. trade flows).</p>
-<p>The number <code>1</code> is added and the transformed variable is logged and
-taken as the dependent variable in the tobit estimation with lower bound
-equal to <code>0</code> as <code>log(1) = 0</code> represents the smallest flows
-in the transformed variable.</p></td>
+<p>This dependent variable is divided by the
+product of unilateral incomes (e.g.
+GDPs or GNPs of the countries of interest, named <code>inc_o</code> and <code>inc_d</code> in the example datasets)
+and logged afterwards.</p>
+<p>The transformed variable is then used as the dependent variable in the
+estimation.</p></td>
     </tr>
     <tr>
       <th>regressors</th>
@@ -139,20 +140,43 @@ in the transformed variable.</p></td>
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.</p>
 <p>The distance is logged automatically when the function is executed.</p>
-<p>Unilateral metric variables such as GDPs can be added but those variables have to be logged first.</p>
-<p>Interaction terms can be added.</p>
+<p>Unilateral metric variables such as GDPs should be inserted via the argument <code>incomes</code>.</p>
+<p>As country specific effects are subdued due to demeaning, no further unilateral variables
+apart from unilateral incomes can be added.</p>
 <p>Write this argument as <code>c(distance, contiguity, common curreny, ...)</code>.</p></td>
     </tr>
     <tr>
-      <th>added_constant</th>
-      <td><p>scalar (type: numeric); represents
-the constant to be added to the dependent variable. The default value
-is <code>1</code>.</p>
-<p>The minimum of <code>log(y + added_constant)</code> is taken as the
-left boundary in the Tobit model.</p>
-<p>In the often used case of <code>added_constant = 1</code>, the
-dependent variable is left-censored at value <code>0</code>
-as <code>log(1) = 0</code>.</p></td>
+      <th>incomes</th>
+      <td><p>variable name (type: character) of the income of the country of
+origin (e.g. <code>inc_o</code>) and destination (e.g. <code>inc_d</code>) in the dataset <code>data</code>.</p>
+<p>The dependent variable <code>dependent_variable</code> is divided by the product of the incomes.</p>
+<p>Write this argument as <code>c(income origin, income destination)</code>.</p></td>
+    </tr>
+    <tr>
+      <th>maxloop</th>
+      <td><p>maximum number of outer loop iterations.
+The default is set to 100. There will be a warning if the iterations
+did not converge.</p></td>
+    </tr>
+    <tr>
+      <th>decimal_places</th>
+      <td><p>number of decimal places that should not change after a new
+iteration for the estimation to stop. The default is set to 4.</p></td>
+    </tr>
+    <tr>
+      <th>robust</th>
+      <td><p>robust (type: logic) determines whether a robust
+variance-covariance matrix should be used. The default is set to <code>TRUE</code>.</p>
+<p>If set <code>TRUE</code> the estimation results are consistent with the
+Stata code provided at the website
+<a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
+when choosing robust estimation.</p></td>
+    </tr>
+    <tr>
+      <th>verbose</th>
+      <td><p>(type: logic) determines whether the estimated coefficients
+of each iteration should be printed in the console. The default is set
+to <code>FALSE</code>.</p></td>
     </tr>
     <tr>
       <th>data</th>
@@ -168,67 +192,59 @@ and other potential influences (e.g. contiguity and common currency) given as a 
 <p>If an independent variable is defined as a ratio, it should be logged.</p>
 <p>The user should perform some data cleaning beforehand to remove observations that contain entries that
 can distort estimates.</p>
-<p>The function allows zero flows but will remove zero distances.</p></td>
+<p>The function will remove zero flows and distances.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>additional arguments to be passed to <code>tobit</code>.</p></td>
+      <td><p>additional arguments to be passed to functions used by
+<code>sils</code>.</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The function returns the summary of the estimated gravity model as a
-<code><a href='http://www.rdocumentation.org/packages/censReg/topics/censReg'>censReg</a></code>-object.</p>
+    <p>The function returns the summary of the estimated gravity model as an
+<code><a href='http://www.rdocumentation.org/packages/stats/topics/lm'>lm</a></code>-object. It furthermore returns the resulting coefficients for each
+iteration.</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p><code>tobit</code> represents the left-censored tobit Tobin (1958)
-    approach utilizing a known censoring threshold
-which is often used when several gravity models are compared.</p>
-<p>When taking the log of the gravity equation flows equal to zero
-constitute a problem as their log is not defined.</p>
-<p>Therefore, in the execution of the function the number <code>1</code>
-is added to all flows and the <code>log(flows+1)</code> is
-taken as the dependent variable.</p>
-<p>The tobit estimation is conducted using the <code><a href='http://www.rdocumentation.org/packages/censReg/topics/censReg'>censReg</a></code>
-function and setting the lower bound equal to <code>0</code> as
-<code>log(1)=0</code> represents the smallest flows in the transformed
-variable.</p>
-<p>A tobit regression represents a combination of a binary and a
-linear regression.</p>
-<p>This procedure has to be taken into consideration when
-interpreting the estimated coefficients.</p>
-<p>The marginal effects of an explanatory variable on the expected value of
-the dependent variable equals the product of both the probability of the
-latent variable exceeding the threshold and the marginal effect of the
-explanatory variable of the expected value of the latent variable.</p>
-<p>The function is designed for cross-sectional data,
-but can be easily extended to panel data using the
-<code><a href='http://www.rdocumentation.org/packages/censReg/topics/censReg'>censReg</a></code> function.</p>
-<p>A robust estimations is not implemented to the present
-as the <code><a href='http://www.rdocumentation.org/packages/censReg/topics/censReg'>censReg</a></code> function is not
-compatible with the <code><a href='http://www.rdocumentation.org/packages/sandwich/topics/vcovHC'>vcovHC</a></code> function.</p>
-<p>For a more elaborate Tobit function, see <code><a href='ek_tobit.html'>ek_tobit</a></code>
-for the Eaton and Kortum (2001) Tobit model where each zero trade volume
-is assigned a country specific interval with the upper
-bound equal to the minimum positive trade level of the respective
-importing country.</p>
+    <p><code>sils</code> is an estimation method for gravity models
+developed by Head and Mayer (2014)
+.</p>
+<p>The function <code>sils</code> utilizes the relationship between the Multilateral
+Resistance terms and the transaction costs. The parameters are estimated by
+an iterative procedure. The function executes loops until the parameters
+stop changing significantly.</p>
+<p><code>sils</code> is designed to be consistent with the Stata code provided at
+<a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
+when choosing robust estimation.</p>
+<p>As, to our knowledge at the moment, there is no explicit literature covering
+the estimation of a gravity equation by <code>sils</code> using panel data,
+we do not recommend to apply this method in this case.</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>For more information on gravity models, theoretical foundations and
-estimation methods in general see</p>
-<p>Anderson JE (1979).
-&#8220;A Theoretical Foundation for the Gravity Equation.&#8221;
-<em>The American Economic Review</em>, <b>69</b>(1), 106--116.
-ISSN 00028282, <a href='http://www.jstor.org/stable/1802501'>http://www.jstor.org/stable/1802501</a>.</p>
+    <p>For information on <code>sils</code> as well as more information on gravity
+models, theoretical foundations and suitable estimation methods in general see</p>
+<p>Head K, Mayer T (2014).
+&#8220;Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.&#8221;
+In Gopinath G, Helpman E, Rogoff K (eds.), <em>Handbook of International Economics</em>, volume 4 series Handbook of International Economics, 131 - 195.
+Elsevier.
+doi: <a href='http://doi.org/https://doi.org/10.1016/B978-0-444-54314-1.00003-3'>https://doi.org/10.1016/B978-0-444-54314-1.00003-3</a>
+.</p>
 <p>Anderson JE, van
 Wincoop E (2001).
 &#8220;Gravity with Gravitas: A Solution to the Border Puzzle.&#8221;
 Technical Report 8079, National Bureau of Economic Research.
 doi: <a href='http://doi.org/10.3386/w8079'>10.3386/w8079</a>
 .</p>
+<p>For more information on gravity models, theoretical foundations and
+estimation methods in general see</p>
+<p>Anderson JE (1979).
+&#8220;A Theoretical Foundation for the Gravity Equation.&#8221;
+<em>The American Economic Review</em>, <b>69</b>(1), 106--116.
+ISSN 00028282, <a href='http://www.jstor.org/stable/1802501'>http://www.jstor.org/stable/1802501</a>.</p>
 <p>Anderson JE (2010).
 &#8220;The Gravity Model.&#8221;
 Technical Report 16576, National Bureau of Economic Research.
@@ -257,47 +273,27 @@ ISSN 0022-1996, doi: <a href='http://doi.org/https://doi.org/10.1016/j.jinteco.2
 doi: <a href='http://doi.org/10.1162/rest.88.4.641'>10.1162/rest.88.4.641</a>
 .</p>
 <p>and the citations therein.</p>
-<p>Especially for Tobit models see</p>
-<p>Tobin J (1958).
-&#8220;Estimation of Relationships for Limited Dependent Variables.&#8221;
-<em>Econometrica</em>, <b>26</b>(1), 24--36.
-ISSN 14680262, doi: <a href='http://doi.org/10.2307/1907382'>10.2307/1907382</a>
-.</p>
-<p>Eaton J, Tamura A (1995).
-&#8220;Bilateralism and Regionalism in Japanese and U.S. Trade and Direct Foreign Investment Patterns.&#8221;
-Technical Report 4758, National Bureau of Economic Research.
-doi: <a href='http://doi.org/10.3386/w4758'>10.3386/w4758</a>
-.</p>
-<p>Eaton J, Kortum S (2001).
-&#8220;Trade in Capital Goods.&#8221;
-Technical Report 8070, National Bureau of Economic Research.
-doi: <a href='http://doi.org/10.3386/w8070'>10.3386/w8070</a>
-, <a href='http://www.nber.org/papers/w8070'>http://www.nber.org/papers/w8070</a>.</p>
-<p>Carson RT, Sun Y (2007).
-&#8220;The Tobit model with a non‐zero threshold.&#8221;
-<em>The Econometrics Journal</em>, <b>10</b>(3), 488-502.
-doi: <a href='http://doi.org/10.1111/j.1368-423X.2007.00218.x'>10.1111/j.1368-423X.2007.00218.x</a>
-.</p>
 <p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='http://www.rdocumentation.org/packages/censReg/topics/censReg'>censReg</a></code></p></div>
+    <div class='dont-index'><p><code><a href='http://www.rdocumentation.org/packages/stats/topics/lm'>lm</a></code>, <code><a href='http://www.rdocumentation.org/packages/lmtest/topics/coeftest'>coeftest</a></code>,
+<code><a href='http://www.rdocumentation.org/packages/sandwich/topics/vcovHC'>vcovHC</a></code></p></div>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='co'># Example for data with zero trade flows</span>
-<span class='fu'>data</span>(<span class='no'>gravity_zeros</span>)
+<span class='fu'>data</span>(<span class='no'>gravity_no_zeros</span>)
 
-<span class='no'>gravity_zeros</span> <span class='kw'>&lt;-</span> <span class='no'>gravity_zeros</span> <span class='kw'>%&gt;%</span>
-    <span class='fu'>mutate</span>(
-        <span class='kw'>lgdp_o</span> <span class='kw'>=</span> <span class='fu'>log</span>(<span class='no'>gdp_o</span>),
-        <span class='kw'>lgdp_d</span> <span class='kw'>=</span> <span class='fu'>log</span>(<span class='no'>gdp_d</span>)
-    )
+<span class='fu'>sils</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>),
+<span class='kw'>incomes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"gdp_o"</span>, <span class='st'>"gdp_d"</span>),
+<span class='kw'>maxloop</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>dec_places</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+<span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
 
-<span class='fu'>tobit</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>, <span class='st'>"lgdp_o"</span>, <span class='st'>"lgdp_d"</span>),
-<span class='kw'>added_constant</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_zeros</span>)
+<span class='fu'>sils</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>, <span class='st'>"comcur"</span>, <span class='st'>"contig"</span>),
+<span class='kw'>incomes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"gdp_o"</span>, <span class='st'>"gdp_d"</span>),
+<span class='kw'>maxloop</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>dec_places</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+<span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
 <span class='co'># }</span><div class='input'>
 </div><div class='input'>
 </div></pre>
