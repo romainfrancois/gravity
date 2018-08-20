@@ -199,10 +199,10 @@ sils <- function(dependent_variable, regressors, incomes, maxloop=50, decimal_pl
     )
 
   loop <- 0
-  dec.point <- 1 * 10^-decimal_places
+  dec_point <- 1 * 10^-decimal_places
   beta_distance <- 1
   beta_distance_old <- 0
-  coef.dist <- 1
+  coef_dist <- 1
 
   beta <- vector(length = length(additional_regressors))
   names(beta) <- additional_regressors
@@ -222,8 +222,8 @@ sils <- function(dependent_variable, regressors, incomes, maxloop=50, decimal_pl
 
   # Begin iterations -----------------------------------------------------------
   while (loop <= maxloop &
-    abs(beta_distance - beta_distance_old) > dec.point &
-    prod(abs(beta - beta_old) > dec.point) == 1) {
+    abs(beta_distance - beta_distance_old) > dec_point &
+    prod(abs(beta - beta_old) > dec_point) == 1) {
 
     # Updating betas -----------------------------------------------------------
     beta_distance_old <- beta_distance
@@ -256,8 +256,8 @@ sils <- function(dependent_variable, regressors, incomes, maxloop=50, decimal_pl
     j <- 1
 
     while (j <= maxloop &
-      sum(abs(d$P_j - d$P_j_old)) > dec.point &
-      sum(abs(d$P_i - d$P_i_old)) > dec.point) {
+      sum(abs(d$P_j - d$P_j_old)) > dec_point &
+      sum(abs(d$P_i - d$P_i_old)) > dec_point) {
       d <- d %>%
         mutate(
           P_j_old = !!sym("P_j"),
@@ -303,15 +303,15 @@ sils <- function(dependent_variable, regressors, incomes, maxloop=50, decimal_pl
       beta[j] <- stats::coef(model_sils)[j + 2]
     }
 
-    coef.dist <- c(coef.dist, beta_distance)
+    coef_dist <- c(coef_dist, beta_distance)
     coef_additional_regressors <- rbind(coef_additional_regressors, rep(0, times = length(additional_regressors)))
     for (j in 1:length(additional_regressors)) {
       coef_additional_regressors[additional_regressors[j]][loop + 2, ] <- beta[j]
     }
 
     # Coefficients -------------------------------------------------------------
-    coef.SILS <- cbind(
-      loop = c(1:loop), dist = as.numeric(coef.dist)[2:(loop + 1)],
+    coef_sils <- cbind(
+      loop = c(1:loop), dist = as.numeric(coef_dist)[2:(loop + 1)],
       coef_additional_regressors[2:(loop + 1), ]
     )
 
