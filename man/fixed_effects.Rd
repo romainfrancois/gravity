@@ -4,8 +4,8 @@
 \alias{fixed_effects}
 \title{Fixed Effects}
 \usage{
-fixed_effects(dependent_variable, regressors, codes = c("iso_o", "iso_d"),
-  robust = TRUE, data, ...)
+fixed_effects(dependent_variable, regressors, codes = c("iso_o",
+  "iso_d"), robust = TRUE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset

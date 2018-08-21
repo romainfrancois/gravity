@@ -4,7 +4,8 @@
 \alias{bvu}
 \title{Bonus vetus OLS (BVU)}
 \usage{
-bvu(dependent_variable, regressors, incomes, codes, robust = TRUE, data, ...)
+bvu(dependent_variable, regressors, incomes, codes, robust = TRUE, data,
+  ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset

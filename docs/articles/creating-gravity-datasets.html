@@ -72,7 +72,7 @@
       <h1>Creating gravity datasets</h1>
                         <h4 class="author">Mauricio Vargas</h4>
             
-            <h4 class="date">2018-08-19</h4>
+            <h4 class="date">2018-08-21</h4>
       
       
       <div class="hidden name"><code>creating-gravity-datasets.Rmd</code></div>
@@ -103,20 +103,20 @@ zip &lt;-<span class="st"> "col_regfile09.zip"</span>
 <span class="kw">try</span>(<span class="kw">system</span>(<span class="st">"7z e -aos col_regfile09.zip"</span>))
 
 <span class="kw">library</span>(haven)
-col_regfile09 &lt;-<span class="st"> </span><span class="kw">read_dta</span>(<span class="st">"col_regfile09.dta"</span>)</code></pre></div>
+col_regfile09 &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/haven/topics/read_dta">read_dta</a></span>(<span class="st">"col_regfile09.dta"</span>)</code></pre></div>
 </div>
 <div id="isolation-of-one-year" class="section level2">
 <h2 class="hasAnchor">
 <a href="#isolation-of-one-year" class="anchor"></a>Isolation of one year</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
 data06 &lt;-<span class="st"> </span>col_regfile09 <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">filter</span>(year <span class="op">==</span><span class="st"> </span><span class="dv">2006</span>)</code></pre></div>
+<span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(year <span class="op">==</span><span class="st"> </span><span class="dv">2006</span>)</code></pre></div>
 </div>
 <div id="choosing-variables-select-columns" class="section level2">
 <h2 class="hasAnchor">
 <a href="#choosing-variables-select-columns" class="anchor"></a>Choosing variables (select columns)</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data06 &lt;-<span class="st"> </span>data06 <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">select</span>(iso_o, iso_d, distw, gdp_o, gdp_d, rta, flow, contig, comlang_off, comcur)</code></pre></div>
+<span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/select.html">select</a></span>(iso_o, iso_d, distw, gdp_o, gdp_d, rta, flow, contig, comlang_off, comcur)</code></pre></div>
 </div>
 <div id="transforming-data" class="section level2">
 <h2 class="hasAnchor">
@@ -126,13 +126,13 @@ data06 &lt;-<span class="st"> </span>col_regfile09 <span class="op">%&gt;%</span
 <a href="#isolation-of-complete-cases" class="anchor"></a>Isolation of complete cases</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyr)
 gravity_zeros &lt;-<span class="st"> </span>data06 <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">drop_na</span>()</code></pre></div>
+<span class="st">  </span><span class="kw"><a href="http://www.rdocumentation.org/packages/tidyr/topics/drop_na">drop_na</a></span>()</code></pre></div>
 </div>
 <div id="divide-gdps-by-1000000-for-scaling-purposes" class="section level3">
 <h3 class="hasAnchor">
 <a href="#divide-gdps-by-1000000-for-scaling-purposes" class="anchor"></a>Divide GDPs by 1,000,000 for scaling purposes</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gravity_zeros &lt;-<span class="st"> </span>gravity_zeros <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">mutate</span>(
+<span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(
     <span class="dt">gdp_o =</span> gdp_o <span class="op">/</span><span class="st"> </span><span class="dv">1000000</span>,
     <span class="dt">gdp_d =</span> gdp_d <span class="op">/</span><span class="st"> </span><span class="dv">1000000</span>,
   )</code></pre></div>
@@ -141,7 +141,7 @@ gravity_zeros &lt;-<span class="st"> </span>data06 <span class="op">%&gt;%</span
 <h3 class="hasAnchor">
 <a href="#exclusion-of-trade-flows-equal-to-0" class="anchor"></a>Exclusion of trade flows equal to 0</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gravity_no_zeros &lt;-<span class="st"> </span>gravity_zeros <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">filter</span>(flow <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)</code></pre></div>
+<span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(flow <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)</code></pre></div>
 </div>
 </div>
 <div id="export-the-data" class="section level2">

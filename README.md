@@ -56,89 +56,13 @@ At the very least, the user should take special care with respect to the meaning
 
 Contributions, extensions and error corrections are very welcome. Please do not hesitate to contact us. We thank Martin Bresslein for valuable comments and advice on early versions of the package.
 
-Todos
------
-
-### Check OLS
-
--   
-     Robust object is called but never used in the original function (line 233)
-
-### Check ET Tobit
-
--   
-    *x*
-     Warning that affects original and tidy function "Consider switching to a more robust optimisation method temporarily + In sqrt(diag(vc)) : NaNs produced" -&gt; *Solved switching from Newton-Rhapson to Simulated Annealing + starting from all betas equal to zero*
-
-### Vignettes
-
--   
-    *x*
-     Reproduce examples
--   
-     Usage
--   
-     Articles
-
-### Tidy functions
-
--   
-    *x*
-     bvu
--   
-    *x*
-     bvw
--   
-    *x*
-     ddm
--   
-    *x*
-     ek tobit
--   
-    *x*
-     et tobit
--   
-    *x*
-     ols
--   
-    *x*
-     tobit
--   
-    *x*
-     robust summary
--   
-    *x*
-     fixed effects
--   
-    *x*
-     gpml
--   
-    *x*
-     nbpml
--   
-    *x*
-     nls
--   
-    *x*
-     ppml
--   
-     sils
--   
-     tetrads
-
-### Data
-
--   
-    *x*
-     Reproduce examples data
-
 References
 ----------
 
-Egger, Peter, and Michael Pfaffermayr. 2003. “The Proper Panel Econometric Specification of the Gravity Equation: A Three-Way Model with Bilateral Interaction Effects.” *Empirical Economics* 28 (3): 571–80. <doi:%5B10.1007/s001810200146%5D(https://doi.org/10.1007/s001810200146)>.
+Egger, Peter, and Michael Pfaffermayr. 2003. "The Proper Panel Econometric Specification of the Gravity Equation: A Three-Way Model with Bilateral Interaction Effects." *Empirical Economics* 28 (3): 571–80. <doi:%5B10.1007/s001810200146%5D(https://doi.org/10.1007/s001810200146)>.
 
-Gómez-Herrera, Estrella. 2013. “Comparing Alternative Methods to Estimate Gravity Models of Bilateral Trade.” *Empirical Economics* 44 (3): 1087–1111. <doi:%5B10.1007/s00181-012-0576-2%5D(https://doi.org/10.1007/s00181-012-0576-2)>.
+Gómez-Herrera, Estrella. 2013. "Comparing Alternative Methods to Estimate Gravity Models of Bilateral Trade." *Empirical Economics* 44 (3): 1087–1111. <doi:%5B10.1007/s00181-012-0576-2%5D(https://doi.org/10.1007/s00181-012-0576-2)>.
 
-Head, Keith, and Thierry Mayer. 2014. “Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.” In *Handbook of International Economics*, edited by Gita Gopinath, Elhanan Helpman, and Kenneth Rogoff, 4:131–95. Handbook of International Economics. Elsevier. <doi:%5Bhttps://doi.org/10.1016/B978-0-444-54314-1.00003-3%5D(https://doi.org/https://doi.org/10.1016/B978-0-444-54314-1.00003-3)>.
+Head, Keith, and Thierry Mayer. 2014. "Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook." In *Handbook of International Economics*, edited by Gita Gopinath, Elhanan Helpman, and Kenneth Rogoff, 4:131–95. Handbook of International Economics. Elsevier. <doi:%5Bhttps://doi.org/10.1016/B978-0-444-54314-1.00003-3%5D(https://doi.org/https://doi.org/10.1016/B978-0-444-54314-1.00003-3)>.
 
-Head, Keith, Thierry Mayer, and John Ries. 2010. “The Erosion of Colonial Trade Linkages After Independence.” *Journal of International Economics* 81 (1): 1–14. <doi:%5Bhttps://doi.org/10.1016/j.jinteco.2010.01.002%5D(https://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002)>.
+Head, Keith, Thierry Mayer, and John Ries. 2010. "The Erosion of Colonial Trade Linkages After Independence." *Journal of International Economics* 81 (1): 1–14. <doi:%5Bhttps://doi.org/10.1016/j.jinteco.2010.01.002%5D(https://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002)>.
