@@ -25,3 +25,5 @@ vignettes/*.dta
 # DS_Store
 .DS_Store
 inst/doc
+paper/paper.pdf
+

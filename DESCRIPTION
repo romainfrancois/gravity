@@ -5,7 +5,6 @@ Version: 0.8.1
 Date: 2018-08-18 
 Authors@R: c(
   person("Anna-Lena", "Woelwer", role = c("aut", "cre"), email = "woelwer@uni-trier.de"),
-  person("Martin", "Bresslein", role = c("ctb"), email = "mar-tin.bresslein@bnetza.de"),
   person("Jan Pablo", "Burgard", role = c("aut"), email = "burgardj@uni-trier.de"),
   person("Joshua", "Kunst", role = c("aut"), email = "jbkunst@gmail.com"),
   person("Mauricio", "Vargas", role = c("aut"), email = "mvargas@dcc.uchile.cl")
