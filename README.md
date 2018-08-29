@@ -56,6 +56,19 @@ At the very least, the user should take special care with respect to the meaning
 
 Contributions, extensions and error corrections are very welcome. Please do not hesitate to contact us. We thank Martin Bresslein for valuable comments and advice on early versions of the package.
 
+How to install
+--------------
+
+From R console:
+
+``` r
+# Install old version from CRAN
+install.packages("gravity")
+
+# Install new version from GitHub
+devtools::install_github("pachamaltese/gravity")
+```
+
 References
 ----------
 

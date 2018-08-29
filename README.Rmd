@@ -63,6 +63,18 @@ At the very least, the user should take special care with respect to the meaning
 
 Contributions, extensions and error corrections are very welcome. Please do not hesitate to contact us. We thank Martin Bresslein for valuable comments and advice on early versions of the package.
 
+## How to install
+
+From R console:
+
+```{r, eval = FALSE}
+# Install old version from CRAN
+install.packages("gravity")
+
+# Install new version from GitHub
+devtools::install_github("pachamaltese/gravity")
+```
+
 ## References
 
 Egger, Peter, and Michael Pfaffermayr. 2003. "The Proper Panel Econometric Specification of the Gravity Equation: A Three-Way Model with Bilateral Interaction Effects." *Empirical Economics* 28 (3): 571–80. doi:[10.1007/s001810200146](https://doi.org/10.1007/s001810200146).
