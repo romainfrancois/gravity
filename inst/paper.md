@@ -12,7 +12,7 @@ authors:
   orcid: 0000-0003-1017-7574
 date: "23 August 2018"
 output: pdf_document
-bibliography: references.bib
+bibliography: REFERENCES.bib
 tags:
 - R
 - econometrics
@@ -40,7 +40,7 @@ application-oriented access, see which method may be suitable for certain resear
 data types, and extend the code available for their specific research projects.
 
 The functions included in this package are designed to be consistent with the Stata code 
-used in @head2014gravity. Beyond offering an **rstats** open alternative to gravity model 
+used in @Head2014. Beyond offering an **rstats** open alternative to gravity model 
 estimation in Stata we also provide cross-system compatibility that eases reproducible research 
 both for researchers and students.
 
