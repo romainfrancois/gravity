@@ -1,7 +1,7 @@
 Package: gravity
 Type: Package
 Title: Estimation Methods for Gravity Models
-Version: 0.8.1
+Version: 0.8.2
 Authors@R: c(
   person("Anna-Lena", "Woelwer", role = c("aut", "cre"), email = "woelwer@uni-trier.de"),
   person("Jan Pablo", "Burgard", role = c("aut"), email = "burgardj@uni-trier.de"),
@@ -10,6 +10,7 @@ Authors@R: c(
   )
 Description: A wrapper of different standard estimation methods for gravity models. 
   This package provides estimation methods for log-log models and multiplicative models.
+URL: http://pacha.hk/gravity
 Imports: lmtest,
   sandwich,
   glm2,
