@@ -121,7 +121,7 @@ gravity_zeros <- gravity_zeros \%>\%
         lgdp_d = log(gdp_d)
     )
 
-et_tobit(y = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
+et_tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
 data = gravity_zeros)
 }
 

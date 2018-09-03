@@ -3,6 +3,7 @@ title: "Creating gravity datasets"
 author: "Mauricio Vargas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+bibliography: ../inst/REFERENCES.bib
 vignette: >
   %\VignetteIndexEntry{Creating gravity datasets}
   %\VignetteEngine{knitr::rmarkdown}
@@ -15,7 +16,7 @@ knitr::opts_chunk$set(eval = F)
 
 # Description
 
-Gravity dataset with zero trade flows is an edited version of the full gravity dataset: The "square" gravity dataset for all possible pairs of Countries worldwide, 1948-2006, which is used in the article: Head, K., T. Mayer and J. Ries, 2010, "The erosion of colonial linkages after independence". Journal of International Economics, 81(1):1-14 (lead article).
+Gravity dataset with zero trade flows is an edited version of the full gravity dataset that is used in the @Head2010.
 
 Dataset `gravity_no_zeros` corresponds to the dataset without zero trade flows, `gravity_zeros`, on the other hand, includes zero trade flows.
 
@@ -72,7 +73,7 @@ gravity_zeros <- data06 %>%
 gravity_zeros <- gravity_zeros %>% 
   mutate(
     gdp_o = gdp_o / 1000000,
-    gdp_d = gdp_d / 1000000,
+    gdp_d = gdp_d / 1000000
   )
 ```
 
@@ -89,3 +90,5 @@ gravity_no_zeros <- gravity_zeros %>%
 save(gravity_zeros, file = "gravity_zeros.rdata", compress = "xz")
 save(gravity_no_zeros, file = "gravity_no_zeros.rdata", compress = "xz")
 ```
+
+## References

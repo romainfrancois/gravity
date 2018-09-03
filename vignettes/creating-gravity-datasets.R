@@ -29,7 +29,7 @@ knitr::opts_chunk$set(eval = F)
 #  gravity_zeros <- gravity_zeros %>%
 #    mutate(
 #      gdp_o = gdp_o / 1000000,
-#      gdp_d = gdp_d / 1000000,
+#      gdp_d = gdp_d / 1000000
 #    )
 
 ## ----no-zeros------------------------------------------------------------

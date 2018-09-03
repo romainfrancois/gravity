@@ -2,7 +2,7 @@
 title: 'Gravity: Estimation Methods for Gravity Models in R'
 authors:
 - affiliation: 1
-  name: Anna-Lena Wöelwer
+  name: Anna-Lena Wölwer
 - affiliation: 1
   name: Jan Pablo Burgard
 - affiliation: 2
@@ -31,13 +31,14 @@ affiliations:
 Gravity models are used to explain bilateral flows related to the sizes of bilateral partners, 
 a measure of distance between them and other influences on interaction costs. 
 The underlying idea is rather simple. The greater the masses of two bodies and the smaller the 
-distance between them, the stronger their attraction. 
+distance between them, the stronger their attraction. For a state-of-the-art exposition about 
+cross-sectional data see @WoelwerBressleinBurgard2018.
 
-It can be quite difficult to get an overview of the different methods and implement them in 
-R [@baser], **gravity** package provides a wrapper of different standard estimation methods.
-By considering the descriptions and codes of these methods, users get a comprehensive and 
-application-oriented access, see which method may be suitable for certain research questions or 
-data types, and extend the code available for their specific research projects.
+**gravity** package provides a wrapper of different standard estimation methods that can be quite 
+difficult to implement them in R [@baser]. By considering the descriptions and codes of these 
+methods, users get a comprehensive and application-oriented access, see which method may be 
+suitable for certain research questions or data types, and extend the code available for their 
+specific research projects.
 
 The functions included in this package are designed to be consistent with the Stata code 
 used in @Head2014. Beyond offering an **rstats** open alternative to gravity model 
