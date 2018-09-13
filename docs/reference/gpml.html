@@ -278,8 +278,11 @@ ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s00181-012-0576-2'>10.1007/
     <pre class="examples"><span class='co'># NOT RUN {</span>
 <span class='fu'>data</span>(<span class='no'>gravity_no_zeros</span>)
 
-<span class='no'>gravity_no_zeros</span>$<span class='no'>lgdp_o</span> <span class='kw'>&lt;-</span> <span class='fu'>log</span>(<span class='no'>gravity_no_zeros</span>$<span class='no'>gdp_o</span>)
-<span class='no'>gravity_no_zeros</span>$<span class='no'>lgdp_d</span> <span class='kw'>&lt;-</span> <span class='fu'>log</span>(<span class='no'>gravity_no_zeros</span>$<span class='no'>gdp_d</span>)
+<span class='no'>gravity_no_zeros</span> <span class='kw'>&lt;-</span> <span class='no'>gravity_no_zeros</span> <span class='kw'>%&gt;%</span>
+   <span class='fu'>mutate</span>(
+     <span class='kw'>lgdp_o</span> <span class='kw'>=</span> <span class='fu'>log</span>(<span class='no'>gdp_o</span>),
+     <span class='kw'>lgdp_d</span> <span class='kw'>=</span> <span class='fu'>log</span>(<span class='no'>gdp_d</span>)
+   )
 
 <span class='fu'>gpml</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>, <span class='st'>"lgdp_o"</span>, <span class='st'>"lgdp_d"</span>),
 <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
