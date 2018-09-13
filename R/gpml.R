@@ -128,8 +128,11 @@
 #' \dontrun{
 #' data(gravity_no_zeros)
 #'
-#' gravity_no_zeros$lgdp_o <- log(gravity_no_zeros$gdp_o)
-#' gravity_no_zeros$lgdp_d <- log(gravity_no_zeros$gdp_d)
+#' gravity_no_zeros <- gravity_no_zeros %>% 
+#'    mutate(
+#'      lgdp_o = log(gdp_o),
+#'      lgdp_d = log(gdp_d)
+#'    )
 #'
 #' gpml(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
 #' robust = TRUE, data = gravity_no_zeros)

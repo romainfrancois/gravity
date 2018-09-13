@@ -12,6 +12,10 @@ knitr::opts_chunk$set(echo = TRUE)
 [![Travis-CI Build Status](https://travis-ci.org/pachamaltese/gravity.svg?branch=master)](https://travis-ci.org/pachamaltese/gravity)
 [![Build status](https://ci.appveyor.com/api/projects/status/tbpew2740yimjxl9?svg=true)](https://ci.appveyor.com/project/pachamaltese/gravity)
 [![DOI](https://zenodo.org/badge/doi/10.17713/ajs.v47i4.688.svg)](https://doi.org/10.17713/ajs.v47i4.688)
+[![cran checks](https://cranchecks.info/badges/summary/gravity)](https://cran.r-project.org/web/checks/check_results_gravity.html)
+[![CRAN downloads](http://cranlogs.r-pkg.org/badges/gravity)](http://cran.rstudio.com/web/packages/gravity/index.html)
+[![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/gravity)](http://cran.rstudio.com/web/packages/gravity/index.html)
+[![Coverage status](https://codecov.io/gh/pachamaltese/gravity/branch/master/graph/badge.svg)](https://codecov.io/github/pachamaltese/gravity?branch=master)
 
 ## About
 
