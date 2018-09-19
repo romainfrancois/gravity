@@ -16,7 +16,7 @@ knitr::opts_chunk$set(eval = F)
 
 # Description
 
-Gravity dataset with zero trade flows is an edited version of the full gravity dataset that is used in the @Head2010.
+Gravity dataset with zero trade flows is an edited version of the full gravity dataset that is used in @Head2010.
 
 Dataset `gravity_no_zeros` corresponds to the dataset without zero trade flows, `gravity_zeros`, on the other hand, includes zero trade flows.
 
