@@ -1,8 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-vignettes/*.zip
-vignettes/*.dta
-vignettes/*.rdata
+vignettes/col_regfile09.zip
 00-check.R
 todos/*
 docs/*

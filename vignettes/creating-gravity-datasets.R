@@ -1,5 +1,5 @@
 ## ----setup, cache = FALSE, echo = FALSE, message = FALSE, warning = FALSE, tidy = FALSE----
-knitr::opts_chunk$set(eval = F)
+knitr::opts_chunk$set(eval = FALSE)
 
 ## ----read----------------------------------------------------------------
 #  url <- "http://econ.sciences-po.fr/sites/default/files/file/tmayer/data/col_regfile09.zip"
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(eval = F)
 #  data06 <- col_regfile09 %>%
 #    filter(year == 2006)
 
-## ----choose, eval= F-----------------------------------------------------
+## ----choose--------------------------------------------------------------
 #  data06 <- data06 %>%
 #    select(iso_o, iso_d, distw, gdp_o, gdp_d, rta, flow, contig, comlang_off, comcur)
 

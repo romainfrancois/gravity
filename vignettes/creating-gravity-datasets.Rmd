@@ -11,7 +11,7 @@ vignette: >
 ---
 
 ```{r setup, cache = FALSE, echo = FALSE, message = FALSE, warning = FALSE, tidy = FALSE}
-knitr::opts_chunk$set(eval = F)
+knitr::opts_chunk$set(eval = FALSE)
 ```
 
 # Description
@@ -52,7 +52,7 @@ data06 <- col_regfile09 %>%
 
 ## Choosing variables (select columns)
 
-```{r choose, eval= F}
+```{r choose}
 data06 <- data06 %>% 
   select(iso_o, iso_d, distw, gdp_o, gdp_d, rta, flow, contig, comlang_off, comcur)
 ```

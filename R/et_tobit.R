@@ -204,7 +204,7 @@ et_tobit <- function(dependent_variable, regressors, data, ...) {
       y2_log = log(!!sym("y2"))
     )
 
-  y2min <- min(d %>% select(!!sym("y2")), na.rm = TRUE)
+  y2min <- min(select(d, !!sym("y2")), na.rm = TRUE)
   y2min_log <- log(y2min)
 
   d <- d %>%

@@ -130,7 +130,7 @@
 #' # Example for data without zero trade flows
 #' data(gravity_no_zeros)
 #'
-#' gravity_no_zeros <- gravity_no_zeros %>% 
+#' gravity_no_zeros <- gravity_no_zeros %>%
 #'    mutate(
 #'      lgdp_o = log(gdp_o),
 #'      lgdp_d = log(gdp_d)
