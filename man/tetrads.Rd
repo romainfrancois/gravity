@@ -4,8 +4,8 @@
 \alias{tetrads}
 \title{Tetrads}
 \usage{
-tetrads(dependent_variable, regressors, codes, reference_countries = c("JPN",
-  "USA"), multiway = TRUE, data, ...)
+tetrads(dependent_variable, regressors, codes,
+  reference_countries = c("JPN", "USA"), multiway = TRUE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset
