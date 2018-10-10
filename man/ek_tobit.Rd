@@ -4,11 +4,11 @@
 \alias{ek_tobit}
 \title{\insertCite{Eaton2001;textual}{gravity} Tobit model (EK Tobit)}
 \usage{
-ek_tobit(dependent_variable, regressors, code_destination, robust = TRUE,
-  data, ...)
+ek_tobit(dependent_variable, distance, additional_regressors = NULL,
+  code_destination, robust = TRUE, data, ...)
 }
 \arguments{
-\item{dependent_variable}{name (type: character) of the dependent variable in the dataset
+\item{dependent_variable}{(Type: character) name of the dependent variable in the dataset
 \code{data} (e.g. trade flows).
 
 This variable is logged and then used as the dependent variable in the estimation.
@@ -16,30 +16,27 @@ This variable is logged and then used as the dependent variable in the estimatio
 As the log of zero is not defined, all flows equal to zero are replaced by a left open interval
 with the logged minimum trade flow of the respective importing country as right border.}
 
-\item{regressors}{name (type: character) of the regressors to include in the model.
-
-Include the distance variable in the dataset \code{data} containing a measure of
+\item{distance}{(Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.
 
-Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes}.
+The distance is logged automatically when the function is executed.}
 
-Interaction terms can be added.
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+variable to indicate contiguity).
 
-Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
+Unilateral metric variables such as GDPs should be inserted via the arguments \code{income_origin} and \code{income_origin}.
 
-\item{code_destination}{variable name (type: character) of the label of the country
-of destination (e.g. ISO-3 code from the \code{iso_d} variable in the example datasets). The variables
-are grouped by using \code{iso_d} to obtain estimates.}
+Write this argument as \code{c(contiguity, common currency, ...)}.}
 
-\item{robust}{robust (type: logical) determines whether a robust
-variance-covariance matrix should be used. By default is set to \code{TRUE}.
+\item{code_destination}{(Type: character) variable name of the code of the country
+of destination (e.g. ISO-3 codes from the variables \code{iso_d}) in the
+example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.}
 
-If \code{robust = TRUE} the estimation results are consistent with the
-Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
-when choosing robust estimation.}
+\item{robust}{(Type: logical) determines whether robust
+fitting should be used. By default is set to \code{TRUE}.}
 
-\item{data}{name of the dataset to be used (type: character).
+\item{data}{(Type: character) name of the dataset to be used.
 
 To estimate gravity equations you need a square dataset including bilateral
 flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
@@ -111,7 +108,9 @@ gravity_zeros <- gravity_zeros \%>\%
         lgdp_d = log(gdp_d)
     )
 
-ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
+ek_tobit(dependent_variable = "flow", 
+distance = "distw",
+additional_regressors = c("rta","lgdp_o","lgdp_d"),
 code_destination = "iso_d",
 robust = TRUE, data = gravity_zeros)
 }
@@ -128,9 +127,11 @@ gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o \%in\% countries_chosen_zeros,]
-ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
+summary(ek_tobit(dependent_variable = "flow",
+distance = "distw",
+additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
 code_destination = "iso_d",
-robust = TRUE, data = grav_small_zeros)
+robust = TRUE, data = grav_small_zeros))
 }
 
 }

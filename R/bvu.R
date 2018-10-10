@@ -157,11 +157,15 @@
 #'
 #' @export
 
-bvu <- function(dependent_variable = "flow", 
-                distance = "distw", additional_regressors = NULL, 
-                income_origin = "gdp_o", income_destination = "gdp_d", 
-                code_origin = "iso_o", code_destination = "iso_d", 
-                robust = TRUE, data, ...) {
+bvu <- function(dependent_variable, 
+                distance, 
+                additional_regressors = NULL, 
+                income_origin, 
+                income_destination, 
+                code_origin, 
+                code_destination, 
+                robust = TRUE, 
+                data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   

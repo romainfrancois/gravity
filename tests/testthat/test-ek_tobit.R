@@ -15,12 +15,11 @@ test_that("EK Tobit returns a valid output", {
     )
 
   fit <- ek_tobit(
-    dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
+    dependent_variable = "flow", distance = "distw",
+    additional_regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
     code_destination = "iso_d",
     robust = TRUE, data = grav_small
   )
 
-  expect_is(fit, "summary.survreg")
-  expect_is(fit$coefficients, "numeric")
-  expect_output(str(fit), "List of 14")
+  expect_is(fit, "survreg")
 })

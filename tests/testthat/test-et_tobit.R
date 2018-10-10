@@ -16,11 +16,9 @@ test_that("ET Tobit returns a valid output", {
     )
 
   fit <- et_tobit(
-    dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
+    dependent_variable = "flow", distance = "distw", additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
     data = grav_small
   )
 
-  expect_is(fit, "summary.maxLik")
-  expect_is(fit$estimate, "matrix")
-  expect_output(str(fit), "List of 11")
+  expect_is(fit, "censReg")
 })

@@ -143,9 +143,13 @@
 #'
 #' @export
 
-ddm <- function(dependent_variable = "flow", distance = "distw", additional_regressors = NULL, 
-                code_origin = "iso_o", code_destination = "iso_d", 
-                robust = TRUE, data, ...) {
+ddm <- function(dependent_variable, 
+                distance, 
+                additional_regressors = NULL, 
+                code_origin, 
+                code_destination, 
+                robust = TRUE, 
+                data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(robust))

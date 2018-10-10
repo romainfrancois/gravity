@@ -69,7 +69,7 @@ For estimating this threshold, we follow Carson and Sun (2007)
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.5</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.7</span>
       </span>
     </div>
 
@@ -133,29 +133,34 @@ data is estimated and interpreted as a threshold.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>et_tobit</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>et_tobit</span>(<span class='no'>dependent_variable</span>, <span class='no'>distance</span>, <span class='kw'>additional_regressors</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>data</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>dependent_variable</th>
-      <td><p>name (type: character) of the dependent variable in the dataset
-<code>data</code>, e.g. trade flows.</p>
+      <td><p>(Type: character) name of the dependent variable in the dataset
+<code>data</code> (e.g. trade flows).</p>
 <p>Following Carson and Sun (2007), the smallest positive flow value is
 used as an estimate of the threshold, this value is is added to the <code>dependent_variable</code>,
 the result is logged and taken as the dependent variable in the Tobit estimation with
 lower bound equal to the log of the smallest possible flow value.</p></td>
     </tr>
     <tr>
-      <th>regressors</th>
-      <td><p>name (type: character) of the regressors to include in the model.</p>
-<p>Include the distance variable in the dataset <code>data</code> containing a measure of
+      <th>distance</th>
+      <td><p>(Type: character) name of the distance variable in the dataset <code>data</code> containing a measure of
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.</p>
-<p>Unilateral metric variables such as GDPs can be added but those variables have to be logged first.</p>
-<p>Interaction terms can be added.</p>
-<p>Write this argument as <code>c(distance, contiguity, common curreny, ...)</code>.</p></td>
+<p>The distance is logged automatically when the function is executed.</p></td>
+    </tr>
+    <tr>
+      <th>additional_regressors</th>
+      <td><p>(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+variable to indicate contiguity).</p>
+<p>Unilateral metric variables such as GDPs should be inserted via the arguments <code>income_origin</code> and <code>income_origin</code>.</p>
+<p>Write this argument as <code>c(contiguity, common currency, ...)</code>.</p></td>
     </tr>
     <tr>
       <th>data</th>
@@ -303,7 +308,8 @@ doi: <a href='http://doi.org/10.1111/j.1368-423X.2007.00218.x'>10.1111/j.1368-42
         <span class='kw'>lgdp_d</span> <span class='kw'>=</span> <span class='fu'>log</span>(<span class='no'>gdp_d</span>)
     )
 
-<span class='fu'>et_tobit</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>, <span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>,<span class='st'>"lgdp_o"</span>,<span class='st'>"lgdp_d"</span>),
+<span class='fu'>et_tobit</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>,
+<span class='kw'>distance</span> <span class='kw'>=</span> <span class='st'>"distw"</span>, <span class='kw'>additional_regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"rta"</span>,<span class='st'>"lgdp_o"</span>,<span class='st'>"lgdp_d"</span>),
 <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_zeros</span>)
 <span class='co'># }</span><div class='input'>
 </div><div class='input'>

@@ -4,10 +4,9 @@
 \alias{bvu}
 \title{Bonus vetus OLS (BVU)}
 \usage{
-bvu(dependent_variable = "flow", distance = "distw",
-  additional_regressors = NULL, income_origin = "gdp_o",
-  income_destination = "gdp_d", code_origin = "iso_o",
-  code_destination = "iso_d", robust = TRUE, data, ...)
+bvu(dependent_variable, distance, additional_regressors = NULL,
+  income_origin, income_destination, code_origin, code_destination,
+  robust = TRUE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{(Type: character) name of the dependent variable in the dataset

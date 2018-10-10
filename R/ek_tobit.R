@@ -33,7 +33,7 @@
 #' The function is designed for cross-sectional data, but can be extended to panel data using the
 #' \code{\link[survival]{survreg}} function.
 #'
-#' @param dependent_variable name (type: character) of the dependent variable in the dataset
+#' @param dependent_variable (Type: character) name of the dependent variable in the dataset
 #' \code{data} (e.g. trade flows).
 #'
 #' This variable is logged and then used as the dependent variable in the estimation.
@@ -41,30 +41,27 @@
 #' As the log of zero is not defined, all flows equal to zero are replaced by a left open interval
 #' with the logged minimum trade flow of the respective importing country as right border.
 #'
-#' @param regressors name (type: character) of the regressors to include in the model.
-#'
-#' Include the distance variable in the dataset \code{data} containing a measure of
+#' @param distance (Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 #' distance between all pairs of bilateral partners and bilateral variables that should
 #' be taken as the independent variables in the estimation.
 #'
-#' Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes}.
+#' The distance is logged automatically when the function is executed.
 #'
-#' Interaction terms can be added.
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+#' variable to indicate contiguity).
 #'
-#' Write this argument as \code{c(distance, contiguity, common curreny, ...)}.
+#' Unilateral metric variables such as GDPs should be inserted via the arguments \code{income_origin} and \code{income_origin}.
 #'
-#' @param code_destination variable name (type: character) of the label of the country
-#' of destination (e.g. ISO-3 code from the \code{iso_d} variable in the example datasets). The variables
-#' are grouped by using \code{iso_d} to obtain estimates.
+#' Write this argument as \code{c(contiguity, common currency, ...)}.
 #'
-#' @param robust robust (type: logical) determines whether a robust
-#' variance-covariance matrix should be used. By default is set to \code{TRUE}.
+#' @param code_destination (Type: character) variable name of the code of the country
+#' of destination (e.g. ISO-3 codes from the variables \code{iso_d}) in the
+#' example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 #'
-#' If \code{robust = TRUE} the estimation results are consistent with the
-#' Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
-#' when choosing robust estimation.
-#'
-#' @param data name of the dataset to be used (type: character).
+#' @param robust (Type: logical) determines whether robust
+#' fitting should be used. By default is set to \code{TRUE}.
+#' 
+#' @param data (Type: character) name of the dataset to be used.
 #'
 #' To estimate gravity equations you need a square dataset including bilateral
 #' flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
@@ -129,7 +126,9 @@
 #'         lgdp_d = log(gdp_d)
 #'     )
 #'
-#' ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
+#' ek_tobit(dependent_variable = "flow", 
+#' distance = "distw",
+#' additional_regressors = c("rta","lgdp_o","lgdp_d"),
 #' code_destination = "iso_d",
 #' robust = TRUE, data = gravity_zeros)
 #' }
@@ -142,13 +141,15 @@
 #' data(gravity_zeros)
 #' gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
 #' gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
-#'
+#' 
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' ek_tobit(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
+#' summary(ek_tobit(dependent_variable = "flow",
+#' distance = "distw",
+#' additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
 #' code_destination = "iso_d",
-#' robust = TRUE, data = grav_small_zeros)
+#' robust = TRUE, data = grav_small_zeros))
 #' }
 #'
 #' @return
@@ -159,17 +160,25 @@
 #'
 #' @export
 
-ek_tobit <- function(dependent_variable, regressors, code_destination, robust = TRUE, data, ...) {
+ek_tobit <- function(dependent_variable, 
+                     distance, 
+                     additional_regressors = NULL, 
+                     code_destination, 
+                     robust = TRUE, 
+                     data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(robust))
+  
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
+  
+  stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
+  
+  if (!is.null(additional_regressors)) {
+    stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
+  }
+  
   stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
-
-  # Split input vectors -----------------------------------------------------
-  distance <- regressors[1]
-  additional_regressors <- regressors[-1]
 
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
@@ -216,8 +225,5 @@ ek_tobit <- function(dependent_variable, regressors, code_destination, robust = 
   form <- stats::as.formula(paste("y_cens_log_ek", "~", vars))
   model_ek_tobit <- survival::survreg(form, data = d, dist = "gaussian", robust = robust)
 
-  # Return ------------------------------------------------------------------
-  return_object <- summary(model_ek_tobit)
-  return_object$call <- form
-  return(return_object)
+  return(model_ek_tobit)
 }
