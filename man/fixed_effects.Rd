@@ -4,44 +4,42 @@
 \alias{fixed_effects}
 \title{Fixed Effects}
 \usage{
-fixed_effects(dependent_variable, regressors, codes = c("iso_o",
-  "iso_d"), robust = TRUE, data, ...)
+fixed_effects(dependent_variable, distance, additional_regressors,
+  code_origin, code_destination, robust = TRUE, data, ...)
 }
 \arguments{
-\item{dependent_variable}{name (type: character) of the dependent variable in the dataset
+\item{dependent_variable}{(Type: character) name of the dependent variable in the dataset
 \code{data} (e.g. trade flows).
 
 This variable is logged and then used as the dependent variable in the estimation.}
 
-\item{regressors}{name (type: character) of the regressors to include in the model.
-
-Include the distance variable in the dataset \code{data} containing a measure of
+\item{distance}{(Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.
 
-The distance is logged automatically when the function is executed.
+The distance is logged automatically when the function is executed.}
 
-Fixed effects catch all unilateral effects. Therefore, no other unilateral variables such as
-GDP can be included as independent variables in the estimation.
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+variable to indicate contiguity).
 
-Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
+Unilateral metric variables such as GDPs should be inserted via the arguments \code{income_origin} and \code{income_origin}.
 
-\item{codes}{variable name (type: character) of the code of the country
-of origin and destination (e.g. ISO-3 codes from the variables \code{iso_o} and \code{iso_d}) in the
-example datasets).
+As country specific effects are subdued due to demeaning, no further unilateral variables apart from incomes can be added.
 
-The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
+Write this argument as \code{c(contiguity, common currency, ...)}.}
 
-Write this argument as \code{c(code origin, code destination)}.}
+\item{code_origin}{(Type: character) variable name of the code of the country
+of origin (e.g. ISO-3 codes from the variables \code{iso_o} in the
+example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.}
 
-\item{robust}{robust (type: logical) determines whether a robust
-variance-covariance matrix should be used. By default is set to \code{TRUE}.
+\item{code_destination}{(Type: character) variable name of the code of the country
+of destination (e.g. ISO-3 codes from the variables \code{iso_d}) in the
+example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.}
 
-If \code{robust = TRUE} the estimation results are consistent with the
-Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
-when choosing robust estimation.}
+\item{robust}{(Type: logical) determines whether robust
+fitting should be used. By default is set to \code{TRUE}.}
 
-\item{data}{name of the dataset to be used (type: character).
+\item{data}{(Type: character) name of the dataset to be used.
 
 To estimate gravity equations you need a square dataset including bilateral
 flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
@@ -137,12 +135,14 @@ see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textu
 data(gravity_no_zeros)
 
 fixed_effects(dependent_variable = "flow",
-regressors = c("distw", "rta"), codes = c("iso_o", "iso_d"),
+distance = "distw", regressors = "rta", 
+code_origin = "iso_o", code_destination = "iso_d",
 robust = TRUE, data = gravity_no_zeros)
 
 fixed_effects(dependent_variable = "flow",
-regressors = c("distw", "rta", "comcur", "contig"),
-codes = c("iso_o", "iso_d"), robust = TRUE, data = gravity_no_zeros)
+distance = "distw", regressors = c("rta", "comcur", "contig"),
+code_origin = "iso_o", code_destination = "iso_d",
+robust = TRUE, data = gravity_no_zeros)
 }
 
 \dontshow{
@@ -154,8 +154,8 @@ data(gravity_no_zeros)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-fixed_effects(dependent_variable = "flow", regressors = c("distw", "rta"),
-codes = c("iso_o", "iso_d"), robust = TRUE, data = grav_small)
+fixed_effects(dependent_variable = "flow", distance = "distw", additional_regressors = "rta",
+code_origin = "iso_o", code_destination = "iso_d", robust = TRUE, data = grav_small)
 }
 
 }

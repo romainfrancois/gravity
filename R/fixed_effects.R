@@ -55,40 +55,38 @@
 #' see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textual}{gravity} and
 #' \insertCite{Head2010;textual}{gravity} as well as the references therein.
 #'
-#' @param dependent_variable name (type: character) of the dependent variable in the dataset
+#' @param dependent_variable (Type: character) name of the dependent variable in the dataset
 #' \code{data} (e.g. trade flows).
 #'
 #' This variable is logged and then used as the dependent variable in the estimation.
 #'
-#' @param regressors name (type: character) of the regressors to include in the model.
-#'
-#' Include the distance variable in the dataset \code{data} containing a measure of
+#' @param distance (Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 #' distance between all pairs of bilateral partners and bilateral variables that should
 #' be taken as the independent variables in the estimation.
 #'
 #' The distance is logged automatically when the function is executed.
 #'
-#' Fixed effects catch all unilateral effects. Therefore, no other unilateral variables such as
-#' GDP can be included as independent variables in the estimation.
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+#' variable to indicate contiguity).
 #'
-#' Write this argument as \code{c(distance, contiguity, common curreny, ...)}.
+#' Unilateral metric variables such as GDPs should be inserted via the arguments \code{income_origin} and \code{income_origin}.
+#' 
+#' As country specific effects are subdued due to demeaning, no further unilateral variables apart from incomes can be added.
 #'
-#' @param codes variable name (type: character) of the code of the country
-#' of origin and destination (e.g. ISO-3 codes from the variables \code{iso_o} and \code{iso_d}) in the
-#' example datasets).
+#' Write this argument as \code{c(contiguity, common currency, ...)}.
 #'
-#' The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
+#' @param code_origin (Type: character) variable name of the code of the country
+#' of origin (e.g. ISO-3 codes from the variables \code{iso_o} in the
+#' example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 #'
-#' Write this argument as \code{c(code origin, code destination)}.
+#' @param code_destination (Type: character) variable name of the code of the country
+#' of destination (e.g. ISO-3 codes from the variables \code{iso_d}) in the
+#' example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 #'
-#' @param robust robust (type: logical) determines whether a robust
-#' variance-covariance matrix should be used. By default is set to \code{TRUE}.
-#'
-#' If \code{robust = TRUE} the estimation results are consistent with the
-#' Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
-#' when choosing robust estimation.
-#'
-#' @param data name of the dataset to be used (type: character).
+#' @param robust (Type: logical) determines whether robust
+#' fitting should be used. By default is set to \code{TRUE}.
+#' 
+#' @param data (Type: character) name of the dataset to be used.
 #'
 #' To estimate gravity equations you need a square dataset including bilateral
 #' flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
@@ -155,12 +153,14 @@
 #' data(gravity_no_zeros)
 #'
 #' fixed_effects(dependent_variable = "flow",
-#' regressors = c("distw", "rta"), codes = c("iso_o", "iso_d"),
+#' distance = "distw", regressors = "rta", 
+#' code_origin = "iso_o", code_destination = "iso_d",
 #' robust = TRUE, data = gravity_no_zeros)
 #'
 #' fixed_effects(dependent_variable = "flow",
-#' regressors = c("distw", "rta", "comcur", "contig"),
-#' codes = c("iso_o", "iso_d"), robust = TRUE, data = gravity_no_zeros)
+#' distance = "distw", regressors = c("rta", "comcur", "contig"),
+#' code_origin = "iso_o", code_destination = "iso_d",
+#' robust = TRUE, data = gravity_no_zeros)
 #' }
 #'
 #' \dontshow{
@@ -172,8 +172,8 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' fixed_effects(dependent_variable = "flow", regressors = c("distw", "rta"),
-#' codes = c("iso_o", "iso_d"), robust = TRUE, data = grav_small)
+#' fixed_effects(dependent_variable = "flow", distance = "distw", additional_regressors = "rta",
+#' code_origin = "iso_o", code_destination = "iso_d", robust = TRUE, data = grav_small)
 #' }
 #'
 #' @return
@@ -185,18 +185,23 @@
 #'
 #' @export
 
-fixed_effects <- function(dependent_variable, regressors, codes = c("iso_o", "iso_d"), robust = TRUE, data, ...) {
+fixed_effects <- function(dependent_variable, distance, 
+                          additional_regressors, code_origin, code_destination, robust = TRUE, data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(robust))
+  
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
-  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
-
-  # Split input vectors -----------------------------------------------------
-  distance <- regressors[1]
-  additional_regressors <- regressors[-1]
-
+  
+  stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
+  
+  if (!is.null(additional_regressors)) {
+    stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
+  }
+  
+  stopifnot(is.character(code_origin) | code_origin %in% colnames(data) | length(code_origin) == 1)
+  stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
+  
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
     filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>%
@@ -212,13 +217,14 @@ fixed_effects <- function(dependent_variable, regressors, codes = c("iso_o", "is
     )
 
   # Model ----------------------------------------------------------------------
-  vars <- paste(c("dist_log", additional_regressors, codes), collapse = " + ")
+  vars <- paste(c("dist_log", additional_regressors, code_origin, code_destination), collapse = " + ")
   form <- stats::as.formula(paste("y_log_fe", "~", vars))
-  model_fe <- stats::lm(form, data = d)
 
-  # Return ---------------------------------------------------------------------
-  return_object <- robust_summary(model_fe, robust = robust)
-  return_object$call <- form
-
-  return(return_object)
+  if (robust == TRUE) {
+    model_fe <- MASS::rlm(form, data = d)
+  } else {
+    model_fe <- stats::lm(form, data = d)
+  }
+  
+  return(model_fe)
 }

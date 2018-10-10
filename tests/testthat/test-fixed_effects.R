@@ -8,11 +8,10 @@ test_that("Fixed Effects returns a valid output", {
 
   fit <- fixed_effects(
     dependent_variable = "flow",
-    regressors = c("distw", "rta", "comcur", "contig"),
-    codes = c("iso_o", "iso_d"), robust = TRUE, data = grav_small
+    distance = "distw",
+    additional_regressors = c("rta", "comcur", "contig"),
+    code_origin = "iso_o", code_destination = "iso_d", robust = TRUE, data = grav_small
   )
 
-  expect_is(fit, "summary.lm")
-  expect_is(fit$coefficients, "matrix")
-  expect_output(str(fit), "List of 11")
+  expect_is(fit, "lm")
 })
