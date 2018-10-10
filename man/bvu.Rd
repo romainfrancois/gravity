@@ -5,7 +5,7 @@
 \title{Bonus vetus OLS (BVU)}
 \usage{
 bvu(dependent_variable = "flow", distance = "distw",
-  additional_regressors = "rta", income_origin = "gdp_o",
+  additional_regressors = NULL, income_origin = "gdp_o",
   income_destination = "gdp_d", code_origin = "iso_o",
   code_destination = "iso_d", robust = TRUE, data, ...)
 }

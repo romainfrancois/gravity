@@ -7,12 +7,11 @@ test_that("DDM returns a valid output", {
   grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen, ]
 
   fit <- ddm(
-    dependent_variable = "flow", regressors = c("distw", "rta", "comcur", "contig"),
-    codes = c("iso_o", "iso_d"),
-    robust = TRUE, data = grav_small
+    dependent_variable = "flow", distance = "distw",
+    additional_regressors = c("rta", "comcur", "contig"),
+    code_origin = "iso_o", code_destination = "iso_d",
+    robust = FALSE, data = grav_small
   )
 
-  expect_is(fit, "summary.lm")
-  expect_is(fit$coefficients, "matrix")
-  expect_output(str(fit), "List of 11")
+  expect_is(fit, "lm")
 })

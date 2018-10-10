@@ -158,7 +158,7 @@
 #' @export
 
 bvu <- function(dependent_variable = "flow", 
-                distance = "distw", additional_regressors = "rta", 
+                distance = "distw", additional_regressors = NULL, 
                 income_origin = "gdp_o", income_destination = "gdp_d", 
                 code_origin = "iso_o", code_destination = "iso_d", 
                 robust = TRUE, data, ...) {
@@ -168,17 +168,18 @@ bvu <- function(dependent_variable = "flow",
   stopifnot(is.logical(robust))
 
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+  
   stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
 
   if (!is.null(additional_regressors)) {
     stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
   }
 
-  stopifnot(is.character(income_origin) | all(income_origin %in% colnames(data)) | length(income_origin) == 1)
-  stopifnot(is.character(income_destination) | all(income_destination %in% colnames(data)) | length(income_destination) == 1)
+  stopifnot(is.character(income_origin) | income_origin %in% colnames(data) | length(income_origin) == 1)
+  stopifnot(is.character(income_destination) | income_destination %in% colnames(data) | length(income_destination) == 1)
 
-  stopifnot(is.character(code_origin) | all(code_origin %in% colnames(data)) | length(code_origin) == 1)
-  stopifnot(is.character(code_destination) | all(code_destination %in% colnames(data)) | length(code_destination) == 1)
+  stopifnot(is.character(code_origin) | code_origin %in% colnames(data) | length(code_origin) == 1)
+  stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
 
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
@@ -248,6 +249,5 @@ bvu <- function(dependent_variable = "flow",
     model_bvu <- stats::lm(y_log_bvu ~ ., data = d)
   }
   
-  # Return ---------------------------------------------------------------------
   return(model_bvu)
 }

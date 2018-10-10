@@ -9,7 +9,7 @@ test_that("BVU returns a valid output", {
   fit <- bvu(
     dependent_variable = "flow", distance = "distw", additional_regressors = c("rta", "contig", "comcur"),
     income_origin = "gdp_o", income_destination = "gdp_d", code_origin = "iso_o", code_destination = "iso_d",
-    robust = TRUE, data = grav_small
+    robust = FALSE, data = grav_small
   )
 
   expect_is(fit, "lm")
