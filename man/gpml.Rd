@@ -4,25 +4,27 @@
 \alias{gpml}
 \title{Gamma Pseudo Maximum Likelihood (GPML)}
 \usage{
-gpml(dependent_variable, regressors, robust = TRUE, data, ...)
+gpml(dependent_variable, distance, additional_regressors, robust = TRUE,
+  data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset
 \code{data} (e.g. trade flows).}
 
-\item{regressors}{name (type: character) of the regressors to include in the model.
-
-Include the distance variable in the dataset \code{data} containing a measure of
+\item{distance}{(Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.
 
-The distance is logged automatically when the function is executed.
+The distance is logged automatically when the function is executed.}
+
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+variable to indicate contiguity).
 
 Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
 
 Interaction terms can be added.
 
-Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
+Write this argument as \code{c(distance, contiguity, common currency, ...)}.}
 
 \item{robust}{robust (type: logical) determines whether a robust
 variance-covariance matrix should be used. By default is set to \code{TRUE}.}
@@ -110,7 +112,8 @@ gravity_no_zeros <- gravity_no_zeros \%>\%
      lgdp_d = log(gdp_d)
    )
 
-gpml(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
+gpml(dependent_variable = "flow", distance = "distw", 
+additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
 robust = TRUE, data = gravity_no_zeros)
 }
 
@@ -123,7 +126,7 @@ data(gravity_no_zeros)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-gpml(dependent_variable = "flow",  regressors = c("distw", "rta", "iso_o", "iso_d"),
+gpml(dependent_variable = "flow", distance = "distw", additional_regressors = c("rta", "iso_o", "iso_d"),
     robust = TRUE, data = grav_small)
 }
 

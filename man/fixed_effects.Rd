@@ -4,7 +4,7 @@
 \alias{fixed_effects}
 \title{Fixed Effects}
 \usage{
-fixed_effects(dependent_variable, distance, additional_regressors,
+fixed_effects(dependent_variable, distance, additional_regressors = NULL,
   code_origin, code_destination, robust = TRUE, data, ...)
 }
 \arguments{
