@@ -49,7 +49,7 @@
 #'
 #' The distance is logged automatically when the function is executed.
 #'
-#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
 #' variable to indicate contiguity).
 #'
 #' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
@@ -126,32 +126,28 @@
 #' and the references therein.
 #'
 #' @examples
-#' \dontrun{
-#' data(gravity_no_zeros)
-#'
-#' gravity_no_zeros <- gravity_no_zeros %>%
-#'    mutate(
-#'      lgdp_o = log(gdp_o),
-#'      lgdp_d = log(gdp_d)
-#'    )
-#'
-#' gpml(dependent_variable = "flow", distance = "distw", 
-#' additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
-#' robust = TRUE, data = gravity_no_zeros)
-#' }
-#'
-#' \dontshow{
-#' # examples for CRAN checks:
-#' # executable in < 5 sec together with the examples above
-#' # not shown to users
-#'
-#' data(gravity_no_zeros)
-#' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' gpml(dependent_variable = "flow", distance = "distw", additional_regressors = c("rta", "iso_o", "iso_d"),
-#'     robust = TRUE, data = grav_small)
-#' }
+#' # Example for CRAN checks:
+#' # Executable in < 5 sec
+#' library(dplyr)
+#' data("gravity_no_zeros")
+#' 
+#' # Choose 5 countries for testing
+#' countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+#' grav_small <- filter(gravity_no_zeros, iso_o %in% countries_chosen)
+#' 
+#' grav_small <- grav_small %>%
+#'   mutate(
+#'     lgdp_o = log(gdp_o),
+#'     lgdp_d = log(gdp_d)
+#'   )
+#' 
+#' fit <- gpml(
+#'   dependent_variable = "flow",
+#'   distance = "distw",
+#'   additional_regressors = c("rta", "iso_o", "iso_d"),
+#'   robust = FALSE,
+#'   data = grav_small
+#' )
 #'
 #' @return
 #' The function returns the summary of the estimated gravity model similar to a
@@ -162,23 +158,23 @@
 #'
 #' @export
 
-gpml <- function(dependent_variable, 
-                 distance, 
-                 additional_regressors, 
-                 robust = FALSE, 
+gpml <- function(dependent_variable,
+                 distance,
+                 additional_regressors,
+                 robust = FALSE,
                  data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(robust))
-  
+
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  
+
   stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
-  
+
   if (!is.null(additional_regressors)) {
     stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
   }
-  
+
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
     filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>%
@@ -198,7 +194,7 @@ gpml <- function(dependent_variable,
   # Model ----------------------------------------------------------------------
   vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
   form <- stats::as.formula(paste("y_gpml", "~", vars))
-  
+
   model_gpml <- glm2::glm2(form,
     data = d,
     family = stats::Gamma(link = "log"),
@@ -207,14 +203,14 @@ gpml <- function(dependent_variable,
 
   if (robust == TRUE) {
     model_gpml_robust <- lmtest::coeftest(model_gpml,
-                                          vcov = sandwich::vcovHC(model_gpml, "HC1")
+      vcov = sandwich::vcovHC(model_gpml, "HC1")
     )
-    
+
     model_gpml$coefficients <- model_gpml_robust[seq_along(rownames(model_gpml_robust)), ]
   }
 
   model_gpml$call <- form
   class(model_gpml) <- c(class(model_gpml), "gpml")
-  
+
   return(model_gpml)
 }

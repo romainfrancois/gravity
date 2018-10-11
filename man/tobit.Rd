@@ -4,7 +4,8 @@
 \alias{tobit}
 \title{Left-censored Tobit model with known threshold}
 \usage{
-tobit(dependent_variable, regressors, added_constant = 1, data, ...)
+tobit(dependent_variable, distance, additional_regressors = NULL,
+  added_constant = 1, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset
@@ -15,13 +16,14 @@ taken as the dependent variable in the tobit estimation with lower bound
 equal to \code{0} as \code{log(1) = 0} represents the smallest flows
 in the transformed variable.}
 
-\item{regressors}{name (type: character) of the regressors to include in the model.
-
-Include the distance variable in the dataset \code{data} containing a measure of
+\item{distance}{(Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.
 
-The distance is logged automatically when the function is executed.
+The distance is logged automatically when the function is executed.}
+
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy
+variable to indicate contiguity).
 
 Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
 
@@ -115,35 +117,28 @@ bound equal to the minimum positive trade level of the respective
 importing country.
 }
 \examples{
-\dontrun{
-# Example for data with zero trade flows
-data(gravity_zeros)
+# Example for CRAN checks:
+# Executable in < 5 sec
+library(dplyr)
+data("gravity_no_zeros")
 
-gravity_zeros <- gravity_zeros \%>\%
-    mutate(
-        lgdp_o = log(gdp_o),
-        lgdp_d = log(gdp_d)
-    )
+# Choose 5 countries for testing
+countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+grav_small <- filter(gravity_no_zeros, iso_o \%in\% countries_chosen)
 
-tobit(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
-added_constant = 1, data = gravity_zeros)
-}
+grav_small <- grav_small \%>\%
+  mutate(
+    lgdp_o = log(gdp_o),
+    lgdp_d = log(gdp_d)
+  )
 
-\dontshow{
-# examples for CRAN checks:
-# executable in < 5 sec together with the examples above
-# not shown to users
-
-data(gravity_zeros)
-gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
-gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
-
-# choose exemplarily 10 biggest countries for check data
-countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
-grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o \%in\% countries_chosen_zeros,]
-tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
-added_constant = 1, data = grav_small_zeros)
-}
+fit <- tobit(
+  dependent_variable = "flow",
+  distance = "distw",
+  additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
+  added_constant = 1,
+  data = grav_small
+)
 
 }
 \references{

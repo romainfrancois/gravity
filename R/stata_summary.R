@@ -4,37 +4,52 @@
 #' Adapted after a function written by Isidore Beautrelet
 #' \url{https://raw.githubusercontent.com/IsidoreBeautrelet/economictheoryblog/master/robust_summary.R}
 #'
-#' @param fit (Type: lm) Regression object obtained by using the estimation methods from this package 
-#' or a generic method such as \code{lm} or \code{glm}. 
-#' Some particular classes (\code{gpml}, \code{nbpml} and \code{nls}) don't return R squared and F statistic.
-#' 
+#' @param model (Type: lm) Regression object obtained by using the estimation methods from this package
+#' or a generic method such as \code{lm} or \code{glm}.
+#' Some particular classes (\code{gpml}, \code{nbpml}, \code{negbin} and \code{nls}) don't return R squared and
+#' F statistic.
+#'
 #' @param robust (Type: logical) Determines whether a robust
 #' variance-covariance matrix should be used. By default is set to \code{FALSE}.
-#' 
+#'
 #' If set \code{TRUE} the estimation results are consistent with the
 #' Stata code provided at the website
 #' \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 #' when choosing robust estimation.
+#' 
+#' @param ... additional arguments to be passed to \code{tobit}.
 #'
 #' @examples
-#' \dontrun{
-#' data(gravity_no_zeros)
+#' # Example for CRAN checks:
+#' # Executable in < 5 sec
+#' library(dplyr)
+#' data("gravity_no_zeros")
+#' 
+#' # Choose 5 countries for testing
+#' countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+#' grav_small <- filter(gravity_no_zeros, iso_o %in% countries_chosen)
+#' 
+#' # Using OLS for testing
+#' fit <- ols(
+#'   dependent_variable = "flow",
+#'   distance = "distw",
+#'   additional_regressors = c("rta", "contig", "comcur"),
+#'   income_origin = "gdp_o",
+#'   income_destination = "gdp_d",
+#'   code_origin = "iso_o",
+#'   code_destination = "iso_d",
+#'   uie = FALSE,
+#'   robust = FALSE,
+#'   data = grav_small
+#' )
+#' 
+#' fit2 <- stata_summary(fit, robust = FALSE)
 #'
-#' fit <- ols(dependent_variable = "flow", 
-#'  distance = "distw",
-#'  additional_regressors = c("rta", "contig", "comcur"),
-#'  income_origin = "gdp_o", income_destination = "gdp_d", 
-#'  code_origin = "iso_o", code_destination = "iso_d",
-#'  data = gravity_no_zeros)
-#'  
-#' stata_summary(fit, robust = TRUE)
-#' }
-#' 
 #' @return summary \code{lm} object
-#' 
+#'
 #' @export
 
-stata_summary <- function(object, robust = FALSE, ...) {
+stata_summary <- function(model, robust = FALSE, ...) {
   # Check -------------------------------------------------------------------
   qr_lm <- function(x, ...) {
     if (is.null(r <- x$qr)) {
@@ -47,8 +62,8 @@ stata_summary <- function(object, robust = FALSE, ...) {
   # Robust standard errors --------------------------------------------------
   if (robust == TRUE) {
     # Save variables that are necessary to calculate robust sd
-    X <- stats::model.matrix(object)
-    u2 <- stats::residuals(object)^2
+    X <- stats::model.matrix(model)
+    u2 <- stats::residuals(model)^2
     XDX <- t(X) %*% (X * u2)
 
     # Inverse(X'X)
@@ -64,9 +79,9 @@ stata_summary <- function(object, robust = FALSE, ...) {
     # square roots of the diagonal elements
     rstdh <- dfc_r * sqrt(diag(varcovar))
   }
-  
+
   # Clustered standard errors -----------------------------------------------
-  z <- object
+  z <- model
   p <- z$rank
   rdf <- z$df.residual
 
@@ -87,7 +102,7 @@ stata_summary <- function(object, robust = FALSE, ...) {
       if (!is.null(z$weights)) "weights"
     )]
     class(ans) <- "summary.lm"
-    ans$aliased <- is.na(stats::coef(object))
+    ans$aliased <- is.na(stats::coef(model))
     ans$residuals <- r
     ans$df <- c(0L, n, length(ans$aliased))
     ans$coefficients <- matrix(NA, 0L, 4L)
@@ -103,11 +118,11 @@ stata_summary <- function(object, robust = FALSE, ...) {
     stop("invalid 'lm' object:  no 'terms' component")
   }
 
-  if (!inherits(object, "lm")) {
+  if (!inherits(model, "lm")) {
     warning("calling summary.lm(<fake-lm-object>) ...")
   }
 
-  Qr <- qr_lm(object)
+  Qr <- qr_lm(model)
   n <- NROW(Qr$qr)
 
   if (is.na(z$df.residual) || n - p != z$df.residual) {
@@ -160,7 +175,7 @@ stata_summary <- function(object, robust = FALSE, ...) {
     names(z$coefficients)[Qr$pivot[p1]],
     c("Estimate", "Std. Error", "t value", "Pr(>|t|)")
   )
-  ans$aliased <- is.na(stats::coef(object))
+  ans$aliased <- is.na(stats::coef(model))
   ans$sigma <- sqrt(resvar)
   ans$df <- c(p, rdf, NCOL(Qr$qr))
 
@@ -215,17 +230,19 @@ stata_summary <- function(object, robust = FALSE, ...) {
   if (!is.null(z$na.action)) {
     ans$na.action <- z$na.action
   }
-  
+
   # Remove R-sq and F statistic for particular classes ----------------------
-  particular_class <- class(object) %in% c("gpml","nbpml","nls")
-  if (any(particular_class) == TRUE) { particular_class <- TRUE }
+  particular_class <- class(model) %in% c("gpml", "nbpml", "negbin", "nls")
+  if (any(particular_class) == TRUE) {
+    particular_class <- TRUE
+  }
 
   if (particular_class == TRUE) {
     ans$r.squared <- NULL
     ans$adj.r.squared <- NULL
     ans$fstatistic <- NULL
   }
-  
+
   # Output ------------------------------------------------------------------
   class(ans) <- "summary.lm"
   return(ans)

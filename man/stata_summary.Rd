@@ -4,9 +4,14 @@
 \alias{stata_summary}
 \title{Stata-consistent summary statistics}
 \usage{
-stata_summary(object, robust = FALSE, ...)
+stata_summary(model, robust = FALSE, ...)
 }
 \arguments{
+\item{model}{(Type: lm) Regression object obtained by using the estimation methods from this package
+or a generic method such as \code{lm} or \code{glm}.
+Some particular classes (\code{gpml}, \code{nbpml}, \code{negbin} and \code{nls}) don't return R squared and
+F statistic.}
+
 \item{robust}{(Type: logical) Determines whether a robust
 variance-covariance matrix should be used. By default is set to \code{FALSE}.
 
@@ -15,9 +20,7 @@ Stata code provided at the website
 \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 when choosing robust estimation.}
 
-\item{fit}{(Type: lm) Regression object obtained by using the estimation methods from this package 
-or a generic method such as \code{lm} or \code{glm}. 
-Some particular classes (\code{gpml}, \code{nbpml} and \code{nls}) don't return R squared and F statistic.}
+\item{...}{additional arguments to be passed to \code{tobit}.}
 }
 \value{
 summary \code{lm} object
@@ -28,17 +31,29 @@ Adapted after a function written by Isidore Beautrelet
 \url{https://raw.githubusercontent.com/IsidoreBeautrelet/economictheoryblog/master/robust_summary.R}
 }
 \examples{
-\dontrun{
-data(gravity_no_zeros)
+# Example for CRAN checks:
+# Executable in < 5 sec
+library(dplyr)
+data("gravity_no_zeros")
 
-fit <- ols(dependent_variable = "flow", 
- distance = "distw",
- additional_regressors = c("rta", "contig", "comcur"),
- income_origin = "gdp_o", income_destination = "gdp_d", 
- code_origin = "iso_o", code_destination = "iso_d",
- data = gravity_no_zeros)
- 
-stata_summary(fit, robust = TRUE)
-}
+# Choose 5 countries for testing
+countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+grav_small <- filter(gravity_no_zeros, iso_o \%in\% countries_chosen)
+
+# Using OLS for testing
+fit <- ols(
+  dependent_variable = "flow",
+  distance = "distw",
+  additional_regressors = c("rta", "contig", "comcur"),
+  income_origin = "gdp_o",
+  income_destination = "gdp_d",
+  code_origin = "iso_o",
+  code_destination = "iso_d",
+  uie = FALSE,
+  robust = FALSE,
+  data = grav_small
+)
+
+fit2 <- stata_summary(fit, robust = FALSE)
 
 }

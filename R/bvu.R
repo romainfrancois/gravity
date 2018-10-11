@@ -36,21 +36,21 @@
 #'
 #' The distance is logged automatically when the function is executed.
 #'
-#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
 #' variable to indicate contiguity).
 #'
 #' Unilateral metric variables such as GDPs should be inserted via the arguments \code{income_origin} and \code{income_origin}.
-#' 
+#'
 #' As country specific effects are subdued due to demeaning, no further unilateral variables apart from incomes can be added.
 #'
 #' Write this argument as \code{c(contiguity, common currency, ...)}.
 #'
 #' @param income_origin (Type: character) variable name of the income of the country of
-#' origin (e.g. \code{inc_o}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+#' origin (e.g. \code{inc_o}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is
 #' divided by the product of the incomes.
 #'
 #' @param income_destination (Type: character) variable name of the income of the country of
-#' destination (e.g. \code{inc_d}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+#' destination (e.g. \code{inc_d}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is
 #' divided by the product of the incomes.
 #'
 #' @param code_origin (Type: character) variable name of the code of the country
@@ -63,7 +63,7 @@
 #'
 #' @param robust (Type: logical) determines whether robust
 #' fitting should be used. By default is set to \code{FALSE}.
-#' 
+#'
 #' @param data (Type: character) name of the dataset to be used.
 #'
 #' To estimate gravity equations you need a square dataset including bilateral
@@ -81,7 +81,7 @@
 #'
 #' The user should perform some data cleaning beforehand to remove observations that contain entries that
 #' can distort estimates.
-#' 
+#'
 #' The function will remove zero flows and distances.
 #'
 #' @param ... Additional arguments to be passed to \code{bvu}.
@@ -118,36 +118,26 @@
 #' for gravity datasets and Stata code for estimating gravity models.
 #'
 #' @examples
-#' \dontrun{
-#' data(gravity_no_zeros)
-#'
-#' bvu(dependent_variable = "flow", 
-#'  distance = "distw", additional_regressors = "rta",
-#'  income_origin = "gdp_o", income_destination = "gdp_d", 
-#'  code_origin = "iso_o", code_destination = "iso_d",
-#'  data = gravity_no_zeros)
-#'
-#' bvu(dependent_variable = "flow", 
-#'  distance = "distw", additional_regressors = c("rta", "contig", "comcur"),
-#'  income_origin = "gdp_o", income_destination = "gdp_d",
-#'  code_origin = "iso_o", code_destination = "iso_d",
-#'  data = gravity_no_zeros)
-#' }
-#'
-#' \dontshow{
-#' # examples for CRAN checks:
-#' # executable in < 5 sec together with the examples above
-#' # not shown to users
-#'
-#' data(gravity_no_zeros)
-#' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' bvu(dependent_variable = "flow", distance = "distw", additional_regressors = "rta",
-#' income_origin = "gdp_o", income_destination = "gdp_d", 
-#' code_origin = "iso_o", code_destination = "iso_d",
-#' robust = TRUE, data = grav_small)
-#' }
+#' # Example for CRAN checks:
+#' # Executable in < 5 sec
+#' library(dplyr)
+#' data("gravity_no_zeros")
+#' 
+#' # Choose 5 countries for testing
+#' countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+#' grav_small <- filter(gravity_no_zeros, iso_o %in% countries_chosen)
+#' 
+#' fit <- bvu(
+#'   dependent_variable = "flow",
+#'   distance = "distw",
+#'   additional_regressors = c("rta", "contig", "comcur"),
+#'   income_origin = "gdp_o",
+#'   income_destination = "gdp_d",
+#'   code_origin = "iso_o",
+#'   code_destination = "iso_d",
+#'   robust = FALSE,
+#'   data = grav_small
+#' )
 #'
 #' @return
 #' The function returns the summary of the estimated gravity model as an
@@ -158,22 +148,22 @@
 #'
 #' @export
 
-bvu <- function(dependent_variable, 
-                distance, 
-                additional_regressors = NULL, 
-                income_origin, 
-                income_destination, 
-                code_origin, 
-                code_destination, 
-                robust = FALSE, 
+bvu <- function(dependent_variable,
+                distance,
+                additional_regressors = NULL,
+                income_origin,
+                income_destination,
+                code_origin,
+                code_destination,
+                robust = FALSE,
                 data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  
+
   stopifnot(is.logical(robust))
 
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  
+
   stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
 
   if (!is.null(additional_regressors)) {
@@ -253,6 +243,6 @@ bvu <- function(dependent_variable,
   } else {
     model_bvu <- stats::lm(y_log_bvu ~ ., data = d)
   }
-  
+
   return(model_bvu)
 }

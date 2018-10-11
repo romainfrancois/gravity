@@ -26,7 +26,7 @@ be taken as the independent variables in the estimation.
 
 The distance is logged automatically when the function is executed.}
 
-\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy
 variable to indicate contiguity).
 
 Unilateral metric variables such as GDPs should be inserted via the arguments \code{income_origin} and \code{income_origin}.
@@ -36,11 +36,11 @@ As country specific effects are subdued due to demeaning, no further unilateral 
 Write this argument as \code{c(contiguity, common currency, ...)}.}
 
 \item{income_origin}{(Type: character) variable name of the income of the country of
-origin (e.g. \code{inc_o}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+origin (e.g. \code{inc_o}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is
 divided by the product of the incomes.}
 
 \item{income_destination}{(Type: character) variable name of the income of the country of
-destination (e.g. \code{inc_d}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+destination (e.g. \code{inc_d}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is
 divided by the product of the incomes.}
 
 \item{code_origin}{(Type: character) variable name of the code of the country
@@ -102,36 +102,26 @@ the estimation of a gravity equation by \code{bvu} using panel data,
 we do not recommend to apply this method in this case.
 }
 \examples{
-\dontrun{
-data(gravity_no_zeros)
+# Example for CRAN checks:
+# Executable in < 5 sec
+library(dplyr)
+data("gravity_no_zeros")
 
-bvu(dependent_variable = "flow", 
- distance = "distw", additional_regressors = "rta",
- income_origin = "gdp_o", income_destination = "gdp_d", 
- code_origin = "iso_o", code_destination = "iso_d",
- data = gravity_no_zeros)
+# Choose 5 countries for testing
+countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+grav_small <- filter(gravity_no_zeros, iso_o \%in\% countries_chosen)
 
-bvu(dependent_variable = "flow", 
- distance = "distw", additional_regressors = c("rta", "contig", "comcur"),
- income_origin = "gdp_o", income_destination = "gdp_d",
- code_origin = "iso_o", code_destination = "iso_d",
- data = gravity_no_zeros)
-}
-
-\dontshow{
-# examples for CRAN checks:
-# executable in < 5 sec together with the examples above
-# not shown to users
-
-data(gravity_no_zeros)
-# choose exemplarily 10 biggest countries for check data
-countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
-grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-bvu(dependent_variable = "flow", distance = "distw", additional_regressors = "rta",
-income_origin = "gdp_o", income_destination = "gdp_d", 
-code_origin = "iso_o", code_destination = "iso_d",
-robust = TRUE, data = grav_small)
-}
+fit <- bvu(
+  dependent_variable = "flow",
+  distance = "distw",
+  additional_regressors = c("rta", "contig", "comcur"),
+  income_origin = "gdp_o",
+  income_destination = "gdp_d",
+  code_origin = "iso_o",
+  code_destination = "iso_d",
+  robust = FALSE,
+  data = grav_small
+)
 
 }
 \references{

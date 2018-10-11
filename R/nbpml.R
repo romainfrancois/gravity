@@ -50,7 +50,7 @@
 #'
 #' The distance is logged automatically when the function is executed.
 #'
-#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
 #' variable to indicate contiguity).
 #'
 #' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
@@ -122,41 +122,22 @@
 #' and the references therein.
 #'
 #' @examples
-#' \dontrun{
-#' # Example for data with zero trade flows
-#' data(gravity_zeros)
-#'
-#' nbpml(dependent_variable = "flow", distance = "distw", 
-#' additional_regressors = c("rta","iso_o","iso_d"),
-#' robust = TRUE, data = gravity_zeros)
-#'
-#' # Example for data without zero trade flows
-#' data(gravity_no_zeros)
-#'
-#' gravity_no_zeros$lgdp_o <- log(gravity_no_zeros$gdp_o)
-#' gravity_no_zeros$lgdp_d <- log(gravity_no_zeros$gdp_d)
-#'
-#' nbpml(dependent_variable = "flow", distance = "distw", 
-#' additional_regressors = c("distw","rta","lgdp_o","lgdp_d"),
-#' robust = TRUE, data = gravity_no_zeros)
-#' }
-#'
-#' \dontshow{
-#' # examples for CRAN checks:
-#' # executable in < 5 sec together with the examples above
-#' # not shown to users
-#'
-#' data(gravity_zeros)
-#' gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
-#' gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
-#'
-#' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' nbpml(dependent_variable = "flow", distance = "distw",
-#' additional_regressors = c("distw","rta","lgdp_o","lgdp_d"),
-#' robust = TRUE, data = grav_small_zeros)
-#' }
+#' # Example for CRAN checks:
+#' # Executable in < 5 sec
+#' library(dplyr)
+#' data("gravity_no_zeros")
+#' 
+#' # Choose 5 countries for testing
+#' countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+#' grav_small <- filter(gravity_no_zeros, iso_o %in% countries_chosen)
+#' 
+#' fit <- nbpml(
+#'   dependent_variable = "flow",
+#'   distance = "distw",
+#'   additional_regressors = c("rta", "iso_o", "iso_d"),
+#'   robust = FALSE,
+#'   data = grav_small
+#' )
 #'
 #' @return
 #' The function returns the summary of the estimated gravity model similar to a
@@ -167,19 +148,19 @@
 #'
 #' @export
 
-nbpml <- function(dependent_variable, 
-                  distance, 
-                  additional_regressors, 
-                  robust = TRUE, 
+nbpml <- function(dependent_variable,
+                  distance,
+                  additional_regressors,
+                  robust = TRUE,
                   data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(robust))
-  
+
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  
+
   stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
-  
+
   if (!is.null(additional_regressors)) {
     stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
   }
@@ -201,20 +182,20 @@ nbpml <- function(dependent_variable,
   # Model ----------------------------------------------------------------------
   vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
   form <- stats::as.formula(paste("y_nbpml", "~", vars))
-  
+
   model_nbpml <- MASS::glm.nb(form,
     data = d,
     link = "log"
   )
-  
+
   if (robust == TRUE) {
     model_nbpml_robust <- lmtest::coeftest(model_nbpml,
-                                           vcov = sandwich::vcovHC(model_nbpml, "HC1")
+      vcov = sandwich::vcovHC(model_nbpml, "HC1")
     )
-    
+
     model_nbpml$coefficients <- model_nbpml_robust[seq_along(rownames(model_nbpml_robust)), ]
   }
-  
+
   model_nbpml$call <- form
   class(model_nbpml) <- c(class(model_nbpml), "nbpml")
 

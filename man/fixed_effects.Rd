@@ -19,7 +19,7 @@ be taken as the independent variables in the estimation.
 
 The distance is logged automatically when the function is executed.}
 
-\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy
 variable to indicate contiguity).
 
 Unilateral metric variables such as GDPs should be inserted via the arguments \code{income_origin} and \code{income_origin}.
@@ -131,32 +131,24 @@ see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textu
 \insertCite{Head2010;textual}{gravity} as well as the references therein.
 }
 \examples{
-\dontrun{
-data(gravity_no_zeros)
+# Example for CRAN checks:
+# Executable in < 5 sec
+library(dplyr)
+data("gravity_no_zeros")
 
-fixed_effects(dependent_variable = "flow",
-distance = "distw", regressors = "rta", 
-code_origin = "iso_o", code_destination = "iso_d",
-robust = TRUE, data = gravity_no_zeros)
+# Choose 5 countries for testing
+countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+grav_small <- filter(gravity_no_zeros, iso_o \%in\% countries_chosen)
 
-fixed_effects(dependent_variable = "flow",
-distance = "distw", regressors = c("rta", "comcur", "contig"),
-code_origin = "iso_o", code_destination = "iso_d",
-robust = TRUE, data = gravity_no_zeros)
-}
-
-\dontshow{
-# examples for CRAN checks:
-# executable in < 5 sec together with the examples above
-# not shown to users
-
-data(gravity_no_zeros)
-# choose exemplarily 10 biggest countries for check data
-countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
-grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-fixed_effects(dependent_variable = "flow", distance = "distw", additional_regressors = "rta",
-code_origin = "iso_o", code_destination = "iso_d", robust = TRUE, data = grav_small)
-}
+fit <- fixed_effects(
+  dependent_variable = "flow",
+  distance = "distw",
+  additional_regressors = c("rta", "comcur", "contig"),
+  code_origin = "iso_o",
+  code_destination = "iso_d",
+  robust = FALSE,
+  data = grav_small
+)
 
 }
 \references{

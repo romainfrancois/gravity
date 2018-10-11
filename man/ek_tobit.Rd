@@ -22,7 +22,7 @@ be taken as the independent variables in the estimation.
 
 The distance is logged automatically when the function is executed.}
 
-\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy
 variable to indicate contiguity).
 
 Unilateral metric variables such as GDPs should be inserted via the arguments \code{income_origin} and \code{income_origin}.
@@ -98,41 +98,30 @@ The function is designed for cross-sectional data, but can be extended to panel 
 \code{\link[survival]{survreg}} function.
 }
 \examples{
-\dontrun{
-# Example for data with zero trade flows
-data(gravity_zeros)
+# Example for CRAN checks:
+# Executable in < 5 sec
+library(dplyr)
+data("gravity_no_zeros")
 
-gravity_zeros <- gravity_zeros \%>\%
-    mutate(
-        lgdp_o = log(gdp_o),
-        lgdp_d = log(gdp_d)
-    )
+# Choose 5 countries for testing
+countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+grav_small <- filter(gravity_no_zeros, iso_o \%in\% countries_chosen)
 
-ek_tobit(dependent_variable = "flow", 
-distance = "distw",
-additional_regressors = c("rta","lgdp_o","lgdp_d"),
-code_destination = "iso_d",
-robust = TRUE, data = gravity_zeros)
-}
+grav_small <- grav_small \%>\%
+  mutate(
+    flow = ifelse(flow < 5, 0, flow), # cutoff for testing purposes
+    lgdp_o = log(gdp_o),
+   lgdp_d = log(gdp_d)
+  )
 
-\dontshow{
-# examples for CRAN checks:
-# executable in < 5 sec together with the examples above
-# not shown to users
-
-data(gravity_zeros)
-gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
-gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
-
-# choose exemplarily 10 biggest countries for check data
-countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
-grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o \%in\% countries_chosen_zeros,]
-summary(ek_tobit(dependent_variable = "flow",
-distance = "distw",
-additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
-code_destination = "iso_d",
-robust = TRUE, data = grav_small_zeros))
-}
+fit <- ek_tobit(
+  dependent_variable = "flow",
+  distance = "distw",
+  additional_regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
+  code_destination = "iso_d",
+  robust = FALSE,
+  data = grav_small
+)
 
 }
 \references{

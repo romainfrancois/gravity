@@ -54,13 +54,14 @@
 #' equal to \code{0} as \code{log(1) = 0} represents the smallest flows
 #' in the transformed variable.
 #'
-#' @param regressors name (type: character) of the regressors to include in the model.
-#'
-#' Include the distance variable in the dataset \code{data} containing a measure of
+#' @param distance (Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 #' distance between all pairs of bilateral partners and bilateral variables that should
 #' be taken as the independent variables in the estimation.
 #'
 #' The distance is logged automatically when the function is executed.
+#'
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
+#' variable to indicate contiguity).
 #'
 #' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
 #'
@@ -134,35 +135,28 @@
 #' See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
 #'
 #' @examples
-#' \dontrun{
-#' # Example for data with zero trade flows
-#' data(gravity_zeros)
-#'
-#' gravity_zeros <- gravity_zeros %>%
-#'     mutate(
-#'         lgdp_o = log(gdp_o),
-#'         lgdp_d = log(gdp_d)
-#'     )
-#'
-#' tobit(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
-#' added_constant = 1, data = gravity_zeros)
-#' }
-#'
-#' \dontshow{
-#' # examples for CRAN checks:
-#' # executable in < 5 sec together with the examples above
-#' # not shown to users
-#'
-#' data(gravity_zeros)
-#' gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
-#' gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
-#'
-#' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' tobit(dependent_variable = "flow", regressors = c("distw", "rta","lgdp_o","lgdp_d"),
-#' added_constant = 1, data = grav_small_zeros)
-#' }
+#' # Example for CRAN checks:
+#' # Executable in < 5 sec
+#' library(dplyr)
+#' data("gravity_no_zeros")
+#' 
+#' # Choose 5 countries for testing
+#' countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+#' grav_small <- filter(gravity_no_zeros, iso_o %in% countries_chosen)
+#' 
+#' grav_small <- grav_small %>%
+#'   mutate(
+#'     lgdp_o = log(gdp_o),
+#'     lgdp_d = log(gdp_d)
+#'   )
+#' 
+#' fit <- tobit(
+#'   dependent_variable = "flow",
+#'   distance = "distw",
+#'   additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
+#'   added_constant = 1,
+#'   data = grav_small
+#' )
 #'
 #' @return
 #' The function returns the summary of the estimated gravity model as a
@@ -172,16 +166,23 @@
 #'
 #' @export
 
-tobit <- function(dependent_variable, regressors, added_constant = 1, data, ...) {
+tobit <- function(dependent_variable,
+                  distance,
+                  additional_regressors = NULL,
+                  added_constant = 1,
+                  data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
-  stopifnot(is.numeric(added_constant), length(added_constant) == 1)
 
-  # Split input vectors -----------------------------------------------------
-  distance <- regressors[1]
-  additional_regressors <- regressors[-1]
+  stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
+
+  stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
+
+  if (!is.null(additional_regressors)) {
+    stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
+  }
+
+  stopifnot(is.numeric(added_constant), length(added_constant) == 1)
 
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
@@ -210,12 +211,10 @@ tobit <- function(dependent_variable, regressors, added_constant = 1, data, ...)
     left = ypc_log_min,
     right = Inf,
     data = d,
-    start = rep(0, 2 + length(regressors)),
+    start = rep(0, 3 + length(additional_regressors)),
     method = "BHHH"
   )
 
-  # Return ---------------------------------------------------------------------
-  return_object <- summary(model_tobit)
-  return_object$call <- form
-  return(return_object)
+  model_tobit$call <- form
+  return(model_tobit)
 }

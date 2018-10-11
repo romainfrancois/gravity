@@ -46,14 +46,14 @@
 #'
 #' @param dependent_variable name (type: character) of the dependent variable in the dataset
 #' \code{data} (e.g. trade flows)
-#' 
+#'
 #' @param distance (Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 #' distance between all pairs of bilateral partners and bilateral variables that should
 #' be taken as the independent variables in the estimation.
 #'
 #' The distance is logged automatically when the function is executed.
 #'
-#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
 #' variable to indicate contiguity).
 #'
 #' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
@@ -125,42 +125,22 @@
 #' and the references therein.
 #'
 #' @examples
-#' \dontrun{
-#' # Example for data with zero trade flows
-#' data(gravity_zeros)
-#'
-#' ppml(dependent_variable = "flow", 
-#' distance = "distw",
-#' additional_regressors = c("distw", "rta","iso_o","iso_d"),
-#' robust = TRUE, data = gravity_zeros)
-#'
-#' # Example for data without zero trade flows
-#' data(gravity_no_zeros)
-#'
-#' gravity_no_zeros$lgdp_o <- log(gravity_no_zeros$gdp_o)
-#' gravity_no_zeros$lgdp_d <- log(gravity_no_zeros$gdp_d)
-#'
-#' ppml(dependent_variable = "flow", 
-#' distance = "distw",
-#' additional_regressors = c("rta","lgdp_o","lgdp_d"),
-#' robust = TRUE, data = gravity_no_zeros)
-#' }
-#'
-#' \dontshow{
-#' # examples for CRAN checks:
-#' # executable in < 5 sec together with the examples above
-#' # not shown to users
-#'
-#' data(gravity_zeros)
-#' gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
-#' gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
-#'
-#' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' ppml(dependent_variable = "flow", regressors = c("distw","rta","lgdp_o","lgdp_d"),
-#' robust = TRUE, data = grav_small_zeros)
-#' }
+#' # Example for CRAN checks:
+#' # Executable in < 5 sec
+#' library(dplyr)
+#' data("gravity_no_zeros")
+#' 
+#' # Choose 5 countries for testing
+#' countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+#' grav_small <- filter(gravity_no_zeros, iso_o %in% countries_chosen)
+#' 
+#' fit <- ppml(
+#'   dependent_variable = "flow",
+#'   distance = "distw",
+#'   additional_regressors = c("rta", "iso_o", "iso_d"),
+#'   robust = FALSE,
+#'   data = grav_small
+#' )
 #'
 #' @return
 #' The function returns the summary of the estimated gravity model as an
@@ -171,19 +151,19 @@
 #'
 #' @export
 
-ppml <- function(dependent_variable, 
+ppml <- function(dependent_variable,
                  distance,
-                 additional_regressors, 
-                 robust = TRUE, 
+                 additional_regressors,
+                 robust = TRUE,
                  data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(robust))
-  
+
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  
+
   stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
-  
+
   if (!is.null(additional_regressors)) {
     stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
   }
@@ -205,22 +185,22 @@ ppml <- function(dependent_variable,
   # Model ----------------------------------------------------------------------
   vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
   form <- stats::as.formula(paste("y_ppml", "~", vars))
-  
+
   model_ppml <- stats::glm(form,
     data = d,
     family = stats::quasipoisson(link = "log")
   )
-  
+
   if (robust == TRUE) {
     model_ppml_robust <- lmtest::coeftest(model_ppml,
-                                          vcov = sandwich::vcovHC(model_ppml, "HC1")
+      vcov = sandwich::vcovHC(model_ppml, "HC1")
     )
-    
+
     model_ppml$coefficients <- model_ppml_robust[1:length(rownames(model_ppml_robust)), ]
   }
 
   model_ppml$call <- form
   class(model_ppml) <- c(class(model_ppml), "ppml")
-  
+
   return(model_ppml)
 }

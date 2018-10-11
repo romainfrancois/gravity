@@ -69,7 +69,7 @@
 #'
 #' The distance is logged automatically when the function is executed.
 #'
-#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
 #' variable to indicate contiguity).
 #'
 #' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
@@ -79,11 +79,11 @@
 #' Write this argument as \code{c(distance, contiguity, common curreny, ...)}.
 #'
 #' @param income_origin (Type: character) variable name of the income of the country of
-#' origin (e.g. \code{inc_o}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+#' origin (e.g. \code{inc_o}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is
 #' divided by the product of the incomes.
 #'
 #' @param income_destination (Type: character) variable name of the income of the country of
-#' destination (e.g. \code{inc_d}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+#' destination (e.g. \code{inc_d}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is
 #' divided by the product of the incomes.
 #'
 #' @param code_origin (Type: character) variable name of the code of the country
@@ -171,31 +171,27 @@
 #' and the references therein.
 #'
 #' @examples
-#' \dontrun{
-#' data(gravity_no_zeros)
-#'
-#' ols(dependent_variable = "flow", distance = "distw",
-#' additional_regressors = c("rta", "contig", "comcur"),
-#' income_origin = "gdp_o", income_destination = "gdp_d", 
-#' code_origin = "iso_o", code_destination = "iso_d",
-#' uie = TRUE, robust = TRUE, data = gravity_no_zeros)
-#' }
-#'
-#' \dontshow{
-#' # examples for CRAN checks:
-#' # executable in < 5 sec together with the examples above
-#' # not shown to users
-#'
-#' data(gravity_no_zeros)
-#' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' ols(dependent_variable = "flow", distance = "distw",
-#' additional_regressors = "rta",
-#' income_origin = "gdp_o", income_destination = "gdp_d", 
-#' code_origin = "iso_o", code_destination = "iso_d",
-#' uie = FALSE, robust = TRUE, data = grav_small)
-#' }
+#' # Example for CRAN checks:
+#' # Executable in < 5 sec
+#' library(dplyr)
+#' data("gravity_no_zeros")
+#' 
+#' # Choose 5 countries for testing
+#' countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+#' grav_small <- filter(gravity_no_zeros, iso_o %in% countries_chosen)
+#' 
+#' fit <- ols(
+#'   dependent_variable = "flow",
+#'   distance = "distw",
+#'   additional_regressors = c("rta", "contig", "comcur"),
+#'   income_origin = "gdp_o",
+#'   income_destination = "gdp_d",
+#'   code_origin = "iso_o",
+#'   code_destination = "iso_d",
+#'   uie = FALSE,
+#'   robust = FALSE,
+#'   data = grav_small
+#' )
 #'
 #' @return
 #' The function returns the summary of the estimated gravity model as an
@@ -206,32 +202,32 @@
 #'
 #' @export
 
-ols <- function(dependent_variable, 
+ols <- function(dependent_variable,
                 distance,
-                additional_regressors = NULL, 
+                additional_regressors = NULL,
                 income_origin,
                 income_destination,
                 code_origin,
                 code_destination,
-                uie = FALSE, 
-                robust = FALSE, 
+                uie = FALSE,
+                robust = FALSE,
                 data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(uie))
   stopifnot(is.logical(robust))
-  
+
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  
+
   stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
-  
+
   if (!is.null(additional_regressors)) {
     stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
   }
-  
+
   stopifnot(is.character(income_origin) | income_origin %in% colnames(data) | length(income_origin) == 1)
   stopifnot(is.character(income_destination) | income_destination %in% colnames(data) | length(income_destination) == 1)
-  
+
   stopifnot(is.character(code_origin) | code_origin %in% colnames(data) | length(code_origin) == 1)
   stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
 
@@ -282,6 +278,6 @@ ols <- function(dependent_variable,
   } else {
     model_ols <- stats::lm(y_log_ols ~ ., data = d)
   }
-  
+
   return(model_ols)
 }

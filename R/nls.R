@@ -55,7 +55,7 @@
 #'
 #' The distance is logged automatically when the function is executed.
 #'
-#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
 #' variable to indicate contiguity).
 #'
 #' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
@@ -127,37 +127,28 @@
 #' and the references therein.
 #'
 #' @examples
-#' \dontrun{
-#' # Example for data without zero trade flows
-#' data(gravity_no_zeros)
-#'
-#' gravity_no_zeros <- gravity_no_zeros %>%
-#'    mutate(
-#'      lgdp_o = log(gdp_o),
-#'      lgdp_d = log(gdp_d)
-#'    )
-#'
-#' nls(dependent_variable = "flow", distance = "distw",
-#' additional_regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
-#' robust = TRUE, data = gravity_no_zeros)
-#' }
-#'
-#' \dontshow{
-#' # examples for CRAN checks:
-#' # executable in < 5 sec together with the examples above
-#' # not shown to users
-#'
-#' data(gravity_zeros)
-#' gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
-#' gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
-#'
-#' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' nls(dependent_variable = "flow", distance = "distw", 
-#' additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
-#' robust = TRUE, data = grav_small_zeros)
-#' }
+#' # Example for CRAN checks:
+#' # Executable in < 5 sec
+#' library(dplyr)
+#' data("gravity_no_zeros")
+#' 
+#' # Choose 5 countries for testing
+#' countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+#' grav_small <- filter(gravity_no_zeros, iso_o %in% countries_chosen)
+#' 
+#' grav_small <- grav_small %>%
+#'   mutate(
+#'     lgdp_o = log(gdp_o),
+#'     lgdp_d = log(gdp_d)
+#'   )
+#' 
+#' fit <- nls(
+#'   dependent_variable = "flow",
+#'   distance = "distw",
+#'   additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
+#'   robust = FALSE,
+#'   data = grav_small
+#' )
 #'
 #' @return
 #' The function returns the summary of the estimated gravity model similar to a
@@ -168,19 +159,19 @@
 #'
 #' @export
 
-nls <- function(dependent_variable, 
+nls <- function(dependent_variable,
                 distance,
-                additional_regressors = NULL, 
-                robust = FALSE, 
+                additional_regressors = NULL,
+                robust = FALSE,
                 data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(robust))
-  
+
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  
+
   stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
-  
+
   if (!is.null(additional_regressors)) {
     stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
   }
@@ -203,7 +194,7 @@ nls <- function(dependent_variable,
 
   # Model ----------------------------------------------------------------------
   vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
-  
+
   form <- stats::as.formula(
     sprintf(
       "%s ~ %s",
@@ -228,14 +219,14 @@ nls <- function(dependent_variable,
 
   if (robust == TRUE) {
     model_nls_robust <- lmtest::coeftest(model_nls,
-                                           vcov = sandwich::vcovHC(model_nls, "HC1")
+      vcov = sandwich::vcovHC(model_nls, "HC1")
     )
-    
+
     model_nls$coefficients <- model_nls_robust[seq_along(rownames(model_nls_robust)), ]
   }
-  
+
   model_nls$call <- form
   class(model_nls) <- c(class(model_nls), "nls")
-  
+
   return(model_nls)
 }

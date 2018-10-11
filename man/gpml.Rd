@@ -17,7 +17,7 @@ be taken as the independent variables in the estimation.
 
 The distance is logged automatically when the function is executed.}
 
-\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy
 variable to indicate contiguity).
 
 Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
@@ -103,32 +103,28 @@ see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textu
 \insertCite{Head2010;textual}{gravity} as well as the references therein.
 }
 \examples{
-\dontrun{
-data(gravity_no_zeros)
+# Example for CRAN checks:
+# Executable in < 5 sec
+library(dplyr)
+data("gravity_no_zeros")
 
-gravity_no_zeros <- gravity_no_zeros \%>\%
-   mutate(
-     lgdp_o = log(gdp_o),
-     lgdp_d = log(gdp_d)
-   )
+# Choose 5 countries for testing
+countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+grav_small <- filter(gravity_no_zeros, iso_o \%in\% countries_chosen)
 
-gpml(dependent_variable = "flow", distance = "distw", 
-additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
-robust = TRUE, data = gravity_no_zeros)
-}
+grav_small <- grav_small \%>\%
+  mutate(
+    lgdp_o = log(gdp_o),
+    lgdp_d = log(gdp_d)
+  )
 
-\dontshow{
-# examples for CRAN checks:
-# executable in < 5 sec together with the examples above
-# not shown to users
-
-data(gravity_no_zeros)
-# choose exemplarily 10 biggest countries for check data
-countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
-grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-gpml(dependent_variable = "flow", distance = "distw", additional_regressors = c("rta", "iso_o", "iso_d"),
-    robust = TRUE, data = grav_small)
-}
+fit <- gpml(
+  dependent_variable = "flow",
+  distance = "distw",
+  additional_regressors = c("rta", "iso_o", "iso_d"),
+  robust = FALSE,
+  data = grav_small
+)
 
 }
 \references{

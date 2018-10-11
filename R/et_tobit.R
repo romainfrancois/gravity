@@ -69,13 +69,13 @@
 #'
 #' The distance is logged automatically when the function is executed.
 #'
-#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
 #' variable to indicate contiguity).
 #'
 #' Unilateral metric variables such as GDPs should be inserted via the arguments \code{income_origin} and \code{income_origin}.
 #'
 #' Write this argument as \code{c(contiguity, common currency, ...)}.
-#' 
+#'
 #' @param data name of the dataset to be used (type: character).
 #'
 #' To estimate gravity equations you need a square dataset including bilateral
@@ -131,37 +131,28 @@
 #' See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
 #'
 #' @examples
-#' \dontrun{
-#' # Example for data with zero trade flows
-#' data(gravity_zeros)
-#'
-#' gravity_zeros <- gravity_zeros %>%
-#'     mutate(
-#'         lgdp_o = log(gdp_o),
-#'         lgdp_d = log(gdp_d)
-#'     )
-#'
-#' et_tobit(dependent_variable = "flow", 
-#' distance = "distw", additional_regressors = c("rta","lgdp_o","lgdp_d"),
-#' data = gravity_zeros)
-#' }
-#'
-#' \dontshow{
-#' # examples for CRAN checks:
-#' # executable in < 5 sec together with the examples above
-#' # not shown to users
-#'
-#' data(gravity_zeros)
-#' gravity_zeros$lgdp_o <- log(gravity_zeros$gdp_o)
-#' gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
+#' # Example for CRAN checks:
+#' # Executable in < 5 sec
+#' library(dplyr)
+#' data("gravity_no_zeros")
 #' 
-#' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' et_tobit(dependent_variable = "flow", 
-#' distance = "distw", additional_regressors = c("rta","lgdp_o","lgdp_d"),
-#' data = grav_small_zeros)
-#' }
+#' # Choose 5 countries for testing
+#' countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+#' grav_small <- filter(gravity_no_zeros, iso_o %in% countries_chosen)
+#' 
+#' grav_small <- grav_small %>%
+#'   mutate(
+#'     flow = ifelse(flow < 5, 0, flow), # cutoff for testing purposes
+#'     lgdp_o = log(gdp_o),
+#'     lgdp_d = log(gdp_d)
+#'   )
+#' 
+#' fit <- et_tobit(
+#'   dependent_variable = "flow",
+#'   distance = "distw",
+#'   additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
+#'   data = grav_small
+#' )
 #'
 #' @return
 #' The function returns the summary of the estimated gravity model as a
@@ -171,21 +162,21 @@
 #'
 #' @export
 
-et_tobit <- function(dependent_variable, 
-                     distance, 
-                     additional_regressors = NULL, 
+et_tobit <- function(dependent_variable,
+                     distance,
+                     additional_regressors = NULL,
                      data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  
+
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  
+
   stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
-  
+
   if (!is.null(additional_regressors)) {
     stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
   }
-  
+
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
     filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>%

@@ -40,32 +40,32 @@
 #'
 #' This variable is logged and then used as the dependent variable in the estimation.
 #'
-#' @param regressors name (type: character) of the regressors to include in the model.
-#'
-#' Include the distance variable in the dataset \code{data} containing a measure of
+#' @param distance (Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 #' distance between all pairs of bilateral partners and bilateral variables that should
 #' be taken as the independent variables in the estimation.
 #'
 #' The distance is logged automatically when the function is executed.
 #'
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
+#' variable to indicate contiguity).
+#'
 #' Unilateral effects drop as the ratio of ratios is taken.
 #'
 #' Write this argument as \code{c(distance, contiguity, common curreny, ...)}.
 #'
-#' @param codes variable name (type: character) of the code of the country
-#' of origin and destination (e.g. ISO-3 codes from the variables \code{iso_o} and \code{iso_d}) in the
-#' example datasets).
+#' @param code_origin (Type: character) variable name of the code of the country
+#' of origin (e.g. ISO-3 codes from the variables \code{iso_o} in the
+#' example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 #'
-#' The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
+#' @param code_destination (Type: character) variable name of the code of the country
+#' of destination (e.g. ISO-3 codes from the variables \code{iso_d}) in the
+#' example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 #'
-#' Write this argument as \code{c(code origin, code destination)}.
+#' @param filter_origin (Type: character) Reference exporting country.
 #'
-#' @param reference_countries reference exporting and importing country, default is set to
-#' \code{c("JPN", "USA")}
+#' @param filter_destination (Type: character) Reference importing country.
 #'
-#' Write this argument as \code{c(importing country, exporting country)}.
-#'
-#' @param multiway (type: logic) In case \code{multiway = TRUE}, the
+#' @param multiway (Type: logical) In case \code{multiway = TRUE}, the
 #' \code{\link[multiwayvcov]{cluster.vcov}} function is used for estimation following
 #' \insertCite{Cameron2011;textual}{gravity} multi-way clustering of
 #' variance-covariance matrices.
@@ -138,39 +138,26 @@
 #' and the references therein.
 #'
 #' @examples
-#' \dontrun{
-#' data(gravity_no_zeros)
-#'
-#' tetrads(dependent_variable = "flow", regressors = c("distw", "rta"),
-#' codes = c("iso_o", "iso_d"), reference_countries = c("JPN", "USA"),
-#' multiway = TRUE, data = gravity_no_zeros)
-#'
-#' tetrads(dependent_variable = "flow", regressors = c("distw", "rta", "comcur", "contig"),
-#' codes = c("iso_o", "iso_d"), reference_countries = c("JPN", "USA"),
-#' multiway = FALSE, data = gravity_no_zeros)
-#' }
-#'
-#' \dontshow{
-#' # examples for CRAN checks:
-#' # executable in < 5 sec together with the examples above
-#' # not shown to users
-#'
-#' data(gravity_no_zeros)
-#' # choose exemplarily 10 biggest countries for check data
-#' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
-#' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' tetrads(
-#'  dependent_variable ="flow",
-#'  distance = "distw",
-#'  additional_regressors = "rta",
-#'  code_origin = "iso_o",
-#'  code_destination = "iso_d",
-#'  filter_origin = countries_chosen[1],
-#'  filter_destination = countries_chosen[2],
-#'  multiway = FALSE,
-#'  data = grav_small
+#' # Example for CRAN checks:
+#' # Executable in < 5 sec
+#' library(dplyr)
+#' data("gravity_no_zeros")
+#' 
+#' # Choose 5 countries for testing
+#' countries_chosen <- c("AUS", "CHN", "GBR", "BRA", "CAN")
+#' grav_small <- filter(gravity_no_zeros, iso_o %in% countries_chosen)
+#' 
+#' fit <- tetrads(
+#'   dependent_variable = "flow",
+#'   distance = "distw",
+#'   additional_regressors = "rta",
+#'   code_origin = "iso_o",
+#'   code_destination = "iso_d",
+#'   filter_origin = countries_chosen[1],
+#'   filter_destination = countries_chosen[2],
+#'   multiway = FALSE,
+#'   data = grav_small
 #' )
-#' }
 #'
 #' @return
 #' The function returns the summary of the estimated gravity model as an
@@ -181,33 +168,33 @@
 #'
 #' @export
 
-tetrads <- function(dependent_variable, 
+tetrads <- function(dependent_variable,
                     distance,
-                    additional_regressors, 
+                    additional_regressors,
                     code_origin,
                     code_destination,
                     filter_origin = NULL,
                     filter_destination = NULL,
-                    multiway = TRUE, 
+                    multiway = TRUE,
                     data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(multiway))
-  
+
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  
+
   stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
-  
+
   if (!is.null(additional_regressors)) {
     stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
   }
-  
+
   stopifnot(is.character(code_origin) | code_origin %in% colnames(data) | length(code_origin) == 1)
   stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
-  
+
   stopifnot(is.character(filter_origin) | filter_origin %in% data[, code_origin] | length(filter_origin) == 1)
   stopifnot(is.character(filter_destination) | filter_destination %in% data[, code_destination] | length(filter_destination) == 1)
-  
+
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
     filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>%
@@ -248,12 +235,12 @@ tetrads <- function(dependent_variable,
 
   # Taking ratios, ratk --------------------------------------------------------
   d2 <- left_join(
-      d2,
-      d2 %>%
-        filter_at(vars(!!sym(code_destination)), any_vars(!!sym(code_destination) == filter_destination)) %>%
-        select(!!sym(code_origin), y_log_tetrads_d = !!sym("y_log_tetrads"), dist_log_d = !!sym("dist_log")),
-      by = code_origin
-    ) %>%
+    d2,
+    d2 %>%
+      filter_at(vars(!!sym(code_destination)), any_vars(!!sym(code_destination) == filter_destination)) %>%
+      select(!!sym(code_origin), y_log_tetrads_d = !!sym("y_log_tetrads"), dist_log_d = !!sym("dist_log")),
+    by = code_origin
+  ) %>%
     mutate(
       lXinratk = !!sym("y_log_tetrads") - !!sym("y_log_tetrads_d"),
       ldistratk = !!sym("dist_log") - !!sym("dist_log_d")
@@ -312,13 +299,13 @@ tetrads <- function(dependent_variable,
 
   # Model ----------------------------------------------------------------------
   additional_regressors <- paste0(additional_regressors, "_rat")
-  
+
   form <- stats::as.formula(
     sprintf("y_log_rat ~ dist_log_rat + %s", paste(additional_regressors, collapse = " + "))
   )
-  
+
   form2 <- as.formula(sprintf("~ %s + %s", code_origin, code_destination))
-  
+
   model_tetrads <- stats::lm(form, data = d2)
 
   # Return ---------------------------------------------------------------------
