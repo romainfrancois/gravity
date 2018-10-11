@@ -60,7 +60,7 @@ These effects catch country specific effects." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.7</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.8</span>
       </span>
     </div>
 
@@ -82,6 +82,9 @@ These effects catch country specific effects." />
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/crash-course-on-gravity-models.html">A crash course on gravity models</a>
+    </li>
     <li>
       <a href="../articles/creating-gravity-datasets.html">Creating gravity datasets</a>
     </li>
@@ -116,48 +119,53 @@ These effects catch country specific effects.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>fixed_effects</span>(<span class='no'>dependent_variable</span>, <span class='no'>regressors</span>, <span class='kw'>codes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"iso_o"</span>,
-  <span class='st'>"iso_d"</span>), <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>fixed_effects</span>(<span class='no'>dependent_variable</span>, <span class='no'>distance</span>, <span class='kw'>additional_regressors</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>code_origin</span>, <span class='no'>code_destination</span>, <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>dependent_variable</th>
-      <td><p>name (type: character) of the dependent variable in the dataset
+      <td><p>(Type: character) name of the dependent variable in the dataset
 <code>data</code> (e.g. trade flows).</p>
 <p>This variable is logged and then used as the dependent variable in the estimation.</p></td>
     </tr>
     <tr>
-      <th>regressors</th>
-      <td><p>name (type: character) of the regressors to include in the model.</p>
-<p>Include the distance variable in the dataset <code>data</code> containing a measure of
+      <th>distance</th>
+      <td><p>(Type: character) name of the distance variable in the dataset <code>data</code> containing a measure of
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.</p>
-<p>The distance is logged automatically when the function is executed.</p>
-<p>Fixed effects catch all unilateral effects. Therefore, no other unilateral variables such as
-GDP can be included as independent variables in the estimation.</p>
-<p>Write this argument as <code>c(distance, contiguity, common curreny, ...)</code>.</p></td>
+<p>The distance is logged automatically when the function is executed.</p></td>
     </tr>
     <tr>
-      <th>codes</th>
-      <td><p>variable name (type: character) of the code of the country
-of origin and destination (e.g. ISO-3 codes from the variables <code>iso_o</code> and <code>iso_d</code>) in the
-example datasets).</p>
-<p>The variables are grouped by using <code>iso_o</code> and <code>iso_d</code> to obtain estimates.</p>
-<p>Write this argument as <code>c(code origin, code destination)</code>.</p></td>
+      <th>additional_regressors</th>
+      <td><p>(Type: character) names of the additional regressors to include in the model (e.g. a dummy
+variable to indicate contiguity).</p>
+<p>Unilateral metric variables such as GDPs should be inserted via the arguments <code>income_origin</code> and <code>income_origin</code>.</p>
+<p>As country specific effects are subdued due to demeaning, no further unilateral variables apart from incomes can be added.</p>
+<p>Write this argument as <code>c(contiguity, common currency, ...)</code>.</p></td>
+    </tr>
+    <tr>
+      <th>code_origin</th>
+      <td><p>(Type: character) variable name of the code of the country
+of origin (e.g. ISO-3 codes from the variables <code>iso_o</code> in the
+example datasets). The variables are grouped by using <code>iso_o</code> and <code>iso_d</code> to obtain estimates.</p></td>
+    </tr>
+    <tr>
+      <th>code_destination</th>
+      <td><p>(Type: character) variable name of the code of the country
+of destination (e.g. ISO-3 codes from the variables <code>iso_d</code>) in the
+example datasets). The variables are grouped by using <code>iso_o</code> and <code>iso_d</code> to obtain estimates.</p></td>
     </tr>
     <tr>
       <th>robust</th>
-      <td><p>robust (type: logical) determines whether a robust
-variance-covariance matrix should be used. By default is set to <code>TRUE</code>.</p>
-<p>If <code>robust = TRUE</code> the estimation results are consistent with the
-Stata code provided at <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a>
-when choosing robust estimation.</p></td>
+      <td><p>(Type: logical) determines whether robust
+fitting should be used. By default is set to <code>FALSE</code>.</p></td>
     </tr>
     <tr>
       <th>data</th>
-      <td><p>name of the dataset to be used (type: character).</p>
+      <td><p>(Type: character) name of the dataset to be used.</p>
 <p>To estimate gravity equations you need a square dataset including bilateral
 flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character
 (e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the
@@ -303,19 +311,24 @@ ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s00181-012-0576-2'>10.1007/
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='fu'>data</span>(<span class='no'>gravity_no_zeros</span>)
+    <pre class="examples"><div class='input'><span class='co'># Example for CRAN checks:</span>
+<span class='co'># Executable in &lt; 5 sec</span>
+<span class='fu'>library</span>(<span class='no'>dplyr</span>)
+<span class='fu'>data</span>(<span class='st'>"gravity_no_zeros"</span>)
 
-<span class='fu'>fixed_effects</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>,
-<span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>), <span class='kw'>codes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"iso_o"</span>, <span class='st'>"iso_d"</span>),
-<span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
+<span class='co'># Choose 5 countries for testing</span>
+<span class='no'>countries_chosen</span> <span class='kw'>&lt;-</span> <span class='fu'>c</span>(<span class='st'>"AUS"</span>, <span class='st'>"CHN"</span>, <span class='st'>"GBR"</span>, <span class='st'>"BRA"</span>, <span class='st'>"CAN"</span>)
+<span class='no'>grav_small</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://dplyr.tidyverse.org/reference/filter.html'>filter</a></span>(<span class='no'>gravity_no_zeros</span>, <span class='no'>iso_o</span> <span class='kw'>%in%</span> <span class='no'>countries_chosen</span>)
 
-<span class='fu'>fixed_effects</span>(<span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>,
-<span class='kw'>regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"distw"</span>, <span class='st'>"rta"</span>, <span class='st'>"comcur"</span>, <span class='st'>"contig"</span>),
-<span class='kw'>codes</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"iso_o"</span>, <span class='st'>"iso_d"</span>), <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>gravity_no_zeros</span>)
-<span class='co'># }</span><div class='input'>
-</div><div class='input'>
-</div></pre>
+<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>fixed_effects</span>(
+  <span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>,
+  <span class='kw'>distance</span> <span class='kw'>=</span> <span class='st'>"distw"</span>,
+  <span class='kw'>additional_regressors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"rta"</span>, <span class='st'>"comcur"</span>, <span class='st'>"contig"</span>),
+  <span class='kw'>code_origin</span> <span class='kw'>=</span> <span class='st'>"iso_o"</span>,
+  <span class='kw'>code_destination</span> <span class='kw'>=</span> <span class='st'>"iso_d"</span>,
+  <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>grav_small</span>
+)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

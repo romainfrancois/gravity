@@ -2,5 +2,6 @@ pandoc: 1.19.2.1
 pkgdown: 1.0.0
 pkgdown_sha: ~
 articles:
+  crash-course-on-gravity-models: crash-course-on-gravity-models.html
   creating-gravity-datasets: creating-gravity-datasets.html
 

@@ -2,7 +2,6 @@
 #'
 #' @description \code{fixed_effects} estimates gravity models via
 #' OLS and fixed effects for the countries of origin and destination.
-#' These effects catch country specific effects.
 #'
 #' @details To account for MR terms, Feenstra (2002) and Feenstra (2004) propose to use
 #' importer and exporter fixed effects. Due to the use of these effects, all
