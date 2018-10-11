@@ -10,6 +10,11 @@
 #' 
 #' @param robust (Type: logical) Determines whether a robust
 #' variance-covariance matrix should be used. By default is set to \code{FALSE}.
+#' 
+#' If set \code{TRUE} the estimation results are consistent with the
+#' Stata code provided at the website
+#' \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
+#' when choosing robust estimation.
 #'
 #' @examples
 #' \dontrun{

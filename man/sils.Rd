@@ -4,8 +4,10 @@
 \alias{sils}
 \title{Structural Iterated Least Squares (SILS)}
 \usage{
-sils(dependent_variable, regressors, incomes, maxloop = 50,
-  decimal_places = 4, robust = TRUE, verbose = FALSE, data, ...)
+sils(dependent_variable, distance, additional_regressors = NULL,
+  income_origin, income_destination, code_origin, code_destination,
+  maxloop = 100, decimal_places = 4, robust = FALSE,
+  verbose = FALSE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset
@@ -19,13 +21,14 @@ and logged afterwards.
 The transformed variable is then used as the dependent variable in the
 estimation.}
 
-\item{regressors}{name (type: character) of the regressors to include in the model.
-
-Include the distance variable in the dataset \code{data} containing a measure of
+\item{distance}{(Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.
 
-The distance is logged automatically when the function is executed.
+The distance is logged automatically when the function is executed.}
+
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+variable to indicate contiguity).
 
 Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes}.
 
@@ -34,12 +37,21 @@ apart from unilateral incomes can be added.
 
 Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
 
-\item{incomes}{variable name (type: character) of the income of the country of
-origin (e.g. \code{inc_o}) and destination (e.g. \code{inc_d}) in the dataset \code{data}.
+\item{income_origin}{(Type: character) variable name of the income of the country of
+origin (e.g. \code{inc_o}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+divided by the product of the incomes.}
 
-The dependent variable \code{dependent_variable} is divided by the product of the incomes.
+\item{income_destination}{(Type: character) variable name of the income of the country of
+destination (e.g. \code{inc_d}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+divided by the product of the incomes.}
 
-Write this argument as \code{c(income origin, income destination)}.}
+\item{code_origin}{(Type: character) variable name of the code of the country
+of origin (e.g. ISO-3 codes from the variables \code{iso_o} in the
+example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.}
+
+\item{code_destination}{(Type: character) variable name of the code of the country
+of destination (e.g. ISO-3 codes from the variables \code{iso_d}) in the
+example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.}
 
 \item{maxloop}{maximum number of outer loop iterations.
 The default is set to 100. There will be a warning if the iterations
@@ -49,12 +61,7 @@ did not converge.}
 iteration for the estimation to stop. The default is set to 4.}
 
 \item{robust}{robust (type: logic) determines whether a robust
-variance-covariance matrix should be used. The default is set to \code{TRUE}.
-
-If set \code{TRUE} the estimation results are consistent with the
-Stata code provided at the website
-\href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
-when choosing robust estimation.}
+variance-covariance matrix should be used. The default is set to \code{FALSE}.}
 
 \item{verbose}{(type: logic) determines whether the estimated coefficients
 of each iteration should be printed in the console. The default is set
@@ -114,14 +121,22 @@ we do not recommend to apply this method in this case.
 \dontrun{
 data(gravity_no_zeros)
 
-sils(dependent_variable = "flow", regressors = c("distw", "rta"),
-incomes = c("gdp_o", "gdp_d"),
-maxloop = 100, dec_places = 4, robust = TRUE, verbose = FALSE,
+sils(dependent_variable = "flow", 
+distance = "distw",
+additional_regressors = "rta",
+income_origin = "gdp_o", income_destination = "gdp_d", 
+code_origin = "iso_o", code_destination = "iso_d",
+maxloop = 100, dec_places = 4, 
+robust = TRUE, verbose = FALSE,
 data = gravity_no_zeros)
 
-sils(dependent_variable = "flow", regressors = c("distw", "rta", "comcur", "contig"),
-incomes = c("gdp_o", "gdp_d"),
-maxloop = 100, dec_places = 4, robust = TRUE, verbose = FALSE,
+sils(dependent_variable = "flow", 
+distance = "distw",
+additional_regressors = c("rta", "comcur", "contig"),
+income_origin = "gdp_o", income_destination = "gdp_d", 
+code_origin = "iso_o", code_destination = "iso_d",
+maxloop = 100, dec_places = 4, 
+robust = TRUE, verbose = FALSE,
 data = gravity_no_zeros)
 }
 
@@ -134,9 +149,14 @@ data(gravity_no_zeros)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-sils(dependent_variable = "flow", regressors = c("distw", "rta"),
-incomes = c("gdp_o", "gdp_d"), maxloop = 100,
-dec_places = 4, robust = TRUE, verbose = TRUE, data = grav_small)
+sils(dependent_variable = "flow",
+distance = "distw",
+additional_regressors = "rta",
+income_origin = "gdp_o", income_destination = "gdp_d", 
+code_origin = "iso_o", code_destination = "iso_d",
+maxloop = 100,
+dec_places = 4, robust = TRUE,
+verbose = TRUE, data = grav_small)
 }
 
 }
