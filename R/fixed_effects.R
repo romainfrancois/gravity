@@ -185,8 +185,13 @@
 #'
 #' @export
 
-fixed_effects <- function(dependent_variable, distance, 
-                          additional_regressors = NULL, code_origin, code_destination, robust = TRUE, data, ...) {
+fixed_effects <- function(dependent_variable, 
+                          distance, 
+                          additional_regressors = NULL, 
+                          code_origin, 
+                          code_destination, 
+                          robust = TRUE, 
+                          data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(robust))

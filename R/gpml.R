@@ -162,7 +162,11 @@
 #'
 #' @export
 
-gpml <- function(dependent_variable, distance, additional_regressors, robust = TRUE, data, ...) {
+gpml <- function(dependent_variable, 
+                 distance, 
+                 additional_regressors, 
+                 robust = TRUE, 
+                 data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(robust))
@@ -201,13 +205,12 @@ gpml <- function(dependent_variable, distance, additional_regressors, robust = T
     control = list(maxit = 200, trace = FALSE)
   )
 
-  # Return ---------------------------------------------------------------------
   if (robust == TRUE) {
     model_gpml_robust <- lmtest::coeftest(model_gpml,
                                           vcov = sandwich::vcovHC(model_gpml, "HC1")
     )
     
-    model_gpml$coefficients <- model_gpml_robust[1:length(rownames(model_gpml_robust)), ]
+    model_gpml$coefficients <- model_gpml_robust[seq_along(rownames(model_gpml_robust)), ]
   }
 
   return(model_gpml)

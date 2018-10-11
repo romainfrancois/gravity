@@ -171,7 +171,10 @@
 #'
 #' @export
 
-et_tobit <- function(dependent_variable, distance, additional_regressors = NULL, data, ...) {
+et_tobit <- function(dependent_variable, 
+                     distance, 
+                     additional_regressors = NULL, 
+                     data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   
