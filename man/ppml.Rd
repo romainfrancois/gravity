@@ -4,19 +4,21 @@
 \alias{ppml}
 \title{Poisson Pseudo Maximum Likelihood (PPML)}
 \usage{
-ppml(dependent_variable, regressors, robust = TRUE, data, ...)
+ppml(dependent_variable, distance, additional_regressors, robust = TRUE,
+  data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset
 \code{data} (e.g. trade flows)}
 
-\item{regressors}{name (type: character) of the regressors to include in the model.
-
-Include the distance variable in the dataset \code{data} containing a measure of
+\item{distance}{(Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.
 
-The distance is logged automatically when the function is executed.
+The distance is logged automatically when the function is executed.}
+
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+variable to indicate contiguity).
 
 Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
 
@@ -109,7 +111,9 @@ see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textu
 # Example for data with zero trade flows
 data(gravity_zeros)
 
-ppml(dependent_variable = "flow", regressors = c("distw", "rta","iso_o","iso_d"),
+ppml(dependent_variable = "flow", 
+distance = "distw",
+additional_regressors = c("distw", "rta","iso_o","iso_d"),
 robust = TRUE, data = gravity_zeros)
 
 # Example for data without zero trade flows
@@ -118,7 +122,9 @@ data(gravity_no_zeros)
 gravity_no_zeros$lgdp_o <- log(gravity_no_zeros$gdp_o)
 gravity_no_zeros$lgdp_d <- log(gravity_no_zeros$gdp_d)
 
-ppml(dependent_variable = "flow", regressors = c("distw","rta","lgdp_o","lgdp_d"),
+ppml(dependent_variable = "flow", 
+distance = "distw",
+additional_regressors = c("rta","lgdp_o","lgdp_d"),
 robust = TRUE, data = gravity_no_zeros)
 }
 

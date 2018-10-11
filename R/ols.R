@@ -106,7 +106,7 @@
 #' and \code{inc_d} in the example datasets).
 #'
 #' @param robust robust (type: logical) determines whether a robust
-#' variance-covariance matrix should be used. By default is set to \code{TRUE}.
+#' variance-covariance matrix should be used. By default is set to \code{FALSE}.
 #'
 #' If \code{robust = TRUE} the estimation results are consistent with the
 #' Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
@@ -214,7 +214,7 @@ ols <- function(dependent_variable,
                 code_origin,
                 code_destination,
                 uie = FALSE, 
-                robust = TRUE, 
+                robust = FALSE, 
                 data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))

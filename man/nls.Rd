@@ -5,7 +5,7 @@
 \title{Non-linear Least Squares (NLS)}
 \usage{
 nls(dependent_variable, distance, additional_regressors = NULL,
-  robust = TRUE, data, ...)
+  robust = FALSE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset
@@ -27,7 +27,7 @@ Interaction terms can be added.
 Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
 
 \item{robust}{robust (type: logical) determines whether a robust
-variance-covariance matrix should be used. By default is set to \code{TRUE}.}
+variance-covariance matrix should be used. By default is set to \code{FALSE}.}
 
 \item{data}{name of the dataset to be used (type: character).
 

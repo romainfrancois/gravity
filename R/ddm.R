@@ -54,7 +54,7 @@
 #' example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 #'
 #' @param robust (Type: logical) determines whether robust
-#' fitting should be used. By default is set to \code{TRUE}.
+#' fitting should be used. By default is set to \code{FALSE}.
 #' 
 #' @param data (Type: character) name of the dataset to be used.
 #'
@@ -148,7 +148,7 @@ ddm <- function(dependent_variable,
                 additional_regressors = NULL, 
                 code_origin, 
                 code_destination, 
-                robust = TRUE, 
+                robust = FALSE, 
                 data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))

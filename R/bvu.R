@@ -62,7 +62,7 @@
 #' example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 #'
 #' @param robust (Type: logical) determines whether robust
-#' fitting should be used. By default is set to \code{TRUE}.
+#' fitting should be used. By default is set to \code{FALSE}.
 #' 
 #' @param data (Type: character) name of the dataset to be used.
 #'
@@ -144,7 +144,8 @@
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
 #' bvu(dependent_variable = "flow", distance = "distw", additional_regressors = "rta",
-#' income_origin = "gdp_o", income_destination = "gdp_d", code_origin = "iso_o", code_destination = "iso_d",
+#' income_origin = "gdp_o", income_destination = "gdp_d", 
+#' code_origin = "iso_o", code_destination = "iso_d",
 #' robust = TRUE, data = grav_small)
 #' }
 #'
@@ -164,7 +165,7 @@ bvu <- function(dependent_variable,
                 income_destination, 
                 code_origin, 
                 code_destination, 
-                robust = TRUE, 
+                robust = FALSE, 
                 data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))

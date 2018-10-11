@@ -4,7 +4,7 @@
 \alias{gpml}
 \title{Gamma Pseudo Maximum Likelihood (GPML)}
 \usage{
-gpml(dependent_variable, distance, additional_regressors, robust = TRUE,
+gpml(dependent_variable, distance, additional_regressors, robust = FALSE,
   data, ...)
 }
 \arguments{
@@ -27,7 +27,7 @@ Interaction terms can be added.
 Write this argument as \code{c(distance, contiguity, common currency, ...)}.}
 
 \item{robust}{robust (type: logical) determines whether a robust
-variance-covariance matrix should be used. By default is set to \code{TRUE}.}
+variance-covariance matrix should be used. By default is set to \code{FALSE}.}
 
 \item{data}{name of the dataset to be used (type: character).
 

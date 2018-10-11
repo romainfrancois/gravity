@@ -6,7 +6,7 @@
 \usage{
 bvw(dependent_variable, distance, additional_regressors = NULL,
   income_origin, income_destination, code_origin, code_destination,
-  robust = TRUE, data, ...)
+  robust = FALSE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{(Type: character) name of the dependent variable in the dataset
@@ -52,7 +52,7 @@ of destination (e.g. ISO-3 codes from the variables \code{iso_d}) in the
 example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.}
 
 \item{robust}{(Type: logical) determines whether robust
-fitting should be used. By default is set to \code{TRUE}.}
+fitting should be used. By default is set to \code{FALSE}.}
 
 \item{data}{(Type: character) name of the dataset to be used.
 

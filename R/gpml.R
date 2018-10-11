@@ -59,7 +59,7 @@
 #' Write this argument as \code{c(distance, contiguity, common currency, ...)}.
 #'
 #' @param robust robust (type: logical) determines whether a robust
-#' variance-covariance matrix should be used. By default is set to \code{TRUE}.
+#' variance-covariance matrix should be used. By default is set to \code{FALSE}.
 #'
 #' @param data name of the dataset to be used (type: character).
 #'
@@ -165,7 +165,7 @@
 gpml <- function(dependent_variable, 
                  distance, 
                  additional_regressors, 
-                 robust = TRUE, 
+                 robust = FALSE, 
                  data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
@@ -213,5 +213,8 @@ gpml <- function(dependent_variable,
     model_gpml$coefficients <- model_gpml_robust[seq_along(rownames(model_gpml_robust)), ]
   }
 
+  model_gpml$call <- form
+  class(model_gpml) <- c(class(model_gpml), "gpml")
+  
   return(model_gpml)
 }

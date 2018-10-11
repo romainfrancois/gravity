@@ -214,6 +214,9 @@ nbpml <- function(dependent_variable,
     
     model_nbpml$coefficients <- model_nbpml_robust[seq_along(rownames(model_nbpml_robust)), ]
   }
+  
+  model_nbpml$call <- form
+  class(model_nbpml) <- c(class(model_nbpml), "nbpml")
 
   return(model_nbpml)
 }

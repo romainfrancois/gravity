@@ -65,7 +65,7 @@
 #' Write this argument as \code{c(distance, contiguity, common curreny, ...)}.
 #'
 #' @param robust robust (type: logical) determines whether a robust
-#' variance-covariance matrix should be used. By default is set to \code{TRUE}.
+#' variance-covariance matrix should be used. By default is set to \code{FALSE}.
 #'
 #' @param data name of the dataset to be used (type: character).
 #'
@@ -171,7 +171,7 @@
 nls <- function(dependent_variable, 
                 distance,
                 additional_regressors = NULL, 
-                robust = TRUE, 
+                robust = FALSE, 
                 data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
@@ -233,6 +233,9 @@ nls <- function(dependent_variable,
     
     model_nls$coefficients <- model_nls_robust[seq_along(rownames(model_nls_robust)), ]
   }
+  
+  model_nls$call <- form
+  class(model_nls) <- c(class(model_nls), "nls")
   
   return(model_nls)
 }

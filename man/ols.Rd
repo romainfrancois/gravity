@@ -6,7 +6,7 @@
 \usage{
 ols(dependent_variable, distance, additional_regressors = NULL,
   income_origin, income_destination, code_origin, code_destination,
-  uie = FALSE, robust = TRUE, data, ...)
+  uie = FALSE, robust = FALSE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset
@@ -65,7 +65,7 @@ variables in the estimation. The variable names for the incomes should be includ
 and \code{inc_d} in the example datasets).}
 
 \item{robust}{robust (type: logical) determines whether a robust
-variance-covariance matrix should be used. By default is set to \code{TRUE}.
+variance-covariance matrix should be used. By default is set to \code{FALSE}.
 
 If \code{robust = TRUE} the estimation results are consistent with the
 Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}

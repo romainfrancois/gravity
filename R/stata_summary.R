@@ -1,25 +1,40 @@
-#' @title Robust summary statistics
+#' @title Stata-consistent summary statistics
 #'
-#' @description Internal function for nice summary of estimates
-#' adapted after a function written by Isidore Beautrelet
+#' @description Summary of estimates written to be consistent with Stata methods.
+#' Adapted after a function written by Isidore Beautrelet
 #' \url{https://raw.githubusercontent.com/IsidoreBeautrelet/economictheoryblog/master/robust_summary.R}
 #'
-#' @param object \code{lm} object
+#' @param fit (Type: lm) Regression object obtained by using the estimation methods from this package 
+#' or a generic method such as \code{lm} or \code{glm}. 
+#' Some particular classes (\code{gpml}, \code{nbpml} and \code{nls}) don't return R squared and F statistic.
+#' 
+#' @param robust (Type: logical) Determines whether a robust
+#' variance-covariance matrix should be used. By default is set to \code{FALSE}.
 #'
-#' @param robust robust or non-robust estimation
+#' @examples
+#' \dontrun{
+#' data(gravity_no_zeros)
 #'
+#' fit <- ols(dependent_variable = "flow", 
+#'  distance = "distw",
+#'  additional_regressors = c("rta", "contig", "comcur"),
+#'  income_origin = "gdp_o", income_destination = "gdp_d", 
+#'  code_origin = "iso_o", code_destination = "iso_d",
+#'  data = gravity_no_zeros)
+#'  
+#' stata_summary(fit, robust = TRUE)
+#' }
+#' 
 #' @return summary \code{lm} object
-#'
-#' @keywords internal
-#'
-#' @noRd
+#' 
+#' @export
 
-robust_summary <- function(object, robust = FALSE, ...) {
+stata_summary <- function(object, robust = FALSE, ...) {
   # Check -------------------------------------------------------------------
   qr_lm <- function(x, ...) {
     if (is.null(r <- x$qr)) {
       stop("lm object does not have a proper 'qr' component.\n 
-           Rank zero or should not have used lm(.., qr=FALSE).")
+           Rank zero or should not have used lm(..., qr = FALSE).")
     }
     r
   }
@@ -44,7 +59,7 @@ robust_summary <- function(object, robust = FALSE, ...) {
     # square roots of the diagonal elements
     rstdh <- dfc_r * sqrt(diag(varcovar))
   }
-
+  
   # Clustered standard errors -----------------------------------------------
   z <- object
   p <- z$rank
@@ -195,8 +210,18 @@ robust_summary <- function(object, robust = FALSE, ...) {
   if (!is.null(z$na.action)) {
     ans$na.action <- z$na.action
   }
+  
+  # Remove R-sq and F statistic for particular classes ----------------------
+  particular_class <- class(object) %in% c("gpml","nbpml","nls")
+  if (any(particular_class) == TRUE) { particular_class <- TRUE }
 
+  if (particular_class == TRUE) {
+    ans$r.squared <- NULL
+    ans$adj.r.squared <- NULL
+    ans$fstatistic <- NULL
+  }
+  
   # Output ------------------------------------------------------------------
   class(ans) <- "summary.lm"
-  ans
+  return(ans)
 }
