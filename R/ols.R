@@ -63,13 +63,14 @@
 #' the dependent variable and the logged income variables are used as independent variables in the
 #' estimation.
 #'
-#' @param regressors name (type: character) of the regressors to include in the model.
-#'
-#' Include the distance variable in the dataset \code{data} containing a measure of
+#' @param distance (Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 #' distance between all pairs of bilateral partners and bilateral variables that should
 #' be taken as the independent variables in the estimation.
 #'
 #' The distance is logged automatically when the function is executed.
+#'
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+#' variable to indicate contiguity).
 #'
 #' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
 #'
@@ -77,20 +78,21 @@
 #'
 #' Write this argument as \code{c(distance, contiguity, common curreny, ...)}.
 #'
-#' @param incomes variable name (type: character) of the income of the country of
-#' origin (e.g. \code{inc_o}) and destination (e.g. \code{inc_d}) in the dataset \code{data}.
+#' @param income_origin (Type: character) variable name of the income of the country of
+#' origin (e.g. \code{inc_o}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+#' divided by the product of the incomes.
 #'
-#' The dependent variable \code{dependent_variable} is divided by the product of the incomes.
+#' @param income_destination (Type: character) variable name of the income of the country of
+#' destination (e.g. \code{inc_d}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+#' divided by the product of the incomes.
 #'
-#' Write this argument as \code{c(income origin, income destination)}.
+#' @param code_origin (Type: character) variable name of the code of the country
+#' of origin (e.g. ISO-3 codes from the variables \code{iso_o} in the
+#' example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 #'
-#' @param codes variable name (type: character) of the code of the country
-#' of origin and destination (e.g. ISO-3 codes from the variables \code{iso_o} and \code{iso_d}) in the
-#' example datasets).
-#'
-#' The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
-#'
-#' Write this argument as \code{c(code origin, code destination)}.
+#' @param code_destination (Type: character) variable name of the code of the country
+#' of destination (e.g. ISO-3 codes from the variables \code{iso_d}) in the
+#' example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
 #'
 #' @param uie Unitary Income Elasticities (type: logic) determines whether the
 #' parameters are to be estimated assuming unitary income elasticities. The default value is set
@@ -172,8 +174,10 @@
 #' \dontrun{
 #' data(gravity_no_zeros)
 #'
-#' ols(dependent_variable = "flow", regressors = c("distw", "rta", "contig", "comcur"),
-#' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
+#' ols(dependent_variable = "flow", distance = "distw",
+#' additional_regressors = c("rta", "contig", "comcur"),
+#' income_origin = "gdp_o", income_destination = "gdp_d", 
+#' code_origin = "iso_o", code_destination = "iso_d",
 #' uie = TRUE, robust = TRUE, data = gravity_no_zeros)
 #' }
 #'
@@ -186,8 +190,10 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' ols(dependent_variable = "flow", regressors = c("distw", "rta"),
-#' incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
+#' ols(dependent_variable = "flow", distance = "distw",
+#' additional_regressors = "rta",
+#' income_origin = "gdp_o", income_destination = "gdp_d", 
+#' code_origin = "iso_o", code_destination = "iso_d",
 #' uie = FALSE, robust = TRUE, data = grav_small)
 #' }
 #'
@@ -200,25 +206,34 @@
 #'
 #' @export
 
-ols <- function(dependent_variable, regressors, incomes, codes, uie = FALSE, robust = TRUE, data, ...) {
+ols <- function(dependent_variable, 
+                distance,
+                additional_regressors = NULL, 
+                income_origin,
+                income_destination,
+                code_origin,
+                code_destination,
+                uie = FALSE, 
+                robust = TRUE, 
+                data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(uie))
   stopifnot(is.logical(robust))
+  
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
-  stopifnot(is.character(incomes) | all(incomes %in% colnames(data)) | length(incomes) == 2)
-  stopifnot(is.character(codes) | all(codes %in% colnames(data)) | length(codes) == 2)
-
-  # Split input vectors -----------------------------------------------------
-  inc_o <- incomes[1]
-  inc_d <- incomes[2]
-
-  code_o <- codes[1]
-  code_d <- codes[2]
-
-  distance <- regressors[1]
-  additional_regressors <- regressors[-1]
+  
+  stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
+  
+  if (!is.null(additional_regressors)) {
+    stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
+  }
+  
+  stopifnot(is.character(income_origin) | income_origin %in% colnames(data) | length(income_origin) == 1)
+  stopifnot(is.character(income_destination) | income_destination %in% colnames(data) | length(income_destination) == 1)
+  
+  stopifnot(is.character(code_origin) | code_origin %in% colnames(data) | length(code_origin) == 1)
+  stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
 
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
@@ -239,15 +254,12 @@ ols <- function(dependent_variable, regressors, incomes, codes, uie = FALSE, rob
     d <- d %>%
       mutate(
         y_log_ols = log(
-          !!sym(dependent_variable) / (!!sym(inc_o) * !!sym(inc_d))
+          !!sym(dependent_variable) / (!!sym(income_origin) * !!sym(income_destination))
         )
       ) %>%
       select(
         !!sym("y_log_ols"), !!sym("dist_log"), !!sym("additional_regressors")
       )
-
-    # Model --------------------------------------------------------------------
-    model_ols <- stats::lm(y_log_ols ~ ., data = d)
   }
 
   if (uie == FALSE) {
@@ -255,27 +267,21 @@ ols <- function(dependent_variable, regressors, incomes, codes, uie = FALSE, rob
     d <- d %>%
       mutate(
         y_log_ols = log(!!sym(dependent_variable)),
-        inc_o_log = log(!!sym(inc_o)),
-        inc_d_log = log(!!sym(inc_d))
+        inc_o_log = log(!!sym(income_origin)),
+        inc_d_log = log(!!sym(income_destination))
       ) %>%
       select(
         !!sym("y_log_ols"), !!sym("inc_o_log"), !!sym("inc_d_log"), !!sym("dist_log"), !!sym("additional_regressors")
       )
+  }
 
-    # Model --------------------------------------------------------------------
+
+  # Model -------------------------------------------------------------------
+  if (robust == TRUE) {
+    model_ols <- MASS::rlm(y_log_ols ~ ., data = d)
+  } else {
     model_ols <- stats::lm(y_log_ols ~ ., data = d)
   }
-
-  # Return ---------------------------------------------------------------------
-  if (robust == TRUE) {
-    return_object_1 <- robust_summary(model_ols, robust = TRUE)
-    return_object_1$call <- as.formula(model_ols)
-    return(return_object_1)
-  }
-
-  if (robust == FALSE) {
-    return_object_1 <- robust_summary(model_ols, robust = FALSE)
-    return_object_1$call <- as.formula(model_ols)
-    return(return_object_1)
-  }
+  
+  return(model_ols)
 }

@@ -7,12 +7,10 @@ test_that("OLS returns a valid output", {
   grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen, ]
 
   fit <- ols(
-    dependent_variable = "flow", regressors = c("distw", "rta", "contig", "comcur"),
-    incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
+    dependent_variable = "flow", distance = "distw", additional_regressors = c("rta", "contig", "comcur"),
+    income_origin = "gdp_o", income_destination = "gdp_d", code_origin = "iso_o", code_destination = "iso_d",
     uie = TRUE, robust = TRUE, data = grav_small
   )
 
-  expect_is(fit, "summary.lm")
-  expect_is(fit$coefficients, "matrix")
-  expect_output(str(fit), "List of 11")
+  expect_is(fit, "lm")
 })

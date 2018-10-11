@@ -4,8 +4,9 @@
 \alias{ols}
 \title{Ordinary Least Squares (OLS)}
 \usage{
-ols(dependent_variable, regressors, incomes, codes, uie = FALSE,
-  robust = TRUE, data, ...)
+ols(dependent_variable, distance, additional_regressors = NULL,
+  income_origin, income_destination, code_origin, code_destination,
+  uie = FALSE, robust = TRUE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset
@@ -21,13 +22,14 @@ If \code{uie=FALSE} the dependent variable is logged directly. The transformed v
 the dependent variable and the logged income variables are used as independent variables in the
 estimation.}
 
-\item{regressors}{name (type: character) of the regressors to include in the model.
-
-Include the distance variable in the dataset \code{data} containing a measure of
+\item{distance}{(Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.
 
-The distance is logged automatically when the function is executed.
+The distance is logged automatically when the function is executed.}
+
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+variable to indicate contiguity).
 
 Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
 
@@ -35,20 +37,21 @@ Interaction terms can be added.
 
 Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
 
-\item{incomes}{variable name (type: character) of the income of the country of
-origin (e.g. \code{inc_o}) and destination (e.g. \code{inc_d}) in the dataset \code{data}.
+\item{income_origin}{(Type: character) variable name of the income of the country of
+origin (e.g. \code{inc_o}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+divided by the product of the incomes.}
 
-The dependent variable \code{dependent_variable} is divided by the product of the incomes.
+\item{income_destination}{(Type: character) variable name of the income of the country of
+destination (e.g. \code{inc_d}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is 
+divided by the product of the incomes.}
 
-Write this argument as \code{c(income origin, income destination)}.}
+\item{code_origin}{(Type: character) variable name of the code of the country
+of origin (e.g. ISO-3 codes from the variables \code{iso_o} in the
+example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.}
 
-\item{codes}{variable name (type: character) of the code of the country
-of origin and destination (e.g. ISO-3 codes from the variables \code{iso_o} and \code{iso_d}) in the
-example datasets).
-
-The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
-
-Write this argument as \code{c(code origin, code destination)}.}
+\item{code_destination}{(Type: character) variable name of the code of the country
+of destination (e.g. ISO-3 codes from the variables \code{iso_d}) in the
+example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.}
 
 \item{uie}{Unitary Income Elasticities (type: logic) determines whether the
 parameters are to be estimated assuming unitary income elasticities. The default value is set
@@ -154,8 +157,10 @@ see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textu
 \dontrun{
 data(gravity_no_zeros)
 
-ols(dependent_variable = "flow", regressors = c("distw", "rta", "contig", "comcur"),
-incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
+ols(dependent_variable = "flow", distance = "distw",
+additional_regressors = c("rta", "contig", "comcur"),
+income_origin = "gdp_o", income_destination = "gdp_d", 
+code_origin = "iso_o", code_destination = "iso_d",
 uie = TRUE, robust = TRUE, data = gravity_no_zeros)
 }
 
@@ -168,8 +173,10 @@ data(gravity_no_zeros)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-ols(dependent_variable = "flow", regressors = c("distw", "rta"),
-incomes = c("gdp_o", "gdp_d"), codes = c("iso_o", "iso_d"),
+ols(dependent_variable = "flow", distance = "distw",
+additional_regressors = "rta",
+income_origin = "gdp_o", income_destination = "gdp_d", 
+code_origin = "iso_o", code_destination = "iso_d",
 uie = FALSE, robust = TRUE, data = grav_small)
 }
 
