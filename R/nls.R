@@ -49,13 +49,14 @@
 #' @param dependent_variable name (type: character) of the dependent variable in the dataset
 #' \code{data} (e.g. trade flows).
 #'
-#' @param regressors name (type: character) of the regressors to include in the model.
-#'
-#' Include the distance variable in the dataset \code{data} containing a measure of
+#' @param distance (Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 #' distance between all pairs of bilateral partners and bilateral variables that should
 #' be taken as the independent variables in the estimation.
 #'
 #' The distance is logged automatically when the function is executed.
+#'
+#' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+#' variable to indicate contiguity).
 #'
 #' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
 #'
@@ -136,7 +137,8 @@
 #'      lgdp_d = log(gdp_d)
 #'    )
 #'
-#' nls(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
+#' nls(dependent_variable = "flow", distance = "distw",
+#' additional_regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
 #' robust = TRUE, data = gravity_no_zeros)
 #' }
 #'
@@ -152,7 +154,8 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o %in% countries_chosen_zeros,]
-#' nls(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
+#' nls(dependent_variable = "flow", distance = "distw", 
+#' additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
 #' robust = TRUE, data = grav_small_zeros)
 #' }
 #'
@@ -165,16 +168,22 @@
 #'
 #' @export
 
-nls <- function(dependent_variable, regressors, robust = TRUE, data, ...) {
+nls <- function(dependent_variable, 
+                distance,
+                additional_regressors = NULL, 
+                robust = TRUE, 
+                data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(robust))
+  
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
-
-  # Split input vectors -----------------------------------------------------
-  distance <- regressors[1]
-  additional_regressors <- regressors[-1]
+  
+  stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
+  
+  if (!is.null(additional_regressors)) {
+    stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
+  }
 
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
@@ -193,12 +202,13 @@ nls <- function(dependent_variable, regressors, robust = TRUE, data, ...) {
     )
 
   # Model ----------------------------------------------------------------------
+  vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  
   form <- stats::as.formula(
     sprintf(
-      "%s ~ %s + %s",
+      "%s ~ %s",
       dependent_variable,
-      "dist_log",
-      paste(additional_regressors, sep = " + ")
+      vars
     )
   )
 
@@ -216,24 +226,13 @@ nls <- function(dependent_variable, regressors, robust = TRUE, data, ...) {
     start = model_PPML_start
   ) # estimated coefficients
 
-  model_nls_robust <- lmtest::coeftest(model_nls, vcov = sandwich::vcovHC(model_nls, "HC1"))
-
-  # Return ---------------------------------------------------------------------
-
   if (robust == TRUE) {
-    summary_nls <- robust_summary(model_nls, robust = TRUE)
-    summary_nls$coefficients <- model_nls_robust[1:length(rownames(model_nls_robust)), ]
-    return_object <- summary_nls
-    return_object$call <- form
-    return_object$r.squared <- NULL
-    return_object$adj.r.squared <- NULL
-    return_object$fstatistic <- NULL
-    return(return_object)
+    model_nls_robust <- lmtest::coeftest(model_nls,
+                                           vcov = sandwich::vcovHC(model_nls, "HC1")
+    )
+    
+    model_nls$coefficients <- model_nls_robust[seq_along(rownames(model_nls_robust)), ]
   }
-
-  if (robust == FALSE) {
-    return_object <- summary(model_nls)
-    return_object$call <- form
-    return(return_object)
-  }
+  
+  return(model_nls)
 }

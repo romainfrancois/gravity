@@ -4,19 +4,21 @@
 \alias{nls}
 \title{Non-linear Least Squares (NLS)}
 \usage{
-nls(dependent_variable, regressors, robust = TRUE, data, ...)
+nls(dependent_variable, distance, additional_regressors = NULL,
+  robust = TRUE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset
 \code{data} (e.g. trade flows).}
 
-\item{regressors}{name (type: character) of the regressors to include in the model.
-
-Include the distance variable in the dataset \code{data} containing a measure of
+\item{distance}{(Type: character) name of the distance variable in the dataset \code{data} containing a measure of
 distance between all pairs of bilateral partners and bilateral variables that should
 be taken as the independent variables in the estimation.
 
-The distance is logged automatically when the function is executed.
+The distance is logged automatically when the function is executed.}
+
+\item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy 
+variable to indicate contiguity).
 
 Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
 
@@ -117,7 +119,8 @@ gravity_no_zeros <- gravity_no_zeros \%>\%
      lgdp_d = log(gdp_d)
    )
 
-nls(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
+nls(dependent_variable = "flow", distance = "distw",
+additional_regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
 robust = TRUE, data = gravity_no_zeros)
 }
 
@@ -133,7 +136,8 @@ gravity_zeros$lgdp_d <- log(gravity_zeros$gdp_d)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen_zeros <- names(sort(table(gravity_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small_zeros <- gravity_zeros[gravity_zeros$iso_o \%in\% countries_chosen_zeros,]
-nls(dependent_variable = "flow", regressors = c("distw", "rta", "lgdp_o", "lgdp_d"),
+nls(dependent_variable = "flow", distance = "distw", 
+additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
 robust = TRUE, data = grav_small_zeros)
 }
 
