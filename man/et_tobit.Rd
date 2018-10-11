@@ -113,5 +113,5 @@ fit <- et_tobit(
 \insertRef{Carson2007}{gravity}
 }
 \seealso{
-\code{\link[censReg]{censReg}}
+\code{\link[censReg]{censReg}}, \code{\link[gravity]{et_tobit}}
 }

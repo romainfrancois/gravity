@@ -29,7 +29,8 @@
 #'
 #' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
 #' variable to indicate contiguity). Unilateral metric variables such as GDP should be inserted via the arguments 
-#' \code{income_origin} and \code{income_destination}. As country specific effects are subdued due to demeaning, no further unilateral variables apart from incomes can be added.
+#' \code{income_origin} and \code{income_destination}. As country specific effects are subdued due to demeaning, no further 
+#' unilateral variables apart from incomes can be added.
 #'
 #' Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.
 #'

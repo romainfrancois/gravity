@@ -31,7 +31,7 @@
 <meta property="og:title" content="Bonus vetus OLS (BVW) — bvw" />
 
 <meta property="og:description" content="bvw estimates gravity models via Bonus
-vetus OLS with GDP-weights." />
+vetus OLS with income-weights." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -113,7 +113,7 @@ vetus OLS with GDP-weights." />
     <div class="ref-description">
     
     <p><code>bvw</code> estimates gravity models via Bonus
-vetus OLS with GDP-weights.</p>
+vetus OLS with income-weights.</p>
     
     </div>
 
@@ -139,7 +139,8 @@ in the estimation. The distance is logged automatically when the function is exe
       <th>additional_regressors</th>
       <td><p>(Type: character) names of the additional regressors to include in the model (e.g. a dummy
 variable to indicate contiguity). Unilateral metric variables such as GDP should be inserted via the arguments 
-<code>income_origin</code> and <code>income_destination</code>. As country specific effects are subdued due to demeaning, no further unilateral variables apart from incomes can be added.</p>
+<code>income_origin</code> and <code>income_destination</code>. As country specific effects are subdued due to demeaning, no further 
+unilateral variables apart from incomes can be added.</p>
 <p>Write this argument as <code>c(contiguity, common currency, ...)</code>. By default this is set to <code>NULL</code>.</p></td>
     </tr>
     <tr>
@@ -183,8 +184,8 @@ grouped using this parameter.</p></td>
 
     <p>Bonus vetus OLS is an estimation method for gravity models
 developed by Baier and Bergstrand (2009); Baier and Bergstrand (2010)
- using GDP-weights to center a
-Taylor-series (see the references for more information).</p>
+ using income-weights to center a
+Taylor series.</p>
 <p>The <code>bvw</code> function considers Multilateral Resistance terms and allows to
 conduct comparative statics. Country specific effects are subdued due
 to demeaning. Hence, unilateral variables apart from <code>inc_o</code>

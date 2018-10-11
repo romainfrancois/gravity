@@ -3,7 +3,7 @@
 #' @description \code{fixed_effects} estimates gravity models via
 #' OLS and fixed effects for the countries of origin and destination.
 #'
-#' @details To account for MR terms, Feenstra (2002) and Feenstra (2004) propose to use
+#' @details To account for MR terms, \insertCite{Feenstra2002;textual}{gravity} proposes to use
 #' importer and exporter fixed effects. Due to the use of these effects, all
 #' unilateral influences such as GDPs can no longer be estimated.
 #'
@@ -54,98 +54,40 @@
 #' see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textual}{gravity} and
 #' \insertCite{Head2010;textual}{gravity} as well as the references therein.
 #'
-#' @param dependent_variable (Type: character) name of the dependent variable in the dataset
-#' \code{data} (e.g. trade flows).
+#' @param dependent_variable (Type: character) name of the dependent variable. This variable is logged and then used as 
+#' the dependent variable in the estimation.
 #'
-#' This variable is logged and then used as the dependent variable in the estimation.
-#'
-#' @param distance (Type: character) name of the distance variable in the dataset \code{data} containing a measure of
-#' distance between all pairs of bilateral partners and bilateral variables that should
-#' be taken as the independent variables in the estimation.
-#'
-#' The distance is logged automatically when the function is executed.
+#' @param distance (Type: character) name of the distance variable that should be taken as the key independent variable 
+#' in the estimation. The distance is logged automatically when the function is executed.
 #'
 #' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
-#' variable to indicate contiguity).
+#' variable to indicate contiguity). Unilateral metric variables such as GDP should be inserted via the arguments 
+#' \code{income_origin} and \code{income_destination}.
 #'
-#' Unilateral metric variables such as GDPs should be inserted via the arguments \code{income_origin} and \code{income_origin}.
+#' Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.
 #'
-#' As country specific effects are subdued due to demeaning, no further unilateral variables apart from incomes can be added.
+#' @param code_origin (Type: character) country of origin variable (e.g. ISO-3 country codes). The variables are grouped 
+#' using this parameter.
 #'
-#' Write this argument as \code{c(contiguity, common currency, ...)}.
+#' @param code_destination (Type: character) country of destination variable (e.g. country ISO-3 codes). The variables are 
+#' grouped using this parameter.
 #'
-#' @param code_origin (Type: character) variable name of the code of the country
-#' of origin (e.g. ISO-3 codes from the variables \code{iso_o} in the
-#' example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
+#' @param robust (Type: logical) whether robust fitting should be used. By default this is set to \code{FALSE}.
 #'
-#' @param code_destination (Type: character) variable name of the code of the country
-#' of destination (e.g. ISO-3 codes from the variables \code{iso_d}) in the
-#' example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
+#' @param data (Type: data.frame) the dataset to be used.
 #'
-#' @param robust (Type: logical) determines whether robust
-#' fitting should be used. By default is set to \code{FALSE}.
-#'
-#' @param data (Type: character) name of the dataset to be used.
-#'
-#' To estimate gravity equations you need a square dataset including bilateral
-#' flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
-#' (e.g. \code{iso_o} for the country of origin and \code{iso_d} for the
-#' destination country), a distance measure defined by the argument \code{distance}
-#' and other potential influences (e.g. contiguity and common currency) given as a vector in
-#' \code{regressors} are required.
-#'
-#' All dummy variables should be of type numeric (0/1).
-#'
-#' Make sure the ISO codes are of type "character".
-#'
-#' If an independent variable is defined as a ratio, it should be logged.
-#'
-#' The user should perform some data cleaning beforehand to remove observations that contain entries that
-#' can distort estimates.
-#'
-#' When using panel data, a variable for the time may be included in the
-#' dataset. Note that the variable for the time dimension should be of
-#' type factor.
-#'
-#' The time variable can be used as a single dependent variable or interaction
-#' term with other variables such as country identifiers by inserting it into
-#' \code{regressors} or as an optional parameter.
-#'
-#' The function will remove zero flows and distances.
-#'
-#' @param ... additional arguments to be passed to \code{fixed_effects}.
+#' @param ... Additional arguments to be passed to \code{bvw}.
 #'
 #' @references
-#' For more information on fixed effects as well as informaton on gravity models,
-#' theoretical foundations and suitable estimation methods in general see
-#'
-#' \insertRef{Anderson1979}{gravity}
-#'
-#' \insertRef{Anderson2001}{gravity}
-#'
-#' \insertRef{Anderson2010}{gravity}
-#'
-#' \insertRef{Baier2009}{gravity}
-#'
-#' \insertRef{Baier2010}{gravity}
-#'
-#' \insertRef{Head2010}{gravity}
-#'
-#' \insertRef{Head2014}{gravity}
-#'
-#' \insertRef{Santos2006}{gravity}
-#'
-#' and the citations therein.
-#'
-#' See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
-#'
-#' For estimating gravity equations using panel data see
-#'
 #' \insertRef{Egger2003}{gravity}
-#'
+#' 
+#' \insertRef{Feenstra2002}{gravity}
+#' 
 #' \insertRef{Gomez-Herrera2013}{gravity}
-#'
-#' and the references therein.
+#' 
+#' \insertRef{Head2010}{gravity}
+#' 
+#' \insertRef{Head2014}{gravity}
 #'
 #' @examples
 #' # Example for CRAN checks:

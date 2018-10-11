@@ -52,8 +52,8 @@ Taylor-series.
 
 The \code{bvu} function considers Multilateral Resistance terms and allows to
 conduct comparative statics. Country specific effects are subdued due
-to demeaning. Hence, unilateral variables apart from \code{inc_o}
-and \code{inc_d} cannot be included in the estimation.
+to demeaning. Hence, unilateral variables apart from incomes cannot be included 
+in the estimation.
 
 \code{bvu} is designed to be consistent with the Stata code provided at
 \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
@@ -85,6 +85,11 @@ fit <- bvu(
   data = grav_small
 )
 
+}
+\references{
+\insertRef{Baier2009}{gravity}
+
+\insertRef{Baier2010}{gravity}
 }
 \seealso{
 \code{\link[stats]{lm}}, \code{\link[lmtest]{coeftest}},

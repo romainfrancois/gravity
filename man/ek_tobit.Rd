@@ -100,5 +100,5 @@ fit <- ek_tobit(
 \insertRef{Eaton2001}{gravity}
 }
 \seealso{
-\code{\link[survival]{Surv}}, \code{\link[survival]{survreg}}
+\code{\link[survival]{Surv}}, \code{\link[survival]{survreg}}, \code{\link[gravity]{tobit}}
 }

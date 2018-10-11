@@ -18,7 +18,8 @@ in the estimation. The distance is logged automatically when the function is exe
 
 \item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy
 variable to indicate contiguity). Unilateral metric variables such as GDP should be inserted via the arguments 
-\code{income_origin} and \code{income_destination}. As country specific effects are subdued due to demeaning, no further unilateral variables apart from incomes can be added.
+\code{income_origin} and \code{income_destination}. As country specific effects are subdued due to demeaning, no further 
+unilateral variables apart from incomes can be added.
 
 Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.}
 
@@ -44,12 +45,12 @@ The function returns the summary of the estimated gravity model as an
 }
 \description{
 \code{bvw} estimates gravity models via Bonus
-vetus OLS with GDP-weights.
+vetus OLS with income-weights.
 }
 \details{
 Bonus vetus OLS is an estimation method for gravity models
-developed by \insertCite{Baier2009,Baier2010;textual}{gravity} using GDP-weights to center a
-Taylor-series (see the references for more information).
+developed by \insertCite{Baier2009,Baier2010;textual}{gravity} using income-weights to center a
+Taylor series.
 
 The \code{bvw} function considers Multilateral Resistance terms and allows to
 conduct comparative statics. Country specific effects are subdued due

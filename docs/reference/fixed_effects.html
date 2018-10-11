@@ -31,8 +31,7 @@
 <meta property="og:title" content="Fixed Effects — fixed_effects" />
 
 <meta property="og:description" content="fixed_effects estimates gravity models via
-OLS and fixed effects for the countries of origin and destination.
-These effects catch country specific effects." />
+OLS and fixed effects for the countries of origin and destination." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -114,8 +113,7 @@ These effects catch country specific effects." />
     <div class="ref-description">
     
     <p><code>fixed_effects</code> estimates gravity models via
-OLS and fixed effects for the countries of origin and destination.
-These effects catch country specific effects.</p>
+OLS and fixed effects for the countries of origin and destination.</p>
     
     </div>
 
@@ -127,67 +125,42 @@ These effects catch country specific effects.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>dependent_variable</th>
-      <td><p>(Type: character) name of the dependent variable in the dataset
-<code>data</code> (e.g. trade flows).</p>
-<p>This variable is logged and then used as the dependent variable in the estimation.</p></td>
+      <td><p>(Type: character) name of the dependent variable. This variable is logged and then used as 
+the dependent variable in the estimation.</p></td>
     </tr>
     <tr>
       <th>distance</th>
-      <td><p>(Type: character) name of the distance variable in the dataset <code>data</code> containing a measure of
-distance between all pairs of bilateral partners and bilateral variables that should
-be taken as the independent variables in the estimation.</p>
-<p>The distance is logged automatically when the function is executed.</p></td>
+      <td><p>(Type: character) name of the distance variable that should be taken as the key independent variable 
+in the estimation. The distance is logged automatically when the function is executed.</p></td>
     </tr>
     <tr>
       <th>additional_regressors</th>
       <td><p>(Type: character) names of the additional regressors to include in the model (e.g. a dummy
-variable to indicate contiguity).</p>
-<p>Unilateral metric variables such as GDPs should be inserted via the arguments <code>income_origin</code> and <code>income_origin</code>.</p>
-<p>As country specific effects are subdued due to demeaning, no further unilateral variables apart from incomes can be added.</p>
-<p>Write this argument as <code>c(contiguity, common currency, ...)</code>.</p></td>
+variable to indicate contiguity). Unilateral metric variables such as GDP should be inserted via the arguments 
+<code>income_origin</code> and <code>income_destination</code>.</p>
+<p>Write this argument as <code>c(contiguity, common currency, ...)</code>. By default this is set to <code>NULL</code>.</p></td>
     </tr>
     <tr>
       <th>code_origin</th>
-      <td><p>(Type: character) variable name of the code of the country
-of origin (e.g. ISO-3 codes from the variables <code>iso_o</code> in the
-example datasets). The variables are grouped by using <code>iso_o</code> and <code>iso_d</code> to obtain estimates.</p></td>
+      <td><p>(Type: character) country of origin variable (e.g. ISO-3 country codes). The variables are grouped 
+using this parameter.</p></td>
     </tr>
     <tr>
       <th>code_destination</th>
-      <td><p>(Type: character) variable name of the code of the country
-of destination (e.g. ISO-3 codes from the variables <code>iso_d</code>) in the
-example datasets). The variables are grouped by using <code>iso_o</code> and <code>iso_d</code> to obtain estimates.</p></td>
+      <td><p>(Type: character) country of destination variable (e.g. country ISO-3 codes). The variables are 
+grouped using this parameter.</p></td>
     </tr>
     <tr>
       <th>robust</th>
-      <td><p>(Type: logical) determines whether robust
-fitting should be used. By default is set to <code>FALSE</code>.</p></td>
+      <td><p>(Type: logical) whether robust fitting should be used. By default this is set to <code>FALSE</code>.</p></td>
     </tr>
     <tr>
       <th>data</th>
-      <td><p>(Type: character) name of the dataset to be used.</p>
-<p>To estimate gravity equations you need a square dataset including bilateral
-flows defined by the argument <code>dependent_variable</code>, ISO codes or similar of type character
-(e.g. <code>iso_o</code> for the country of origin and <code>iso_d</code> for the
-destination country), a distance measure defined by the argument <code>distance</code>
-and other potential influences (e.g. contiguity and common currency) given as a vector in
-<code>regressors</code> are required.</p>
-<p>All dummy variables should be of type numeric (0/1).</p>
-<p>Make sure the ISO codes are of type "character".</p>
-<p>If an independent variable is defined as a ratio, it should be logged.</p>
-<p>The user should perform some data cleaning beforehand to remove observations that contain entries that
-can distort estimates.</p>
-<p>When using panel data, a variable for the time may be included in the
-dataset. Note that the variable for the time dimension should be of
-type factor.</p>
-<p>The time variable can be used as a single dependent variable or interaction
-term with other variables such as country identifiers by inserting it into
-<code>regressors</code> or as an optional parameter.</p>
-<p>The function will remove zero flows and distances.</p></td>
+      <td><p>(Type: data.frame) the dataset to be used.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>additional arguments to be passed to <code>fixed_effects</code>.</p></td>
+      <td><p>Additional arguments to be passed to <code>bvw</code>.</p></td>
     </tr>
     </table>
     
@@ -198,7 +171,8 @@ term with other variables such as country identifiers by inserting it into
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>To account for MR terms, Feenstra (2002) and Feenstra (2004) propose to use
+    <p>To account for MR terms, Feenstra (2002)
+ proposes to use
 importer and exporter fixed effects. Due to the use of these effects, all
 unilateral influences such as GDPs can no longer be estimated.</p>
 <p>A disadvantage of the use of <code>fixed_effects</code> is that, when applied to
@@ -244,34 +218,18 @@ Head et al. (2010)
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>For more information on fixed effects as well as informaton on gravity models,
-theoretical foundations and suitable estimation methods in general see</p>
-<p>Anderson JE (1979).
-&#8220;A Theoretical Foundation for the Gravity Equation.&#8221;
-<em>The American Economic Review</em>, <b>69</b>(1), pp. 106--116.
-ISSN 00028282.</p>
-<p>Anderson JE and van
-Wincoop E (2001).
-&#8220;Gravity with Gravitas: A Solution to the Border Puzzle.&#8221;
-Technical Report 8079, National Bureau of Economic Research.
-doi: <a href='http://doi.org/10.3386/w8079'>10.3386/w8079</a>
+    <p>Egger P and Pfaffermayr M (2003).
+&#8220;The proper panel econometric specification of the gravity equation: A three-way model with bilateral interaction effects.&#8221;
+<em>Empirical Economics</em>, <b>28</b>(3), pp. 571--580.
+ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s001810200146'>10.1007/s001810200146</a>
 .</p>
-<p>Anderson JE (2010).
-&#8220;The Gravity Model.&#8221;
-Technical Report 16576, National Bureau of Economic Research.
-doi: <a href='http://doi.org/10.3386/w16576'>10.3386/w16576</a>
-.</p>
-<p>Baier SL and Bergstrand JH (2009).
-&#8220;Bonus vetus OLS: A simple method for approximating international trade-cost effects using the gravity equation.&#8221;
-<em>Journal of International Economics</em>, <b>77</b>(1), pp. 77 - 85.
-ISSN 0022-1996, doi: <a href='http://doi.org/10.1016/j.jinteco.2008.10.004'>10.1016/j.jinteco.2008.10.004</a>
-.</p>
-<p>Baier SL and Bergstrand JH (2010).
-&#8220;The Gravity Model in International Trade: Advances and Applications.&#8221;
-In van
-Bergeijk PAG and Brakman S (eds.), chapter 4.
-Cambridge University Press.
-doi: <a href='http://doi.org/10.1017/CBO9780511762109'>10.1017/CBO9780511762109</a>
+<p>Feenstra RC (2002).
+&#8220;Border effects and the gravity equation: consistent methods for estimation.&#8221;
+<em>Scottish Journal of Political Economy</em>, <b>49</b>(5), pp. 491--506.</p>
+<p>Gómez-Herrera E (2013).
+&#8220;Comparing alternative methods to estimate gravity models of bilateral trade.&#8221;
+<em>Empirical Economics</em>, <b>44</b>(3), pp. 1087--1111.
+ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s00181-012-0576-2'>10.1007/s00181-012-0576-2</a>
 .</p>
 <p>Head K, Mayer T and Ries J (2010).
 &#8220;The erosion of colonial trade linkages after independence.&#8221;
@@ -284,25 +242,6 @@ In Gopinath G, Helpman E and Rogoff K (eds.), <em>Handbook of International Econ
 Elsevier.
 doi: <a href='http://doi.org/10.1016/B978-0-444-54314-1.00003-3'>10.1016/B978-0-444-54314-1.00003-3</a>
 .</p>
-<p>Silva JMCS and Tenreyro S (2006).
-&#8220;The Log of Gravity.&#8221;
-<em>The Review of Economics and Statistics</em>, <b>88</b>(4), pp. 641-658.
-doi: <a href='http://doi.org/10.1162/rest.88.4.641'>10.1162/rest.88.4.641</a>
-.</p>
-<p>and the citations therein.</p>
-<p>See <a href='https://sites.google.com/site/hiegravity/'>Gravity Equations: Workhorse, Toolkit, and Cookbook</a> for gravity datasets and Stata code for estimating gravity models.</p>
-<p>For estimating gravity equations using panel data see</p>
-<p>Egger P and Pfaffermayr M (2003).
-&#8220;The proper panel econometric specification of the gravity equation: A three-way model with bilateral interaction effects.&#8221;
-<em>Empirical Economics</em>, <b>28</b>(3), pp. 571--580.
-ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s001810200146'>10.1007/s001810200146</a>
-.</p>
-<p>Gómez-Herrera E (2013).
-&#8220;Comparing alternative methods to estimate gravity models of bilateral trade.&#8221;
-<em>Empirical Economics</em>, <b>44</b>(3), pp. 1087--1111.
-ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s00181-012-0576-2'>10.1007/s00181-012-0576-2</a>
-.</p>
-<p>and the references therein.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
