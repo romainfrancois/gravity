@@ -131,23 +131,20 @@
 #' \dontrun{
 #' data(gravity_no_zeros)
 #'
-#' sils(dependent_variable = "flow", 
-#' distance = "distw",
-#' additional_regressors = "rta",
-#' income_origin = "gdp_o", income_destination = "gdp_d", 
-#' code_origin = "iso_o", code_destination = "iso_d",
-#' maxloop = 100, dec_places = 4, 
-#' robust = TRUE, verbose = FALSE,
-#' data = gravity_no_zeros)
-#'
-#' sils(dependent_variable = "flow", 
-#' distance = "distw",
-#' additional_regressors = c("rta", "comcur", "contig"),
-#' income_origin = "gdp_o", income_destination = "gdp_d", 
-#' code_origin = "iso_o", code_destination = "iso_d",
-#' maxloop = 100, dec_places = 4, 
-#' robust = TRUE, verbose = FALSE,
-#' data = gravity_no_zeros)
+#' sils(
+#'  dependent_variable = "flow", 
+#'  distance = "distw",
+#'  additional_regressors = c("rta", "comcur", "contig"),
+#'  income_origin = "gdp_o", 
+#'  income_destination = "gdp_d", 
+#'  code_origin = "iso_o", 
+#'  code_destination = "iso_d",
+#'  maxloop = 50, 
+#'  dec_places = 3, 
+#'  robust = TRUE, 
+#'  verbose = FALSE,
+#'  data = gravity_no_zeros
+#' )
 #' }
 #'
 #' \dontshow{
@@ -159,14 +156,17 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' sils(dependent_variable = "flow",
-#' distance = "distw",
-#' additional_regressors = "rta",
-#' income_origin = "gdp_o", income_destination = "gdp_d", 
-#' code_origin = "iso_o", code_destination = "iso_d",
-#' maxloop = 100,
-#' dec_places = 4, robust = TRUE,
-#' verbose = TRUE, data = grav_small)
+#' sils(
+#'  dependent_variable = "flow", 
+#'  distance = "distw",
+#'  additional_regressors = "rta",
+#'  income_origin = "gdp_o", 
+#'  income_destination = "gdp_d",
+#'  code_origin = "iso_o", 
+#'  code_destination = "iso_d",
+#'  maxloop = 10,
+#'  data = grav_small
+#' )
 #' }
 #'
 #' @return

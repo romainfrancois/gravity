@@ -159,12 +159,17 @@
 #' # choose exemplarily 10 biggest countries for check data
 #' countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 #' grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o %in% countries_chosen,]
-#' tetrads(dependent_variable ="flow",
-#' regressors = c("distw", "rta"),
-#' codes = c("iso_o", "iso_d"),
-#' reference_countries = c(countries_chosen[1], countries_chosen[2]),
-#' multiway = FALSE,
-#' data = grav_small)
+#' tetrads(
+#'  dependent_variable ="flow",
+#'  distance = "distw",
+#'  additional_regressors = "rta",
+#'  code_origin = "iso_o",
+#'  code_destination = "iso_d",
+#'  filter_origin = countries_chosen[1],
+#'  filter_destination = countries_chosen[2],
+#'  multiway = FALSE,
+#'  data = grav_small
+#' )
 #' }
 #'
 #' @return
@@ -176,24 +181,33 @@
 #'
 #' @export
 
-tetrads <- function(dependent_variable, regressors, codes, reference_countries = c("JPN", "USA"), multiway = TRUE, data, ...) {
+tetrads <- function(dependent_variable, 
+                    distance,
+                    additional_regressors, 
+                    code_origin,
+                    code_destination,
+                    filter_origin = NULL,
+                    filter_destination = NULL,
+                    multiway = TRUE, 
+                    data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
   stopifnot(is.logical(multiway))
+  
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
-  stopifnot(is.character(regressors), all(regressors %in% colnames(data)), length(regressors) > 1)
-  stopifnot(is.character(reference_countries) | all(reference_countries %in% colnames(data)) | length(reference_countries) == 2)
-
-  # Split input vectors -----------------------------------------------------
-  code_o <- codes[1]
-  code_d <- codes[2]
-
-  filter_o <- reference_countries[1]
-  filter_d <- reference_countries[2]
-
-  distance <- regressors[1]
-  additional_regressors <- regressors[-1]
-
+  
+  stopifnot(is.character(distance), distance %in% colnames(data), length(distance) == 1)
+  
+  if (!is.null(additional_regressors)) {
+    stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
+  }
+  
+  stopifnot(is.character(code_origin) | code_origin %in% colnames(data) | length(code_origin) == 1)
+  stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
+  
+  stopifnot(is.character(filter_origin) | filter_origin %in% data[, code_origin] | length(filter_origin) == 1)
+  stopifnot(is.character(filter_destination) | filter_destination %in% data[, code_destination] | length(filter_destination) == 1)
+  
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
     filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>%
@@ -215,31 +229,31 @@ tetrads <- function(dependent_variable, regressors, codes, reference_countries =
 
   # Truncating dataset to reference importer and exporter partners -------------
   d2_filter_d <- d %>%
-    filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) == filter_d)) %>%
-    select(!!sym(code_o)) %>%
+    filter_at(vars(!!sym(code_destination)), any_vars(!!sym(code_destination) == filter_destination)) %>%
+    select(!!sym(code_origin)) %>%
     distinct() %>%
     as_vector()
 
   d2 <- d %>%
-    filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) %in% d2_filter_d))
+    filter_at(vars(!!sym(code_origin)), any_vars(!!sym(code_origin) %in% d2_filter_d))
 
   d2_filter_o <- d2 %>%
-    filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) == filter_o)) %>%
-    select(!!sym(code_d)) %>%
+    filter_at(vars(!!sym(code_origin)), any_vars(!!sym(code_origin) == filter_origin)) %>%
+    select(!!sym(code_destination)) %>%
     distinct() %>%
     as_vector()
 
   d2 <- d2 %>%
-    filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) %in% d2_filter_o))
+    filter_at(vars(!!sym(code_destination)), any_vars(!!sym(code_destination) %in% d2_filter_o))
 
   # Taking ratios, ratk --------------------------------------------------------
   d2 <- left_join(
-    d2,
-    d2 %>%
-      filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) == filter_d)) %>%
-      select(!!sym("code_o"), y_log_tetrads_d = !!sym("y_log_tetrads"), dist_log_d = !!sym("dist_log")),
-    by = code_o
-  ) %>%
+      d2,
+      d2 %>%
+        filter_at(vars(!!sym(code_destination)), any_vars(!!sym(code_destination) == filter_destination)) %>%
+        select(!!sym(code_origin), y_log_tetrads_d = !!sym("y_log_tetrads"), dist_log_d = !!sym("dist_log")),
+      by = code_origin
+    ) %>%
     mutate(
       lXinratk = !!sym("y_log_tetrads") - !!sym("y_log_tetrads_d"),
       ldistratk = !!sym("dist_log") - !!sym("dist_log_d")
@@ -248,27 +262,27 @@ tetrads <- function(dependent_variable, regressors, codes, reference_countries =
 
   # Taking ratios, ratk, for the other independent variables -------------------
   d2 <- d2 %>%
-    select(c(!!sym("code_o"), !!sym("code_d"), regressors)) %>%
-    gather(!!sym("key"), !!sym("value"), -!!sym("code_o"), -!!sym("code_d")) %>%
+    select(c(!!sym(code_origin), !!sym(code_destination), !!sym(distance), !!!syms(additional_regressors))) %>%
+    gather(!!sym("key"), !!sym("value"), -!!sym(code_origin), -!!sym(code_destination)) %>%
     left_join(
       d2 %>%
-        filter_at(vars(!!sym(code_d)), any_vars(!!sym(code_d) == filter_d)) %>%
-        select(c(!!sym("code_o"), regressors)) %>%
-        gather(!!sym("key"), !!sym("value"), -!!sym("code_o")),
-      by = c(code_o, "key")
+        filter_at(vars(!!sym(code_destination)), any_vars(!!sym(code_destination) == filter_destination)) %>%
+        select(c(!!sym(code_origin), !!sym(distance), !!!syms(additional_regressors))) %>%
+        gather(!!sym("key"), !!sym("value"), -!!sym(code_origin)),
+      by = c(code_origin, "key")
     ) %>%
     mutate(value = !!sym("value.x") - !!sym("value.y")) %>%
-    select(c(!!sym("code_o"), !!sym("code_d"), "key", "value")) %>%
+    select(c(!!sym(code_origin), !!sym(code_destination), "key", "value")) %>%
     spread(!!sym("key"), !!sym("value")) %>%
-    left_join(d2 %>% select(-one_of(regressors)), by = c(code_o, code_d))
+    left_join(d2 %>% select(-one_of(distance, additional_regressors)), by = c(code_origin, code_destination))
 
   # Taking the ratio of ratios, rat --------------------------------------------
   d2 <- left_join(
     d2,
     d2 %>%
-      filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) == filter_o)) %>%
-      select(!!sym("code_d"), lXinratk_o = !!sym("lXinratk"), ldistratk_o = !!sym("ldistratk")),
-    by = code_d
+      filter_at(vars(!!sym(code_origin)), any_vars(!!sym(code_origin) == filter_origin)) %>%
+      select(!!sym(code_destination), lXinratk_o = !!sym("lXinratk"), ldistratk_o = !!sym("ldistratk")),
+    by = code_destination
   ) %>%
     mutate(
       y_log_rat = !!sym("lXinratk") - !!sym("lXinratk_o"),
@@ -278,46 +292,42 @@ tetrads <- function(dependent_variable, regressors, codes, reference_countries =
 
   # Taking the ratio of ratios, rat, for the other independent variables -------
   d2 <- d2 %>%
-    select(c(!!sym("code_o"), !!sym("code_d"), additional_regressors)) %>%
-    gather(!!sym("key"), !!sym("value"), -!!sym("code_o"), -!!sym("code_d")) %>%
+    select(c(!!sym(code_origin), !!sym(code_destination), !!sym(distance), !!!syms(additional_regressors))) %>%
+    gather(!!sym("key"), !!sym("value"), -!!sym(code_origin), -!!sym(code_destination)) %>%
     left_join(
       d2 %>%
-        filter_at(vars(!!sym(code_o)), any_vars(!!sym(code_o) == filter_o)) %>%
-        select(c(!!sym("code_d"), additional_regressors)) %>%
-        gather(!!sym("key"), !!sym("value"), -!!sym("code_d")),
-      by = c(code_d, "key")
+        filter_at(vars(!!sym(code_origin)), any_vars(!!sym(code_origin) == filter_origin)) %>%
+        select(c(!!sym(code_destination), additional_regressors)) %>%
+        gather(!!sym("key"), !!sym("value"), -!!sym(code_destination)),
+      by = c(code_destination, "key")
     ) %>%
     mutate(
       key = paste0(!!sym("key"), "_rat"),
       value = !!sym("value.x") - !!sym("value.y")
     ) %>%
-    select(c(!!sym("code_o"), !!sym("code_d"), "key", "value")) %>%
+    select(c(!!sym(code_origin), !!sym(code_destination), "key", "value")) %>%
     spread(!!sym("key"), !!sym("value")) %>%
-    left_join(d2 %>% select(-one_of(regressors)), by = c(code_o, code_d)) %>%
-    select(ends_with("_rat"), codes)
+    left_join(d2 %>% select(-one_of(distance, additional_regressors)), by = c(code_origin, code_destination)) %>%
+    select(ends_with("_rat"), !!sym(code_origin), !!sym(code_destination))
 
   # Model ----------------------------------------------------------------------
   additional_regressors <- paste0(additional_regressors, "_rat")
+  
   form <- stats::as.formula(
     sprintf("y_log_rat ~ dist_log_rat + %s", paste(additional_regressors, collapse = " + "))
   )
-  form2 <- as.formula(sprintf("~ %s + %s", code_o, code_d))
+  
+  form2 <- as.formula(sprintf("~ %s + %s", code_origin, code_destination))
+  
   model_tetrads <- stats::lm(form, data = d2)
-  model_tetrads_vcov <- multiwayvcov::cluster.vcov(model = model_tetrads, cluster = form2)
-  model_tetrads_robust <- lmtest::coeftest(x = model_tetrads, vcov = model_tetrads_vcov)
 
   # Return ---------------------------------------------------------------------
   if (multiway == TRUE) {
-    summary_ted <- robust_summary(model_tetrads, robust = TRUE)
-    summary_ted$coefficients <- model_tetrads_robust[1:length(rownames(model_tetrads_robust)), ]
-    return_object <- summary_ted
-    return_object$call <- form
-    return(return_object)
+    model_tetrads_vcov <- multiwayvcov::cluster.vcov(model = model_tetrads, cluster = form2)
+    model_tetrads_robust <- lmtest::coeftest(x = model_tetrads, vcov = model_tetrads_vcov)
+    model_tetrads$coefficients <- model_tetrads_robust[1:length(rownames(model_tetrads_robust)), ]
   }
 
-  if (multiway == FALSE) {
-    return_object <- robust_summary(model_tetrads, robust = FALSE)
-    return_object$call <- form
-    return(return_object)
-  }
+  model_tetrads$call <- form
+  return(model_tetrads)
 }

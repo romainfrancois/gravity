@@ -4,39 +4,15 @@
 \alias{tetrads}
 \title{Tetrads}
 \usage{
-tetrads(dependent_variable, regressors, codes,
-  reference_countries = c("JPN", "USA"), multiway = TRUE, data, ...)
+tetrads(dependent_variable, distance, additional_regressors, code_origin,
+  code_destination, filter_origin = NULL, filter_destination = NULL,
+  multiway = TRUE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{name (type: character) of the dependent variable in the dataset
 \code{data} (e.g. trade flows).
 
 This variable is logged and then used as the dependent variable in the estimation.}
-
-\item{regressors}{name (type: character) of the regressors to include in the model.
-
-Include the distance variable in the dataset \code{data} containing a measure of
-distance between all pairs of bilateral partners and bilateral variables that should
-be taken as the independent variables in the estimation.
-
-The distance is logged automatically when the function is executed.
-
-Unilateral effects drop as the ratio of ratios is taken.
-
-Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
-
-\item{codes}{variable name (type: character) of the code of the country
-of origin and destination (e.g. ISO-3 codes from the variables \code{iso_o} and \code{iso_d}) in the
-example datasets).
-
-The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
-
-Write this argument as \code{c(code origin, code destination)}.}
-
-\item{reference_countries}{reference exporting and importing country, default is set to
-\code{c("JPN", "USA")}
-
-Write this argument as \code{c(importing country, exporting country)}.}
 
 \item{multiway}{(type: logic) In case \code{multiway = TRUE}, the
 \code{\link[multiwayvcov]{cluster.vcov}} function is used for estimation following
@@ -75,6 +51,31 @@ The function will remove zero flows and distances.}
 
 \item{...}{additional arguments to be passed to functions used by
 \code{tetrads}.}
+
+\item{regressors}{name (type: character) of the regressors to include in the model.
+
+Include the distance variable in the dataset \code{data} containing a measure of
+distance between all pairs of bilateral partners and bilateral variables that should
+be taken as the independent variables in the estimation.
+
+The distance is logged automatically when the function is executed.
+
+Unilateral effects drop as the ratio of ratios is taken.
+
+Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
+
+\item{codes}{variable name (type: character) of the code of the country
+of origin and destination (e.g. ISO-3 codes from the variables \code{iso_o} and \code{iso_d}) in the
+example datasets).
+
+The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.
+
+Write this argument as \code{c(code origin, code destination)}.}
+
+\item{reference_countries}{reference exporting and importing country, default is set to
+\code{c("JPN", "USA")}
+
+Write this argument as \code{c(importing country, exporting country)}.}
 }
 \value{
 The function returns the summary of the estimated gravity model as an
@@ -139,12 +140,17 @@ data(gravity_no_zeros)
 # choose exemplarily 10 biggest countries for check data
 countries_chosen <- names(sort(table(gravity_no_zeros$iso_o), decreasing = TRUE)[1:10])
 grav_small <- gravity_no_zeros[gravity_no_zeros$iso_o \%in\% countries_chosen,]
-tetrads(dependent_variable ="flow",
-regressors = c("distw", "rta"),
-codes = c("iso_o", "iso_d"),
-reference_countries = c(countries_chosen[1], countries_chosen[2]),
-multiway = FALSE,
-data = grav_small)
+tetrads(
+ dependent_variable ="flow",
+ distance = "distw",
+ additional_regressors = "rta",
+ code_origin = "iso_o",
+ code_destination = "iso_d",
+ filter_origin = countries_chosen[1],
+ filter_destination = countries_chosen[2],
+ multiway = FALSE,
+ data = grav_small
+)
 }
 
 }
