@@ -31,16 +31,12 @@
 #' cross-sectional data. Its up to the user to ensure that the functions can be applied
 #' to panel data.
 #'
-#' Depending on the panel dataset and the variables -
-#' specifically the type of fixed effects -
-#' included in the model, it may easily occur that the model is not computable.
-#'
 #' Also, note that by including bilateral fixed effects such as country-pair
 #' effects, the coefficients of time-invariant observables such as distance
 #' can no longer be estimated.
 #'
 #' Depending on the specific model, the code of the
-#' respective function may has to be changed in order to exclude the distance
+#' respective function might have to be changed in order to exclude the distance
 #' variable from the estimation.
 #'
 #' At the very least, the user should take special
@@ -61,8 +57,8 @@
 #' in the estimation. The distance is logged automatically when the function is executed.
 #'
 #' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
-#' variable to indicate contiguity). Unilateral metric variables such as GDP should be inserted via the arguments 
-#' \code{income_origin} and \code{income_destination}.
+#' variable to indicate contiguity). Unilateral metric variables such as GDPs can be added but those variables have to be 
+#' logged first.
 #'
 #' Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.
 #'
