@@ -29,7 +29,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.8</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.9</span>
       </span>
     </div>
 
@@ -75,7 +75,7 @@
       <h1>A crash course on gravity models</h1>
                         <h4 class="author">Mauricio Vargas</h4>
             
-            <h4 class="date">2018-10-11</h4>
+            <h4 class="date">2018-10-12</h4>
       
       
       <div class="hidden name"><code>crash-course-on-gravity-models.Rmd</code></div>
@@ -84,13 +84,24 @@
 
     
     
-<p>To estimate gravity equations you need a square dataset including bilateral flows defined by the argument , ISO codes or similar of type character (e.g.  for the country of origin and  for the destination country), a distance measure defined by the argument  and other potential influences (e.g. contiguity and common currency) given as a vector in  are required.</p>
-<p>All dummy variables should be of type numeric (0/1). Make sure the origin and destination codes are of type “character”. If an independent variable is defined as a ratio, it should be logged. The user should perform some data cleaning beforehand to remove observations that contain entries that can distort estimates. The functions will remove zero flows and distances.</p>
-<p>containing a measure of distance between all pairs of bilateral partners and bilateral variables that should be taken as the independent variables in the estimation.</p>
-<p>For estimating gravity equations via Bonus Vetus OLS see</p>
-
-
+<div id="introduction" class="section level2">
+<h2 class="hasAnchor">
+<a href="#introduction" class="anchor"></a>Introduction</h2>
+<p>To estimate gravity equations you need a square dataset including bilateral flows defined by the argument , a distance measure defined by the argument  that is the key regressor, and other potential influences (e.g. contiguity and common currency) given as a vector in  are required.</p>
+<p>Some estimation methods require ISO codes or similar of type character variables to compute particular country effects. Make sure the origin and destination codes are of type “character”.</p>
+<p>The rule of thumb for regressors or independent variables consists in:</p>
+<ul>
+<li>All dummy variables should be of type numeric (0/1).</li>
+<li>If an independent variable is defined as a ratio, it should be logged.</li>
+</ul>
+<p>The user should perform some data cleaning beforehand to remove observations that contain entries that can distort estimates, notwithstanding the functions provided within this package will remove zero flows and distances.</p>
+<p>See  for gravity datasets and Stata code for estimating gravity models.</p>
+</div>
+<div id="references" class="section level2">
+<h2 class="hasAnchor">
+<a href="#references" class="anchor"></a>References</h2>
 <p>For more information on gravity models, theoretical foundations and estimation methods in general see</p>
+
 
 
 
@@ -101,9 +112,10 @@
 
 <p>and the citations therein.</p>
 <p>See  for gravity datasets and Stata code for estimating gravity models.</p>
-<div id="references" class="section level2">
-<h2 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h2>
+<p>For estimating gravity equations using panel data see</p>
+
+
+<p>and the references therein.</p>
 </div>
   </div>
 
@@ -112,7 +124,8 @@
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#references">References</a></li>
+<li><a href="#introduction">Introduction</a></li>
+      <li><a href="#references">References</a></li>
       </ul>
 </div>
       </div>

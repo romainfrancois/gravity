@@ -64,14 +64,41 @@
 #'
 #' @param data (Type: data.frame) the dataset to be used.
 #'
-#' @param ... Additional arguments to be passed to \code{bvw}.
+#' @param ... Additional arguments to be passed to the function.
 #' 
-#' @references 
-#' \insertRef{Eaton1995}{gravity}
+#' @references
+#' For more information on gravity models, theoretical foundations and
+#' estimation methods in general see
+#'
+#' \insertRef{Anderson1979}{gravity}
+#'
+#' \insertRef{Anderson2001}{gravity}
+#'
+#' \insertRef{Anderson2010}{gravity}
+#'
+#' \insertRef{Baier2009}{gravity}
+#'
+#' \insertRef{Baier2010}{gravity}
 #' 
-#' \insertRef{Eaton2001}{gravity}
-#' 
-#' \insertRef{Carson2007}{gravity}
+#' \insertRef{Feenstra2002}{gravity}
+#'
+#' \insertRef{Head2010}{gravity}
+#'
+#' \insertRef{Head2014}{gravity}
+#'
+#' \insertRef{Santos2006}{gravity}
+#'
+#' and the citations therein.
+#'
+#' See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
+#'
+#' For estimating gravity equations using panel data see
+#'
+#' \insertRef{Egger2003}{gravity}
+#'
+#' \insertRef{Gomez-Herrera2013}{gravity}
+#'
+#' and the references therein.
 #'
 #' @examples
 #' # Example for CRAN checks:

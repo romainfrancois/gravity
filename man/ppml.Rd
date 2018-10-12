@@ -8,53 +8,23 @@ ppml(dependent_variable, distance, additional_regressors, robust = TRUE,
   data, ...)
 }
 \arguments{
-\item{dependent_variable}{name (type: character) of the dependent variable in the dataset
-\code{data} (e.g. trade flows)}
+\item{dependent_variable}{(Type: character) name of the dependent variable. This variable is logged and then used as 
+the dependent variable in the estimation.}
 
-\item{distance}{(Type: character) name of the distance variable in the dataset \code{data} containing a measure of
-distance between all pairs of bilateral partners and bilateral variables that should
-be taken as the independent variables in the estimation.
-
-The distance is logged automatically when the function is executed.}
+\item{distance}{(Type: character) name of the distance variable that should be taken as the key independent variable 
+in the estimation. The distance is logged automatically when the function is executed.}
 
 \item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy
-variable to indicate contiguity).
+variable to indicate contiguity). Unilateral metric variables such as GDPs can be added but those variables have to be 
+logged first. Interaction terms can be added.
 
-Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
+Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.}
 
-Interaction terms can be added.
+\item{robust}{(Type: logical) whether robust fitting should be used. By default this is set to \code{FALSE}.}
 
-Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
+\item{data}{(Type: data.frame) the dataset to be used.}
 
-\item{robust}{robust (type: logical) determines whether a robust
-variance-covariance matrix should be used. By default is set to \code{TRUE}.
-
-If \code{robust = TRUE} the estimation results are consistent with the
-Stata code provided at \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
-when choosing robust estimation.}
-
-\item{data}{name of the dataset to be used (type: character).
-
-To estimate gravity equations you need a square dataset including bilateral
-flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
-(e.g. \code{iso_o} for the country of origin and \code{iso_d} for the
-destination country), a distance measure defined by the argument \code{distance}
-and other potential influences (e.g. contiguity and common currency) given as a vector in
-\code{regressors} are required.
-
-All dummy variables should be of type numeric (0/1).
-
-Make sure the ISO codes are of type "character".
-
-If an independent variable is defined as a ratio, it should be logged.
-
-The user should perform some data cleaning beforehand to remove observations that contain entries that
-can distort estimates.
-
-The function allows zero flows but will remove zero distances.}
-
-\item{...}{additional arguments to be passed to functions used by
-\code{ppml}.}
+\item{...}{Additional arguments to be passed to the function.}
 }
 \value{
 The function returns the summary of the estimated gravity model as an
@@ -66,10 +36,8 @@ multiplicative form via Poisson Pseudo Maximum Likelihood.
 }
 \details{
 \code{ppml} is an estimation method for gravity models
-belonging to generalized linear models.
-
-It is estimated via \code{\link[stats]{glm}} using the quasipoisson distribution and a log-link.
-\code{ppml} is presented in \insertCite{Santos2006;textual}{gravity}.
+belonging to generalized linear models. It is estimated via \code{\link[stats]{glm}} using the quasipoisson 
+distribution and a log-link. \code{ppml} is presented in \insertCite{Santos2006;textual}{gravity}.
 
 For similar functions, utilizing the multiplicative form via the log-link,
 but different distributions, see \code{\link[gravity]{gpml}}, \code{\link[gravity]{nls}},
@@ -80,9 +48,7 @@ panel data. The function is designed to be consistent with the
 results from the Stata function \code{ppml} written by \insertCite{Santos2006;textual}{gravity}.
 
 The function \code{ols} was therefore tested for cross-sectional data. For the use with panel data
-no tests were performed.
-
-Therefore, it is up to the user to ensure that the functions can be applied
+no tests were performed. Therefore, it is up to the user to ensure that the functions can be applied
 to panel data.
 
 Depending on the panel dataset and the variables -
@@ -138,6 +104,8 @@ estimation methods in general see
 \insertRef{Baier2009}{gravity}
 
 \insertRef{Baier2010}{gravity}
+
+\insertRef{Feenstra2002}{gravity}
 
 \insertRef{Head2010}{gravity}
 

@@ -10,85 +10,45 @@ sils(dependent_variable, distance, additional_regressors = NULL,
   verbose = FALSE, data, ...)
 }
 \arguments{
-\item{dependent_variable}{name (type: character) of the dependent variable in the dataset
-\code{data} (e.g. trade flows).
+\item{dependent_variable}{(Type: character) name of the dependent variable. This dependent variable is 
+divided by the product of unilateral incomes such (i.e. \code{income_origin} and \code{income_destination}) 
+and logged afterwards.}
 
-This dependent variable is divided by the
-product of unilateral incomes (e.g.
-GDPs or GNPs of the countries of interest, named \code{inc_o} and \code{inc_d} in the example datasets)
-and logged afterwards.
-
-The transformed variable is then used as the dependent variable in the
-estimation.}
-
-\item{distance}{(Type: character) name of the distance variable in the dataset \code{data} containing a measure of
-distance between all pairs of bilateral partners and bilateral variables that should
-be taken as the independent variables in the estimation.
-
-The distance is logged automatically when the function is executed.}
+\item{distance}{(Type: character) name of the distance variable that should be taken as the key independent variable 
+in the estimation. The distance is logged automatically when the function is executed.}
 
 \item{additional_regressors}{(Type: character) names of the additional regressors to include in the model (e.g. a dummy
-variable to indicate contiguity).
+variable to indicate contiguity). Unilateral metric variables such as GDP should be inserted via the arguments 
+\code{income_origin} and \code{income_destination}. As country specific effects are subdued due to demeaning, no further unilateral variables apart from incomes can be added.
 
-Unilateral metric variables such as GDPs should be inserted via the argument \code{incomes}.
+Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.}
 
-As country specific effects are subdued due to demeaning, no further unilateral variables
-apart from unilateral incomes can be added.
+\item{income_origin}{(Type: character) origin income variable (e.g. GDP) in the dataset.}
 
-Write this argument as \code{c(distance, contiguity, common curreny, ...)}.}
+\item{income_destination}{(Type: character) destination income variable (e.g. GDP) in the dataset.}
 
-\item{income_origin}{(Type: character) variable name of the income of the country of
-origin (e.g. \code{inc_o}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is
-divided by the product of the incomes.}
+\item{code_origin}{(Type: character) country of origin variable (e.g. ISO-3 country codes). The variables are grouped 
+using this parameter.}
 
-\item{income_destination}{(Type: character) variable name of the income of the country of
-destination (e.g. \code{inc_d}) in the dataset \code{data}. The dependent variable \code{dependent_variable} is
-divided by the product of the incomes.}
+\item{code_destination}{(Type: character) country of destination variable (e.g. country ISO-3 codes). The variables are 
+grouped using this parameter.}
 
-\item{code_origin}{(Type: character) variable name of the code of the country
-of origin (e.g. ISO-3 codes from the variables \code{iso_o} in the
-example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.}
-
-\item{code_destination}{(Type: character) variable name of the code of the country
-of destination (e.g. ISO-3 codes from the variables \code{iso_d}) in the
-example datasets). The variables are grouped by using \code{iso_o} and \code{iso_d} to obtain estimates.}
-
-\item{maxloop}{maximum number of outer loop iterations.
+\item{maxloop}{(Type: numeric) maximum number of outer loop iterations.
 The default is set to 100. There will be a warning if the iterations
 did not converge.}
 
-\item{decimal_places}{number of decimal places that should not change after a new
+\item{decimal_places}{(Type: numeric) number of decimal places that should not change after a new
 iteration for the estimation to stop. The default is set to 4.}
 
-\item{robust}{robust (type: logic) determines whether a robust
-variance-covariance matrix should be used. The default is set to \code{FALSE}.}
+\item{robust}{(Type: logical) whether robust fitting should be used. By default this is set to \code{FALSE}.}
 
-\item{verbose}{(type: logic) determines whether the estimated coefficients
+\item{verbose}{(Type: logical) determines whether the estimated coefficients
 of each iteration should be printed in the console. The default is set
 to \code{FALSE}.}
 
-\item{data}{name of the dataset to be used (type: character).
+\item{data}{(Type: data.frame) the dataset to be used.}
 
-To estimate gravity equations you need a square dataset including bilateral
-flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
-(e.g. \code{iso_o} for the country of origin and \code{iso_d} for the
-destination country), a distance measure defined by the argument \code{distance}
-and other potential influences (e.g. contiguity and common currency) given as a vector in
-\code{regressors} are required.
-
-All dummy variables should be of type numeric (0/1).
-
-Make sure the ISO codes are of type "character".
-
-If an independent variable is defined as a ratio, it should be logged.
-
-The user should perform some data cleaning beforehand to remove observations that contain entries that
-can distort estimates.
-
-The function will remove zero flows and distances.}
-
-\item{...}{additional arguments to be passed to functions used by
-\code{sils}.}
+\item{...}{Additional arguments to be passed to the function.}
 }
 \value{
 The function returns the summary of the estimated gravity model as an
@@ -115,7 +75,7 @@ when choosing robust estimation.
 
 As, to our knowledge at the moment, there is no explicit literature covering
 the estimation of a gravity equation by \code{sils} using panel data,
-we do not recommend to apply this method in this case.
+and we do not recommend to apply this method in this case.
 }
 \examples{
 # Example for CRAN checks:
@@ -144,17 +104,12 @@ fit <- sils(
 
 }
 \references{
-For information on \code{sils} as well as more information on gravity
-models, theoretical foundations and suitable estimation methods in general see
-
-\insertRef{Head2014}{gravity}
-
-\insertRef{Anderson2001}{gravity}
-
 For more information on gravity models, theoretical foundations and
 estimation methods in general see
 
 \insertRef{Anderson1979}{gravity}
+
+\insertRef{Anderson2001}{gravity}
 
 \insertRef{Anderson2010}{gravity}
 
@@ -162,13 +117,25 @@ estimation methods in general see
 
 \insertRef{Baier2010}{gravity}
 
+\insertRef{Feenstra2002}{gravity}
+
 \insertRef{Head2010}{gravity}
+
+\insertRef{Head2014}{gravity}
 
 \insertRef{Santos2006}{gravity}
 
 and the citations therein.
 
 See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
+
+For estimating gravity equations using panel data see
+
+\insertRef{Egger2003}{gravity}
+
+\insertRef{Gomez-Herrera2013}{gravity}
+
+and the references therein.
 }
 \seealso{
 \code{\link[stats]{lm}}, \code{\link[lmtest]{coeftest}},

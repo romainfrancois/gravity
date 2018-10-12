@@ -14,29 +14,24 @@ vignette: >
 knitr::opts_chunk$set(eval = FALSE)
 ```
 
-To estimate gravity equations you need a square dataset including bilateral
-flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
-(e.g. \code{iso_o} for the country of origin and \code{iso_d} for the
-destination country), a distance measure defined by the argument \code{distance}
-and other potential influences (e.g. contiguity and common currency) given as a vector in
-\code{regressors} are required.
+## Introduction
 
-All dummy variables should be of type numeric (0/1).
-Make sure the origin and destination codes are of type "character".
-If an independent variable is defined as a ratio, it should be logged.
+To estimate gravity equations you need a square dataset including bilateral flows defined by the argument \code{dependent_variable}, a distance measure defined by the argument \code{distance} that is the key regressor, and other potential influences (e.g. contiguity and common currency) given as a vector in \code{additional_regressors} are required.
+
+Some estimation methods require ISO codes or similar of type character variables to compute particular country effects. Make sure the origin and destination codes are of type "character".
+
+The rule of thumb for regressors or independent variables consists in:
+
+* All dummy variables should be of type numeric (0/1). 
+* If an independent variable is defined as a ratio, it should be logged.
+
 The user should perform some data cleaning beforehand to remove observations that contain entries that
-can distort estimates.
-The functions will remove zero flows and distances.
+can distort estimates, notwithstanding the functions provided within this package will remove zero flows and distances.
 
-containing a measure of
-distance between all pairs of bilateral partners and bilateral variables that should
-be taken as the independent variables in the estimation.
+See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
+for gravity datasets and Stata code for estimating gravity models.
 
-For estimating gravity equations via Bonus Vetus OLS see
-
-\insertRef{Baier2009}{gravity}
-
-\insertRef{Baier2010}{gravity}
+## References
 
 For more information on gravity models, theoretical foundations and
 estimation methods in general see
@@ -51,6 +46,8 @@ estimation methods in general see
 
 \insertRef{Baier2010}{gravity}
 
+\insertRef{Feenstra2002}{gravity}
+
 \insertRef{Head2010}{gravity}
 
 \insertRef{Head2014}{gravity}
@@ -59,7 +56,12 @@ estimation methods in general see
 
 and the citations therein.
 
-See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
-for gravity datasets and Stata code for estimating gravity models.
+See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
 
-## References
+For estimating gravity equations using panel data see
+
+\insertRef{Egger2003}{gravity}
+
+\insertRef{Gomez-Herrera2013}{gravity}
+
+and the references therein.

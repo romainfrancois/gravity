@@ -24,7 +24,7 @@ Write this argument as \code{c(contiguity, common currency, ...)}. By default th
 
 \item{data}{(Type: data.frame) the dataset to be used.}
 
-\item{...}{Additional arguments to be passed to \code{bvw}.}
+\item{...}{Additional arguments to be passed to the function.}
 }
 \value{
 The function returns the summary of the estimated gravity model as a
@@ -106,11 +106,38 @@ fit <- et_tobit(
 
 }
 \references{
-\insertRef{Eaton1995}{gravity}
+For more information on gravity models, theoretical foundations and
+estimation methods in general see
 
-\insertRef{Eaton2001}{gravity}
+\insertRef{Anderson1979}{gravity}
 
-\insertRef{Carson2007}{gravity}
+\insertRef{Anderson2001}{gravity}
+
+\insertRef{Anderson2010}{gravity}
+
+\insertRef{Baier2009}{gravity}
+
+\insertRef{Baier2010}{gravity}
+
+\insertRef{Feenstra2002}{gravity}
+
+\insertRef{Head2010}{gravity}
+
+\insertRef{Head2014}{gravity}
+
+\insertRef{Santos2006}{gravity}
+
+and the citations therein.
+
+See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
+
+For estimating gravity equations using panel data see
+
+\insertRef{Egger2003}{gravity}
+
+\insertRef{Gomez-Herrera2013}{gravity}
+
+and the references therein.
 }
 \seealso{
 \code{\link[censReg]{censReg}}, \code{\link[gravity]{et_tobit}}

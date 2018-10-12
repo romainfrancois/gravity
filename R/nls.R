@@ -4,9 +4,8 @@
 #' multiplicative form via Nonlinear Least Squares.
 #'
 #' @details \code{nls} is an estimation method for gravity models
-#' belonging to generalized linear models.
-#'
-#' It is estimated via \code{\link[stats]{glm}} using the gaussian distribution and a log-link.
+#' belonging to generalized linear models. It is estimated via \code{\link[stats]{glm}} using the gaussian 
+#' distribution and a log-link.
 #'
 #' As the method may not lead to convergence when poor
 #' starting values are used, the linear predictions, fitted values,
@@ -19,9 +18,7 @@
 #' and \code{\link[gravity]{nbpml}}.
 #'
 #' \code{nls} estimation can be used for both, cross-sectional as well as
-#' panel data.
-#'
-#' It is up to the user to ensure that the functions can be applied
+#' panel data, but its up to the user to ensure that the functions can be applied
 #' to panel data.
 #'
 #' Depending on the panel dataset and the variables -
@@ -46,53 +43,23 @@
 #' see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textual}{gravity} and
 #' \insertCite{Head2010;textual}{gravity} as well as the references therein.
 #'
-#' @param dependent_variable name (type: character) of the dependent variable in the dataset
-#' \code{data} (e.g. trade flows).
+#' @param dependent_variable (Type: character) name of the dependent variable. This variable is logged and then used as 
+#' the dependent variable in the estimation.
 #'
-#' @param distance (Type: character) name of the distance variable in the dataset \code{data} containing a measure of
-#' distance between all pairs of bilateral partners and bilateral variables that should
-#' be taken as the independent variables in the estimation.
-#'
-#' The distance is logged automatically when the function is executed.
+#' @param distance (Type: character) name of the distance variable that should be taken as the key independent variable 
+#' in the estimation. The distance is logged automatically when the function is executed.
 #'
 #' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
-#' variable to indicate contiguity).
+#' variable to indicate contiguity). Unilateral metric variables such as GDPs can be added but those variables have to be 
+#' logged first. Interaction terms can be added.
+#' 
+#' Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.
 #'
-#' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
+#' @param robust (Type: logical) whether robust fitting should be used. By default this is set to \code{FALSE}.
 #'
-#' Interaction terms can be added.
+#' @param data (Type: data.frame) the dataset to be used.
 #'
-#' Write this argument as \code{c(distance, contiguity, common curreny, ...)}.
-#'
-#' @param robust robust (type: logical) determines whether a robust
-#' variance-covariance matrix should be used. By default is set to \code{FALSE}.
-#'
-#' @param data name of the dataset to be used (type: character).
-#'
-#' To estimate gravity equations you need a square dataset including bilateral
-#' flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
-#' (e.g. \code{iso_o} for the country of origin and \code{iso_d} for the
-#' destination country), a distance measure defined by the argument \code{distance}
-#' and other potential influences (e.g. contiguity and common currency) given as a vector in
-#' \code{regressors} are required.
-#'
-#' All dummy variables should be of type numeric (0/1).
-#'
-#' Make sure the ISO codes are of type "character".
-#'
-#' If an independent variable is defined as a ratio, it should be logged.
-#'
-#' The user should perform some data cleaning beforehand to remove observations that contain entries that
-#' can distort estimates.
-#'
-#' When using panel data, a variable for the time may be included in the
-#' dataset. Note that the variable for the time dimension should be of
-#' type factor.
-#'
-#' The function allows zero flows but will remove zero distances.
-#'
-#' @param ... additional arguments to be passed to functions used by
-#' \code{nls}.
+#' @param ... Additional arguments to be passed to the function.
 #'
 #' @references
 #' For more information on gravity models, theoretical foundations and
@@ -107,6 +74,8 @@
 #' \insertRef{Baier2009}{gravity}
 #'
 #' \insertRef{Baier2010}{gravity}
+#' 
+#' \insertRef{Feenstra2002}{gravity}
 #'
 #' \insertRef{Head2010}{gravity}
 #'

@@ -35,7 +35,7 @@
 #'
 #' For a comprehensive overview of gravity models for panel data
 #' see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textual}{gravity} and
-#' \insertCite{Head2010;textual}{gravity} as well as the references therein.
+#' \insertCite{Head2010;textual}{gravity}.
 #'
 #' @param dependent_variable (Type: character) name of the dependent variable. This variable is logged and then used as 
 #' the dependent variable in the estimation.
@@ -47,22 +47,47 @@
 #' variable to indicate contiguity). Unilateral metric variables such as GDPs can be added but those variables have to be 
 #' logged first. Interaction terms can be added.
 #'
-#' Write this argument as \code{c(distance, contiguity, common currency, ...)}.
+#' Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.
 #'
 #' @param robust (Type: logical) whether robust fitting should be used. By default this is set to \code{FALSE}.
 #'
 #' @param data (Type: data.frame) the dataset to be used.
 #'
-#' @param ... Additional arguments to be passed to \code{bvw}.
+#' @param ... Additional arguments to be passed to the function.
 #'
 #' @references
-#' \insertRef{Egger2003}{gravity}
+#' For more information on gravity models, theoretical foundations and
+#' estimation methods in general see
+#'
+#' \insertRef{Anderson1979}{gravity}
+#'
+#' \insertRef{Anderson2001}{gravity}
+#'
+#' \insertRef{Anderson2010}{gravity}
+#'
+#' \insertRef{Baier2009}{gravity}
+#'
+#' \insertRef{Baier2010}{gravity}
 #' 
-#' \insertRef{Gomez-Herrera2013}{gravity}
-#' 
+#' \insertRef{Feenstra2002}{gravity}
+#'
 #' \insertRef{Head2010}{gravity}
-#' 
+#'
+#' \insertRef{Head2014}{gravity}
+#'
 #' \insertRef{Santos2006}{gravity}
+#'
+#' and the citations therein.
+#'
+#' See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
+#'
+#' For estimating gravity equations using panel data see
+#'
+#' \insertRef{Egger2003}{gravity}
+#'
+#' \insertRef{Gomez-Herrera2013}{gravity}
+#'
+#' and the references therein.
 #'
 #' @examples
 #' # Example for CRAN checks:

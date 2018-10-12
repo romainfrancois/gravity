@@ -76,8 +76,8 @@ Egger, Peter, and Michael Pfaffermayr. 2003. “The Proper Panel Econometric Spe
 
 Gómez-Herrera, Estrella. 2013. “Comparing Alternative Methods to Estimate Gravity Models of Bilateral Trade.” *Empirical Economics* 44 (3): 1087–1111. doi:[10.1007/s00181-012-0576-2](https://doi.org/10.1007/s00181-012-0576-2).
 
-Head, Keith, and Thierry Mayer. 2014. “Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.” In *Handbook of International Economics*, edited by Gita Gopinath, Elhanan Helpman, and Kenneth Rogoff, 4:131–95. Handbook of International Economics. Elsevier. doi:[https://doi.org/10.1016/B978-0-444-54314-1.00003-3](https://doi.org/https://doi.org/10.1016/B978-0-444-54314-1.00003-3).
+Head, Keith, and Thierry Mayer. 2014. “Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.” In *Handbook of International Economics*, edited by Gita Gopinath, Elhanan Helpman, and Kenneth Rogoff, 4:131–95. Handbook of International Economics. Elsevier. doi:[10.1016/B978-0-444-54314-1.00003-3](https://doi.org/10.1016/B978-0-444-54314-1.00003-3).
 
-Head, Keith, Thierry Mayer, and John Ries. 2010. “The Erosion of Colonial Trade Linkages After Independence.” *Journal of International Economics* 81 (1): 1–14. doi:[https://doi.org/10.1016/j.jinteco.2010.01.002](https://doi.org/https://doi.org/10.1016/j.jinteco.2010.01.002).
+Head, Keith, Thierry Mayer, and John Ries. 2010. “The Erosion of Colonial Trade Linkages After Independence.” *Journal of International Economics* 81 (1): 1–14. doi:[10.1016/j.jinteco.2010.01.002](https://doi.org/10.1016/j.jinteco.2010.01.002).
 
-Wölwer, Anna-Lena, Martin Breßlein, and Jan Pablo Burgard. 2018. “Gravity Models in R.” *Austrian Journal of Statistics* 47 (4): 16–35. doi:[https://doi.org/10.17713/ajs.v47i4.688](https://doi.org/https://doi.org/10.17713/ajs.v47i4.688).
+Wölwer, Anna-Lena, Martin Breßlein, and Jan Pablo Burgard. 2018. “Gravity Models in R.” *Austrian Journal of Statistics* 47 (4): 16–35. doi:[10.17713/ajs.v47i4.688](https://doi.org/10.17713/ajs.v47i4.688).

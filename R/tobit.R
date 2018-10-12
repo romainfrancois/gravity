@@ -46,61 +46,30 @@
 #' bound equal to the minimum positive trade level of the respective
 #' importing country.
 #'
-#' @param dependent_variable name (type: character) of the dependent variable in the dataset
-#' \code{data} (e.g. trade flows).
-#'
-#' The number \code{1} is added and the transformed variable is logged and
-#' taken as the dependent variable in the tobit estimation with lower bound
+#' @param dependent_variable (Type: character) name of the dependent variable. The number \code{1} is added and the 
+#' transformed variable is logged and taken as the dependent variable in the tobit estimation with lower bound
 #' equal to \code{0} as \code{log(1) = 0} represents the smallest flows
 #' in the transformed variable.
 #'
-#' @param distance (Type: character) name of the distance variable in the dataset \code{data} containing a measure of
-#' distance between all pairs of bilateral partners and bilateral variables that should
-#' be taken as the independent variables in the estimation.
-#'
-#' The distance is logged automatically when the function is executed.
+#' @param distance (Type: character) name of the distance variable that should be taken as the key independent variable 
+#' in the estimation. The distance is logged automatically when the function is executed.
 #'
 #' @param additional_regressors (Type: character) names of the additional regressors to include in the model (e.g. a dummy
-#' variable to indicate contiguity).
+#' variable to indicate contiguity). Unilateral metric variables such as GDP should be inserted via the arguments 
+#' \code{income_origin} and \code{income_destination}.
 #'
-#' Unilateral metric variables such as GDPs can be added but those variables have to be logged first.
+#' Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.
 #'
-#' Interaction terms can be added.
-#'
-#' Write this argument as \code{c(distance, contiguity, common curreny, ...)}.
-#'
-#' @param added_constant scalar (type: numeric); represents
-#' the constant to be added to the dependent variable. The default value
-#' is \code{1}.
-#'
-#' The minimum of \code{log(y + added_constant)} is taken as the
+#' @param added_constant (Type: numeric) the constant to be added to the dependent variable. The default value
+#' is \code{1}. The minimum of \code{log(y + added_constant)} is taken as the
 #' left boundary in the Tobit model.
 #'
-#' In the often used case of \code{added_constant = 1}, the
-#' dependent variable is left-censored at value \code{0}
+#' In the often used case of \code{added_constant = 1}, the dependent variable is left-censored at value \code{0}
 #' as \code{log(1) = 0}.
 #'
-#' @param data name of the dataset to be used (type: character).
+#' @param data (Type: data.frame) the dataset to be used.
 #'
-#' To estimate gravity equations you need a square dataset including bilateral
-#' flows defined by the argument \code{dependent_variable}, ISO codes or similar of type character
-#' (e.g. \code{iso_o} for the country of origin and \code{iso_d} for the
-#' destination country), a distance measure defined by the argument \code{distance}
-#' and other potential influences (e.g. contiguity and common currency) given as a vector in
-#' \code{regressors} are required.
-#'
-#' All dummy variables should be of type numeric (0/1).
-#'
-#' Make sure the ISO codes are of type "character".
-#'
-#' If an independent variable is defined as a ratio, it should be logged.
-#'
-#' The user should perform some data cleaning beforehand to remove observations that contain entries that
-#' can distort estimates.
-#'
-#' The function allows zero flows but will remove zero distances.
-#'
-#' @param ... additional arguments to be passed to \code{tobit}.
+#' @param ... Additional arguments to be passed to the function.
 #'
 #' @references
 #' For more information on gravity models, theoretical foundations and
@@ -115,24 +84,26 @@
 #' \insertRef{Baier2009}{gravity}
 #'
 #' \insertRef{Baier2010}{gravity}
+#' 
+#' \insertRef{Feenstra2002}{gravity}
 #'
 #' \insertRef{Head2010}{gravity}
+#'
+#' \insertRef{Head2014}{gravity}
 #'
 #' \insertRef{Santos2006}{gravity}
 #'
 #' and the citations therein.
 #'
-#' Especially for Tobit models see
-#'
-#' \insertRef{Tobin1958}{gravity}
-#'
-#' \insertRef{Eaton1995}{gravity}
-#'
-#' \insertRef{Eaton2001}{gravity}
-#'
-#' \insertRef{Carson2007}{gravity}
-#'
 #' See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook} for gravity datasets and Stata code for estimating gravity models.
+#'
+#' For estimating gravity equations using panel data see
+#'
+#' \insertRef{Egger2003}{gravity}
+#'
+#' \insertRef{Gomez-Herrera2013}{gravity}
+#'
+#' and the references therein.
 #'
 #' @examples
 #' # Example for CRAN checks:

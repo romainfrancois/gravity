@@ -1,9 +1,9 @@
-#' @title Stata-consistent summary statistics
+#' @title Head and Mayer consistent summary statistics
 #'
-#' @description Summary of estimates written to be consistent with Stata methods.
-#' Adapted after a function written by Isidore Beautrelet
-#' \url{https://raw.githubusercontent.com/IsidoreBeautrelet/economictheoryblog/master/robust_summary.R}
-#'
+#' @description Summary of estimates function that, if is used with default options, provides estimation results are 
+#' consistent with the Stata methods used in \insertCite{Head2014;textual}{gravity}. This function is adapted from the work of 
+#' \href{https://github.com/IsidoreBeautrelet/}{Isidore Beautrelet}.
+#' 
 #' @param model (Type: lm) Regression object obtained by using the estimation methods from this package
 #' or a generic method such as \code{lm} or \code{glm}.
 #' Some particular classes (\code{gpml}, \code{nbpml}, \code{negbin} and \code{nls}) don't return R squared and
@@ -43,13 +43,13 @@
 #'   data = grav_small
 #' )
 #' 
-#' fit2 <- stata_summary(fit, robust = FALSE)
+#' fit2 <- hm_summary(fit, robust = FALSE)
 #'
-#' @return summary \code{lm} object
+#' @return Summary \code{lm} object.
 #'
 #' @export
 
-stata_summary <- function(model, robust = FALSE, ...) {
+hm_summary <- function(model, robust = FALSE, ...) {
   # Check -------------------------------------------------------------------
   qr_lm <- function(x, ...) {
     if (is.null(r <- x$qr)) {
