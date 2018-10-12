@@ -24,7 +24,7 @@ test_that("Stata summary returns a valid output", {
     data = grav_small
   )
   
-  fit2 <- stata_summary(fit, robust = FALSE)
+  fit2 <- hm_summary(fit, robust = FALSE)
 
   expect_is(fit2, "summary.lm")
 })
