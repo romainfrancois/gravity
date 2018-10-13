@@ -75,7 +75,7 @@
       <h1>A crash course on gravity models</h1>
                         <h4 class="author">Mauricio Vargas</h4>
             
-            <h4 class="date">2018-10-12</h4>
+            <h4 class="date">2018-10-13</h4>
       
       
       <div class="hidden name"><code>crash-course-on-gravity-models.Rmd</code></div>
@@ -94,16 +94,16 @@ F_{ij}=G\frac{M_{i}M_{j}}{D^{2}_{ij}}.
 <p>The force <span class="math inline">\(F\)</span> between two bodies <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> with <span class="math inline">\(i \neq j\)</span> is proportional to the masses <span class="math inline">\(M\)</span> of these bodies and inversely proportional to the square of their geographical distance <span class="math inline">\(D\)</span>. <span class="math inline">\(G\)</span> is a constant and as such of no major concern.</p>
 <p>The underlying idea of a traditional gravity model, shown for international trade, is equally simple:</p>
 <p><span class="math display">\[
-X_{ij}=G\frac{Y_{i}^{\beta_{1}}Y_{j}^{\beta_{2}}}{D_{ij}^{\beta_{3}}}. 
+X_{ij}=G\frac{Y_{i}^{\beta_{1}}Y_{j}^{\beta_{2}}}{D_{ij}^{\beta_{3}}}.
 \]</span></p>
 <p>The trade flow <span class="math inline">\(X\)</span> is explained by <span class="math inline">\(Y_{i}\)</span> and <span class="math inline">\(Y_{j}\)</span> that are the masses of the exporting and importing country (e.g. the GDP) and $ D_{ij}$ that is the distance between the countries.</p>
 <p>Dummy variables such as common borders <span class="math inline">\(contig\)</span> or regional trade agreements <span class="math inline">\(rta\)</span> can be added to the model. Let <span class="math inline">\(t_{ij}\)</span> be the transaction cost defined as:</p>
 <p><span class="math display">\[
-t_{ij}=\exp(contig_{ij} + rta_{ij})
+t_{ij}= D_{ij} \exp(contig_{ij} + rta_{ij})
 \]</span></p>
-<p>So that the model with frictions is now:</p>
+<p>So that the model with friction becomes:</p>
 <p><span class="math display">\[
-X_{ij}=G\frac{Y_{i}^{\beta_{1}}Y_{j}^{\beta_{2}}}{D_{ij}^{\beta_{3}}}t_{ij}^{\beta_4}. 
+X_{ij}=G\frac{Y_{i}^{\beta_{1}}Y_{j}^{\beta_{2}}}{t_{ij}^{\beta_{3}}}.
 \]</span></p>
 <p>A logarithmic operator can be applied to form a log-linear model and use a standard estimation methods such as OLS:</p>
 <p><span class="math display">\[
@@ -117,14 +117,14 @@ X_{ij}=G\frac{Y_{i}^{\beta_{1}}Y_{j}^{\beta_{2}}}{D_{ij}^{\beta_{3}}}t_{ij}^{\be
 <p><span class="math display">\[
 X_{ij}=\frac{Y_{i}Y_{j}}{Y}\frac{t_{ij}^{1-\sigma}}{P_{j}^{1-\sigma}\Pi_{i}^{1-\sigma}}
 \]</span> with <span class="math display">\[
-\Pi_{i}^{1-\sigma}=\sum_{j}\frac{t_{ij}^{1-\sigma}}{P_{j}^{1-\sigma}}\frac{Y_{j}}{Y}
+P_{i}^{1-\sigma}=\sum_{j}\frac{t_{ij}^{1-\sigma}}{\Pi_{j}^{1-\sigma}}\frac{Y_{j}}{Y}.
 \]</span> and <span class="math display">\[
-P_{j}^{1-\sigma}=\sum_{i}\frac{t_{ij}^{1-\sigma}}{\Pi_{i}^{1-\sigma}}\frac{Y_{i}}{Y}.
+\Pi_{j}^{1-\sigma}=\sum_{i}\frac{t_{ij}^{1-\sigma}}{P_{i}^{1-\sigma}}\frac{Y_{i}}{Y}
 \]</span></p>
-<p>Basically the model proposes that the exports <span class="math inline">\(X_{ij}\)</span> from <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> are determined by the supply factors in <span class="math inline">\(i\)</span>, <span class="math inline">\(Y_{i}\)</span>, and the demand factors in $ j $, <span class="math inline">\(Y_{j}\)</span>, as well as the transaction costs <span class="math inline">\(t_{ij}\)</span>.</p>
+<p>Basically the model proposes that the exports <span class="math inline">\(X_{ij}\)</span> from <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> are determined by the supply factors in <span class="math inline">\(i\)</span>, <span class="math inline">\(Y_{i}\)</span>, and the demand factors in <span class="math inline">\(j\)</span>, <span class="math inline">\(Y_{j}\)</span>, as well as the transaction costs <span class="math inline">\(t_{ij}\)</span>.</p>
 <p>Next to information on bilateral partners <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, information on the rest of the world is included in the gravity model with <span class="math inline">\(Y=\sum_{i} Y_{i}= \sum_{j} Y_{j}\)</span> that represents the worldwide sum of incomes (e.g. the world’s GDP).</p>
-<p><span class="math inline">\(\sigma\)</span> represents the elasticity of substitution between all goods with <span class="math inline">\(\sigma &gt; 1\)</span> in order to account for the preference for a variation of goods (e.g. in this model goods can be replaced for other similar goods).</p>
-<p>The Multilateral Resistance terms are included via the terms <span class="math inline">\(P\)</span>, Inward Multilateral Resistance, and <span class="math inline">\(\Pi\)</span>, Outward Multilateral Resistance. The Outward Multilateral Resistance <span class="math inline">\(\Pi_{i}\)</span> is a function of the transaction costs of <span class="math inline">\(i\)</span> to all trade partners <span class="math inline">\(j\)</span> and their demand, <span class="math inline">\(P_{j}\)</span>.</p>
+<p>In this model <span class="math inline">\(\sigma\)</span> represents the elasticity of substitution between all goods. A key assumption is to take a fixed value <span class="math inline">\(\sigma &gt; 1\)</span> in order to account for the preference for a variation of goods (e.g. in this model goods can be replaced for other similar goods).</p>
+<p>The Multilateral Resistance terms are included via the terms <span class="math inline">\(P\)</span>, Inward Multilateral Resistance, and <span class="math inline">\(\Pi\)</span>, Outward Multilateral Resistance. The Inward Multilateral Resistance <span class="math inline">\(P_i\)</span> is a function of the transaction costs of <span class="math inline">\(i\)</span> to all trade partners <span class="math inline">\(j\)</span>. The Outward Multilateral Resistance <span class="math inline">\(\Pi_{j}\)</span> is a function of the transaction costs of <span class="math inline">\(j\)</span> to all trade partners <span class="math inline">\(i\)</span> and their demand.</p>
 <p>The Multilateral Resistance terms dependent on each other. Hence, the estimation of structural gravity models becomes complex.</p>
 </div>
 <div id="model-estimation" class="section level2">
