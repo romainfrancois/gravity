@@ -213,12 +213,22 @@ bvw <- function(dependent_variable,
   } else {
     d <- select(d, !!sym("y_log_bvw"), ends_with("_mr"))
   }
+  
+  if (!is.null(additional_regressors)) {
+    vars <- paste(c("dist_log_mr", paste0(additional_regressors, "_mr")), collapse = " + ")
+  } else {
+    vars <- "dist_log_mr"
+  }
+  
+  form <- stats::as.formula(paste("y_log_bvw", "~", vars))
 
   if (robust == TRUE) {
-    model_bvw <- MASS::rlm(y_log_bvw ~ ., data = d)
+    model_bvw <- MASS::rlm(form, data = d)
   } else {
-    model_bvw <- stats::lm(y_log_bvw ~ ., data = d)
+    model_bvw <- stats::lm(form, data = d)
   }
+  
+  model_bvw$call <- form
 
   return(model_bvw)
 }

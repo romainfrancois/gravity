@@ -182,9 +182,22 @@ ek_tobit <- function(dependent_variable,
   y_cens_log_ek <- survival::Surv(f1, f2, type = "interval2") %>% as_vector()
 
   # Model -------------------------------------------------------------------
-  vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  if (!is.null(additional_regressors)) {
+    vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  } else {
+    vars <- "dist_log"
+  }
+  
   form <- stats::as.formula(paste("y_cens_log_ek", "~", vars))
-  model_ek_tobit <- survival::survreg(form, data = d, dist = "gaussian", robust = robust)
-
+  
+  model_ek_tobit <- survival::survreg(
+    form, 
+    data = d, 
+    dist = "gaussian", 
+    robust = robust
+  )
+  
+  model_ek_tobit$call <- form
+  
   return(model_ek_tobit)
 }

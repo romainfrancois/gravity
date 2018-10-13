@@ -198,15 +198,23 @@ ddm <- function(dependent_variable,
   if (!is.null(additional_regressors)) {
     d <- left_join(d, d2, by = c(code_origin, code_destination)) %>%
       select(!!sym("y_log_ddm"), ends_with("_ddm"))
+    
+    vars <- paste(c("dist_log_ddm", paste0(additional_regressors, "_ddm"), 0), collapse = " + ")
   } else {
     d <- select(d, !!sym("y_log_ddm,"), ends_with("_ddm"))
+    
+    vars <- paste(c("dist_log_ddm", 0), collapse = " + ")
   }
-
+  
+  form <- stats::as.formula(paste("y_log_ddm", "~", vars))
+  
   if (robust == TRUE) {
-    model_bvw <- MASS::rlm(y_log_ddm ~ . + 0, data = d)
+    model_ddm <- MASS::rlm(form, data = d)
   } else {
-    model_bvw <- stats::lm(y_log_ddm ~ . + 0, data = d)
+    model_ddm <- stats::lm(form, data = d)
   }
+  
+  model_ddm$call <- form
 
-  return(model_bvw)
+  return(model_ddm)
 }

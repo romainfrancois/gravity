@@ -182,8 +182,14 @@ et_tobit <- function(dependent_variable,
     ungroup()
 
   # Model -------------------------------------------------------------------
-  vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  if (!is.null(additional_regressors)) {
+    vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  } else {
+    vars <- "dist_log"
+  }
+  
   form <- stats::as.formula(paste("y_cens_log_et", "~", vars))
+  
   model_et_tobit <- censReg::censReg(
     formula = form,
     left = y2min_log,
@@ -192,6 +198,8 @@ et_tobit <- function(dependent_variable,
     start = rep(0, 3 + length(additional_regressors)),
     method = "BHHH"
   )
+  
+  model_et_tobit$call <- form
 
   return(model_et_tobit)
 }

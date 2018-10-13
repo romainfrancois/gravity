@@ -29,7 +29,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.9</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.10</span>
       </span>
     </div>
 
@@ -130,7 +130,7 @@ P_{i}^{1-\sigma}=\sum_{j}\frac{t_{ij}^{1-\sigma}}{\Pi_{j}^{1-\sigma}}\frac{Y_{j}
 <div id="model-estimation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#model-estimation" class="anchor"></a>Model estimation</h2>
-<p>To estimate gravity equations you need a square dataset including bilateral flows defined by the argument , a distance measure defined by the argument  that is the key regressor, and other potential influences (e.g. contiguity and common currency) given as a vector in  are required.</p>
+<p>To estimate gravity equations you need a square dataset including bilateral flows defined by the argument dependent_variable, a distance measure defined by the argument distance that is the key regressor, and other potential influences (e.g. contiguity and common currency) given as a vector in additional_regressors are required.</p>
 <p>Some estimation methods require ISO codes or similar of type character variables to compute particular country effects. Make sure the origin and destination codes are of type “character”.</p>
 <p>The rule of thumb for regressors or independent variables consists in:</p>
 <ul>
@@ -140,25 +140,97 @@ P_{i}^{1-\sigma}=\sum_{j}\frac{t_{ij}^{1-\sigma}}{\Pi_{j}^{1-\sigma}}\frac{Y_{j}
 <p>The user should perform some data cleaning beforehand to remove observations that contain entries that can distort estimates, notwithstanding the functions provided within this package will remove zero flows and distances.</p>
 <p>See  for gravity datasets and Stata code for estimating gravity models.</p>
 </div>
+<div id="double-demeaning-example" class="section level2">
+<h2 class="hasAnchor">
+<a href="#double-demeaning-example" class="anchor"></a>Double demeaning example</h2>
+<p>This example is adapted from <span class="citation">Wölwer, Breßlein, and Burgard (2018)</span>.</p>
+<p>Double Demeaning, as introduced by <span class="citation">Head and Mayer (2014)</span>, subtracts importer and exporter averages on the left and right hand side of the respective gravity equation, and all unilateral influences including the MR terms vanish. Therefore, no unilateral variables may be added as independent variables for the estimation.</p>
+<p>Our ddm function first logs the dependent variable and the distance variable. Afterwards, the dependent and independent variables are transformed in the following way (exemplary shown for trade flows, <span class="math inline">\(X_{ij}\)</span>):</p>
+<p><span class="math display">\[
+(\log X_{ij})_{\text{DDM}} = (\log X_{ij}) - (\log X_{ij})_{\text{Origin Mean}} \\- (\log X_{ij})_{\text{Destination Mean}} + (\log X_{ij})_{\text{Mean}}.
+\]</span></p>
+<p>One subtracts the mean value for the origin country and the mean value for the destination country and adds the overall mean value to the logged trade flows. This procedure is repeated for all dependent and independent variables. The transformed variables are then used for the estimation.</p>
+<p>DDM is easily applied, but, as shown in , its very sensitive to missing data.</p>
+<p>An example of how to apply the function ddm to an example dataset in gravity and the resulting output is shown in the following:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(gravity)
+
+fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/ddm.html">ddm</a></span>(
+    <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
+    <span class="dt">distance =</span> <span class="st">"distw"</span>,
+    <span class="dt">additional_regressors =</span> <span class="kw">c</span>(<span class="st">"rta"</span>, <span class="st">"comcur"</span>, <span class="st">"contig"</span>),
+    <span class="dt">code_origin =</span> <span class="st">"iso_o"</span>,
+    <span class="dt">code_destination =</span> <span class="st">"iso_d"</span>,
+    <span class="dt">data =</span> gravity_no_zeros
+  )
+
+<span class="kw">summary</span>(fit)</code></pre></div>
+<pre><code>## 
+## Call:
+## y_log_ddm ~ dist_log_ddm + rta_ddm + comcur_ddm + contig_ddm + 
+##     0
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -20.9411  -1.2268   0.3032   1.5195   8.4538 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## dist_log_ddm -1.60334    0.03312 -48.407   &lt;2e-16 ***
+## rta_ddm       0.79727    0.07004  11.383   &lt;2e-16 ***
+## comcur_ddm    0.17376    0.14613   1.189    0.234    
+## contig_ddm    1.00184    0.11981   8.362   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 2.318 on 17084 degrees of freedom
+## Multiple R-squared:  0.2541, Adjusted R-squared:  0.254 
+## F-statistic:  1455 on 4 and 17084 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Since v.0.8.0 the package returns lm or glm objects instead of summaries. Doing that allows to use our functions in conjunction with broom or other packages, for example:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(broom)
+
+<span class="kw">tidy</span>(fit)</code></pre></div>
+<pre><code>## # A tibble: 4 x 5
+##   term         estimate std.error statistic  p.value
+##   &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 dist_log_ddm   -1.60     0.0331    -48.4  0.      
+## 2 rta_ddm         0.797    0.0700     11.4  6.54e-30
+## 3 comcur_ddm      0.174    0.146       1.19 2.34e- 1
+## 4 contig_ddm      1.00     0.120       8.36 6.62e-17</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glance</span>(fit)</code></pre></div>
+<pre><code>## # A tibble: 1 x 11
+##   r.squared adj.r.squared sigma statistic p.value    df  logLik    AIC
+## *     &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt;
+## 1     0.254         0.254  2.32     1455.       0     4 -38611. 77232.
+## # ... with 3 more variables: BIC &lt;dbl&gt;, deviance &lt;dbl&gt;, df.residual &lt;int&gt;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">augment</span>(fit)</code></pre></div>
+<pre><code>## # A tibble: 17,088 x 12
+##    y_log_ddm dist_log_ddm rta_ddm comcur_ddm contig_ddm  .fitted .se.fit
+##  *     &lt;dbl&gt;        &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;
+##  1  -0.710         0.540   0.0175    0.0562    -0.0435  -0.885   0.0205 
+##  2   0.00279      -0.0201  0.0318    0.0501    -0.00474  0.0616  0.00754
+##  3  -0.373         0.154  -0.197    -0.00870   -0.0502  -0.456   0.0126 
+##  4  -3.85         -0.758  -0.0408    0.0562    -0.0533   1.14    0.0298 
+##  5   0.301         0.223  -0.191    -0.00705   -0.0237  -0.534   0.0111 
+##  6  -3.45          0.599  -0.0747   -0.0747    -0.0762  -1.11    0.0176 
+##  7   1.80         -0.861   0.0562    0.0562    -0.0152   1.42    0.0276 
+##  8  -1.43         -0.0245 -0.127     0.0562    -0.0319  -0.0845  0.0135 
+##  9   3.10         -0.0260 -0.0195    0.0562    -0.0426  -0.00683 0.0104 
+## 10  -3.88          0.622  -0.0227    0.0562    -0.0486  -1.05    0.0217 
+## # ... with 17,078 more rows, and 5 more variables: .resid &lt;dbl&gt;,
+## #   .hat &lt;dbl&gt;, .sigma &lt;dbl&gt;, .cooksd &lt;dbl&gt;, .std.resid &lt;dbl&gt;</code></pre>
+</div>
 <div id="references" class="section level2">
 <h2 class="hasAnchor">
 <a href="#references" class="anchor"></a>References</h2>
-<p>For more information on gravity models, theoretical foundations and estimation methods in general see</p>
-
-
-
-
-
-
-
-
-
-<p>and the citations therein.</p>
-<p>See  for gravity datasets and Stata code for estimating gravity models.</p>
-<p>For estimating gravity equations using panel data see</p>
-
-
-<p>and the references therein.</p>
+<p> </p>
+<div id="refs" class="references">
+<div id="ref-Head2014">
+<p>Head, Keith, and Thierry Mayer. 2014. “Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.” In <em>Handbook of International Economics</em>, edited by Gita Gopinath, Elhanan Helpman, and Kenneth Rogoff, 4:131–95. Handbook of International Economics. Elsevier. doi:<a href="https://doi.org/10.1016/B978-0-444-54314-1.00003-3">10.1016/B978-0-444-54314-1.00003-3</a>.</p>
+</div>
+<div id="ref-WoelwerBressleinBurgard2018">
+<p>Wölwer, Anna-Lena, Martin Breßlein, and Jan Pablo Burgard. 2018. “Gravity Models in R.” <em>Austrian Journal of Statistics</em> 47 (4): 16–35. doi:<a href="https://doi.org/10.17713/ajs.v47i4.688">10.17713/ajs.v47i4.688</a>.</p>
+</div>
+</div>
 </div>
   </div>
 
@@ -170,6 +242,7 @@ P_{i}^{1-\sigma}=\sum_{j}\frac{t_{ij}^{1-\sigma}}{\Pi_{j}^{1-\sigma}}\frac{Y_{j}
 <li><a href="#basic-model">Basic model</a></li>
       <li><a href="#trade-barriers-model">Trade barriers model</a></li>
       <li><a href="#model-estimation">Model estimation</a></li>
+      <li><a href="#double-demeaning-example">Double demeaning example</a></li>
       <li><a href="#references">References</a></li>
       </ul>
 </div>

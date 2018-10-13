@@ -11,7 +11,7 @@ vignette: >
 ---
 
 ```{r setup, cache = FALSE, echo = FALSE, message = FALSE, warning = FALSE, tidy = FALSE}
-knitr::opts_chunk$set(eval = FALSE)
+knitr::opts_chunk$set(eval = TRUE, message = FALSE, warning = FALSE)
 ```
 
 ## Basic model
@@ -78,7 +78,7 @@ The Multilateral Resistance terms dependent on each other. Hence, the estimation
 
 ## Model estimation
 
-To estimate gravity equations you need a square dataset including bilateral flows defined by the argument \code{dependent_variable}, a distance measure defined by the argument \code{distance} that is the key regressor, and other potential influences (e.g. contiguity and common currency) given as a vector in \code{additional_regressors} are required.
+To estimate gravity equations you need a square dataset including bilateral flows defined by the argument dependent_variable, a distance measure defined by the argument distance that is the key regressor, and other potential influences (e.g. contiguity and common currency) given as a vector in additional_regressors are required.
 
 Some estimation methods require ISO codes or similar of type character variables to compute particular country effects. Make sure the origin and destination codes are of type "character".
 
@@ -97,9 +97,9 @@ for gravity datasets and Stata code for estimating gravity models.
 
 This example is adapted from @WoelwerBressleinBurgard2018.
 
-Double Demeaning, as introduced by \cite{Head2014}, subtracts importer and exporter averages on the left and right hand side of the respective gravity equation, and all unilateral influences including the MR terms vanish. Therefore, no unilateral variables may be added as independent variables for the estimation.
+Double Demeaning, as introduced by @Head2014, subtracts importer and exporter averages on the left and right hand side of the respective gravity equation, and all unilateral influences including the MR terms vanish. Therefore, no unilateral variables may be added as independent variables for the estimation.
 
-Our \texttt{ddm} function first logs the dependent variable and the distance variable. Afterwards, the dependent and independent variables are transformed in the following way (exemplary shown for trade flows, $X_{ij}$):
+Our ddm function first logs the dependent variable and the distance variable. Afterwards, the dependent and independent variables are transformed in the following way (exemplary shown for trade flows, $X_{ij}$):
 
 $$
 (\log X_{ij})_{\text{DDM}} = (\log X_{ij}) - (\log X_{ij})_{\text{Origin Mean}} \\- (\log X_{ij})_{\text{Destination Mean}} + (\log X_{ij})_{\text{Mean}}.
@@ -109,7 +109,7 @@ One subtracts the mean value for the origin country and the mean value for the d
 
 DDM is easily applied, but, as shown in \cite{Head2014}, its very sensitive to missing data.
 	
-An example of how to apply the function \texttt{DDM} to an example dataset in \textbf{gravity} and the resulting output is shown in the following:
+An example of how to apply the function ddm to an example dataset in gravity and the resulting output is shown in the following:
 
 ```{r ddm}
 library(gravity)
@@ -126,6 +126,17 @@ fit <- ddm(
 summary(fit)
 ```
 
+Since v.0.8.0 the package returns lm or glm objects instead of summaries. Doing that allows to use our functions in conjunction with broom or other packages, for example:
+
+```{r ddm2}
+library(broom)
+
+tidy(fit)
+glance(fit)
+augment(fit)
+```
+
 ## References
 
-\insertRef{Anderson1979}{gravity}
+\insertRef{Head2014}{gravity}
+\insertRef{WoelwerBressleinBurgard2018}{gravity}

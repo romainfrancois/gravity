@@ -202,12 +202,22 @@ bvu <- function(dependent_variable,
   } else {
     d <- select(d, !!sym("y_log_bvu"), ends_with("_mr"))
   }
+  
+  if (!is.null(additional_regressors)) {
+    vars <- paste(c("dist_log_mr", paste0(additional_regressors, "_mr")), collapse = " + ")
+  } else {
+    vars <- "dist_log_mr"
+  }
+  
+  form <- stats::as.formula(paste("y_log_bvu", "~", vars))
 
   if (robust == TRUE) {
-    model_bvu <- MASS::rlm(y_log_bvu ~ ., data = d)
+    model_bvu <- MASS::rlm(form, data = d)
   } else {
-    model_bvu <- stats::lm(y_log_bvu ~ ., data = d)
+    model_bvu <- stats::lm(form, data = d)
   }
+  
+  model_bvu$call <- form
 
   return(model_bvu)
 }

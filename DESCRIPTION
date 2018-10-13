@@ -1,7 +1,7 @@
 Package: gravity
 Type: Package
 Title: Estimation Methods for Gravity Models
-Version: 0.8.9
+Version: 0.8.10
 Authors@R: c(
   person("Anna-Lena", "Woelwer", role = c("aut"), email = "woelwer@uni-trier.de"),
   person("Jan Pablo", "Burgard", role = c("aut"), email = "burgardj@uni-trier.de"),
@@ -34,5 +34,6 @@ LazyData: true
 RoxygenNote: 6.1.0
 Suggests: knitr,
   rmarkdown,
-  testthat
+  testthat,
+  broom
 VignetteBuilder: knitr
