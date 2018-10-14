@@ -174,8 +174,13 @@ fixed_effects <- function(dependent_variable,
       y_log_fe = log(!!sym(dependent_variable))
     )
 
-  # Model ----------------------------------------------------------------------
-  vars <- paste(c("dist_log", additional_regressors, code_origin, code_destination), collapse = " + ")
+  # Model -------------------------------------------------------------------
+  if (!is.null(additional_regressors)) {
+    vars <- paste(c("dist_log", additional_regressors, code_origin, code_destination), collapse = " + ")
+  } else {
+    vars <- "dist_log"
+  }
+  
   form <- stats::as.formula(paste("y_log_fe", "~", vars))
 
   if (robust == TRUE) {
@@ -183,6 +188,8 @@ fixed_effects <- function(dependent_variable,
   } else {
     model_fe <- stats::lm(form, data = d)
   }
+  
+  model_et_tobit$call <- form
 
   return(model_fe)
 }

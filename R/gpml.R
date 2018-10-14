@@ -156,7 +156,12 @@ gpml <- function(dependent_variable,
     )
 
   # Model ----------------------------------------------------------------------
-  vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  if (!is.null(additional_regressors)) {
+    vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  } else {
+    vars <- "dist_log"
+  }
+  
   form <- stats::as.formula(paste("y_gpml", "~", vars))
 
   model_gpml <- glm2::glm2(form,

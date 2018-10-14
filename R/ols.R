@@ -223,11 +223,20 @@ ols <- function(dependent_variable,
 
 
   # Model -------------------------------------------------------------------
-  if (robust == TRUE) {
-    model_ols <- MASS::rlm(y_log_ols ~ ., data = d)
+  if (!is.null(additional_regressors)) {
+    vars <- paste(c("dist_log", "inc_o_log", "inc_d_log", additional_regressors), collapse = " + ")
   } else {
-    model_ols <- stats::lm(y_log_ols ~ ., data = d)
+    vars <- paste(c("dist_log", "inc_o_log", "inc_d_log"), collapse = " + ")
+  }
+  
+  form <- stats::as.formula(paste("y_log_ols", "~", vars))
+  
+  if (robust == TRUE) {
+    model_ols <- MASS::rlm(form, data = d)
+  } else {
+    model_ols <- stats::lm(form, data = d)
   }
 
+  model_nls$call <- form
   return(model_ols)
 }

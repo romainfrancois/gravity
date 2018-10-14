@@ -261,14 +261,19 @@ tetrads <- function(dependent_variable,
     select(ends_with("_rat"), !!sym(code_origin), !!sym(code_destination))
 
   # Model ----------------------------------------------------------------------
-  additional_regressors <- paste0(additional_regressors, "_rat")
-
+  if (!is.null(additional_regressors)) {
+    additional_regressors <- paste0(additional_regressors, "_rat")
+    vars <- paste(c("dist_log_rat", additional_regressors), collapse = " + ")
+  } else {
+    vars <- "dist_log_rat"
+  }
+  
   form <- stats::as.formula(
-    sprintf("y_log_rat ~ dist_log_rat + %s", paste(additional_regressors, collapse = " + "))
+    sprintf("y_log_rat ~ %s", vars)
   )
-
+  
   form2 <- as.formula(sprintf("~ %s + %s", code_origin, code_destination))
-
+  
   model_tetrads <- stats::lm(form, data = d2)
 
   # Return ---------------------------------------------------------------------

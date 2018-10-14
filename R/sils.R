@@ -279,7 +279,12 @@ sils <- function(dependent_variable,
           log((!!sym(income_origin) * !!sym(income_destination)) / (!!sym("P_i") * !!sym("P_j")))
       )
 
-    vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+    if (!is.null(additional_regressors)) {
+      vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+    } else {
+      vars <- "dist_log"
+    }
+    
     form <- stats::as.formula(paste("y_log_sils", "~", vars))
 
     if (robust == TRUE) {

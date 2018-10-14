@@ -30,7 +30,7 @@ $$
 X_{ij}=G\frac{Y_{i}^{\beta_{1}}Y_{j}^{\beta_{2}}}{D_{ij}^{\beta_{3}}}.
 $$
 
-The trade flow $X$ is explained by $Y_{i}$ and $Y_{j}$ that are the masses of the exporting and importing country (e.g. the GDP) and $ D_{ij}$ that is the distance between the countries.
+The trade flow $X$ is explained by $Y_{i}$ and $Y_{j}$ that are the masses of the exporting and importing country (e.g. the GDP) and $D_{ij}$ that is the distance between the countries.
 
 Dummy variables such as common borders $contig$ or regional trade agreements $rta$ can be added to the model. Let $t_{ij}$ be the transaction cost defined as:
 

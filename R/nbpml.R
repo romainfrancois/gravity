@@ -148,7 +148,12 @@ nbpml <- function(dependent_variable,
     )
 
   # Model ----------------------------------------------------------------------
-  vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  if (!is.null(additional_regressors)) {
+    vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  } else {
+    vars <- "dist_log"
+  }
+  
   form <- stats::as.formula(paste("y_nbpml", "~", vars))
 
   model_nbpml <- MASS::glm.nb(form,

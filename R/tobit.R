@@ -175,8 +175,14 @@ tobit <- function(dependent_variable,
   ypc_log_min <- min(d %>% select(!!sym("y_cens_log_tobit")), na.rm = TRUE)
 
   # Model ----------------------------------------------------------------------
-  vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  if (!is.null(additional_regressors)) {
+    vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  } else {
+    vars <- "dist_log"
+  }
+  
   form <- stats::as.formula(paste("y_cens_log_tobit", "~", vars))
+  
   model_tobit <- censReg::censReg(
     formula = form,
     left = ypc_log_min,

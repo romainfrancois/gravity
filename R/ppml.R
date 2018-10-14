@@ -151,7 +151,12 @@ ppml <- function(dependent_variable,
     )
 
   # Model ----------------------------------------------------------------------
-  vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  if (!is.null(additional_regressors)) {
+    vars <- paste(c("dist_log", additional_regressors), collapse = " + ")
+  } else {
+    vars <- "dist_log"
+  }
+  
   form <- stats::as.formula(paste("y_ppml", "~", vars))
 
   model_ppml <- stats::glm(form,
