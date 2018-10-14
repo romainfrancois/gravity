@@ -237,6 +237,6 @@ ols <- function(dependent_variable,
     model_ols <- stats::lm(form, data = d)
   }
 
-  model_nls$call <- form
+  model_ols$call <- form
   return(model_ols)
 }

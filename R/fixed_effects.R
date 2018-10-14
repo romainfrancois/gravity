@@ -189,7 +189,6 @@ fixed_effects <- function(dependent_variable,
     model_fe <- stats::lm(form, data = d)
   }
   
-  model_et_tobit$call <- form
-
+  model_fe$call <- form
   return(model_fe)
 }

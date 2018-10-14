@@ -41,7 +41,8 @@ The function returns the summary of the estimated gravity model as an
 OLS and fixed effects for the countries of origin and destination.
 }
 \details{
-To account for MR terms, \insertCite{Feenstra2002;textual}{gravity} proposes to use
+To account for MR terms, \insertCite{Feenstra2002;textual}{gravity} and 
+\insertCite{Feenstra2004;textual}{gravity} propose to use
 importer and exporter fixed effects. Due to the use of these effects, all
 unilateral influences such as GDPs can no longer be estimated.
 
