@@ -6,8 +6,8 @@
 \usage{
 sils(dependent_variable, distance, additional_regressors = NULL,
   income_origin, income_destination, code_origin, code_destination,
-  maxloop = 100, decimal_places = 4, robust = FALSE, verbose = FALSE,
-  data, ...)
+  maxloop = 100, decimal_places = 4, robust = FALSE,
+  verbose = FALSE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{(Type: character) name of the dependent variable. This dependent variable is 

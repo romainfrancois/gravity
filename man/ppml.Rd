@@ -4,8 +4,8 @@
 \alias{ppml}
 \title{Poisson Pseudo Maximum Likelihood (PPML)}
 \usage{
-ppml(dependent_variable, distance, additional_regressors, robust = TRUE, data,
-  ...)
+ppml(dependent_variable, distance, additional_regressors, robust = TRUE,
+  data, ...)
 }
 \arguments{
 \item{dependent_variable}{(Type: character) name of the dependent variable. This variable is logged and then used as 

@@ -4,10 +4,10 @@ knitr::opts_chunk$set(eval = FALSE)
 ## ----read----------------------------------------------------------------
 #  url <- "http://econ.sciences-po.fr/sites/default/files/file/tmayer/data/col_regfile09.zip"
 #  zip <- "col_regfile09.zip"
-#
+#  
 #  if (!file.exists(zip)) { try(download.file(url, zip)) }
 #  try(system("7z e -aos col_regfile09.zip"))
-#
+#  
 #  library(haven)
 #  col_regfile09 <- read_dta("col_regfile09.dta")
 
@@ -39,3 +39,4 @@ knitr::opts_chunk$set(eval = FALSE)
 ## ----export--------------------------------------------------------------
 #  save(gravity_zeros, file = "gravity_zeros.rdata", compress = "xz")
 #  save(gravity_no_zeros, file = "gravity_no_zeros.rdata", compress = "xz")
+

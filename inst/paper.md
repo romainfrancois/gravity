@@ -47,7 +47,7 @@ both for researchers and students.
 
 The current version of this package relies heavily on ``rlang`` package [@rlang] which provides 
 tools to work with core language features of base R and the ``tidyverse`` package [@tidyverse]. As a 
-result we provide fast model fitting computation and we don't lose correct handling and consistency 
+result we provide fast model fitting computation while keeping correct handling and consistency 
 when facing rank-deficient model matrices that base R handles well.
 
 # References

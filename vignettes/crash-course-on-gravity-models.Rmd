@@ -95,9 +95,9 @@ for gravity datasets and Stata code for estimating gravity models.
 
 ## Double demeaning example
 
-This example is adapted from @WoelwerBressleinBurgard2018.
+This example is adapted from @WoelwerBressleinBurgard2018 and it's included here to show how the functions withing this package simplify some tasks that otherwise would take some coding time.
 
-Double Demeaning, as introduced by @Head2014, subtracts importer and exporter averages on the left and right hand side of the respective gravity equation, and all unilateral influences including the MR terms vanish. Therefore, no unilateral variables may be added as independent variables for the estimation.
+Double Demeaning, as introduced by @Head2014, subtracts importer and exporter averages on the left and right hand side of the respective gravity equation, and all unilateral influences including the Multilateral Resistance terms vanish. Therefore, no unilateral variables may be added as independent variables for the estimation.
 
 Our ddm function first logs the dependent variable and the distance variable. Afterwards, the dependent and independent variables are transformed in the following way (exemplary shown for trade flows, $X_{ij}$):
 
