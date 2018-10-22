@@ -14,7 +14,7 @@ vignette: >
 knitr::opts_chunk$set(eval = TRUE, message = FALSE, warning = FALSE)
 ```
 
-## Basic model
+# Basic model
 
 Gravity models in their traditional form are inspired by Newton law of gravitation:
 
@@ -50,7 +50,7 @@ $$
 \log X_{ij}=\beta_{0}\log G +\beta_{1}\log Y_{i}+\beta_{2}\log Y_{j}+\beta_{3}\log D_{ij}+\beta_{4}contig_{ij}+\beta_{5}rta_{ij}
 $$
 
-## Trade barriers model
+# Trade barriers model
 
 Provided trade barriers exists, the econometric literature proposes the Multilateral Resistance model defined by the equations:
 
@@ -76,7 +76,7 @@ The Multilateral Resistance terms are included via the terms $P$, Inward Multila
 
 The Multilateral Resistance terms dependent on each other. Hence, the estimation of structural gravity models becomes complex.
 
-## Model estimation
+# Model estimation
 
 To estimate gravity equations you need a square dataset including bilateral flows defined by the argument dependent_variable, a distance measure defined by the argument distance that is the key regressor, and other potential influences (e.g. contiguity and common currency) given as a vector in additional_regressors are required.
 
@@ -93,9 +93,11 @@ can distort estimates, notwithstanding the functions provided within this packag
 See \href{https://sites.google.com/site/hiegravity/}{Gravity Equations: Workhorse, Toolkit, and Cookbook}
 for gravity datasets and Stata code for estimating gravity models.
 
-## Double demeaning example
+# Examples
 
-This example is adapted from @WoelwerBressleinBurgard2018 and it's included here to show how the functions withing this package simplify some tasks that otherwise would take some coding time.
+All the examples here are adapted from @WoelwerBressleinBurgard2018. We included some examples that require further explanation as they perform some data transforming and therefore the functions provide a simplification for the end user.
+
+## Double Demeaning
 
 Double Demeaning, as introduced by @Head2014, subtracts importer and exporter averages on the left and right hand side of the respective gravity equation, and all unilateral influences including the Multilateral Resistance terms vanish. Therefore, no unilateral variables may be added as independent variables for the estimation.
 
@@ -126,7 +128,7 @@ fit <- ddm(
 summary(fit)
 ```
 
-Since v.0.8.0 the package returns lm or glm objects instead of summaries. Doing that allows to use our functions in conjunction with broom or other packages, for example:
+The package returns lm or glm objects instead of summaries. Doing that allows to use our functions in conjunction with broom or other packages, for example:
 
 ```{r ddm2}
 library(broom)
@@ -136,7 +138,60 @@ glance(fit)
 augment(fit)
 ```
 
-## References
+## Bonus Vetus
+
+@Baier2010 suggest a modification of the simple OLS that is easily implemented, allows for comparative statics and yields results close to those of NLS, called Bonus vetus OLS (BVU and BVW). They estimate gravity models in their additive form.
+
+As unilateral income elasticities are assumed, flows are divided by the product of unilateral incomes. The dependent variable for the estimation is therefore
+$$\log\left(\frac{y}{inc_{o} \: inc_{d}}\right).$$
+
+By applying a Taylor-series expansion and the assumption of symmetrical, bilateral trade costs, they develop a reduced gravity model in which multilateral and worldwide resistance enter exogenously.
+
+@Baier2010 distinguish two types of Bonus vetus estimations depending on how the Taylor-series is centered. One method, called BVU, uses simple averages while the other, called BVW, uses GDP weights. Depending on which method is used, the transaction costs are weighted differently. For advantages and disadvantages of both methods see @Baier2009 and @Baier2010.
+	
+To give an example with simple averages (BVU), distance would be transformed to Multilateral and World Resistance in the following way: 
+$$
+MWR_{ij} = \frac{1}{N}\left(\sum_{i=1}^{N}\log D_{ij} \right)+\frac{1}{N}\left(\sum_{j=1}^{N}\log D_{ij} \right)-\frac{1}{N^{2}}\left(\sum_{i=1}^{N}\sum_{j=1}^{N}\log D_{ij} \right)
+$$
+with $D_{ij}$ denoting the bilateral distance, $N$ the number of countries and $(MWR)_{D_{ij}}$ the transformed variable adjusted for multilateral resistances.
+
+When using weighted averages (BVW), the simple averages are replaced by GDP weights. The transformed variables are included as independent variables in the estimation. The resulting equation can be estimated by simple OLS.
+
+An example of how to apply the functions bvu and bvw to an example dataset in gravity and the resulting output is shown in the following:
+
+```{r bvu}
+fit2 <- bvu(
+    dependent_variable = "flow",
+    distance = "distw",
+    additional_regressors = c("rta", "contig", "comcur"),
+    income_origin = "gdp_o",
+    income_destination = "gdp_d",
+    code_origin = "iso_o",
+    code_destination = "iso_d",
+    data = gravity_no_zeros
+  )
+
+tidy(fit2)
+glance(fit2)
+```
+
+```{r bvw}
+fit3 <- bvw(
+    dependent_variable = "flow",
+    distance = "distw",
+    additional_regressors = c("rta", "comcur", "contig"),
+    income_origin = "gdp_o",
+    income_destination = "gdp_d",
+    code_origin = "iso_o",
+    code_destination = "iso_d",
+    data = gravity_no_zeros
+  )
+
+tidy(fit3)
+glance(fit3)
+```
+
+# References
 
 \insertRef{Head2014}{gravity}
 \insertRef{WoelwerBressleinBurgard2018}{gravity}
