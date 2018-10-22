@@ -38,7 +38,7 @@ Multiplicative models are covered with a log-link and different families of dist
 
 All functions named estimate gravity models, but they differ in whether they estimate them in their additive or multiplicative form, their requirements and assumptions with respect to data, their handling of Multilateral Resistance terms as well as their possibilities concerning the inclusion of unilateral independent variables. Therefore, they normally lead to different estimation results. We refer the user to the [Gravity Cookbook website](https://sites.google.com/site/hiegravity/) for more information on gravity models in general.
 
-Head and Mayer (2014) provide a comprehensive and accessible overview of the theoretical and empirical development of the gravity literature as well as the use of gravity models and the various estimation methods, especially their merits and potential problems regarding applicability as well as different datasets. In order to have a straightforward application of all methods, the package comes with two example dataset, one including and the other one excluding zero trade flows.
+Head and Mayer (2014) provide a comprehensive and accessible overview of the theoretical and empirical development of the gravity literature as well as the use of gravity models and the various estimation methods, especially their merits and potential problems regarding applicability as well as different datasets. In order to have a straightforward application of all methods, the package comes with two example datasets, one including and the other one excluding zero trade flows.
 
 Examples utilizing these dataset are included in the description of the methods. As the range of gravity models and their suitable estimation methods is huge and specific to data and research question at hand, the functions are kept simple such that researchers can utilize them as a starting point of their research and get familiar with them.
 
@@ -68,6 +68,13 @@ install.packages("gravity")
 # Install new version from GitHub
 devtools::install_github("pachamaltese/gravity")
 ```
+
+Community guidelines
+--------------------
+
+If you want to contribute to the software, report issues or problems with the software, please fork the repo and send us a Pull Request or open an issue. We are happy to receive ideas and we would do our best to coordinate efforts and improve this package without reinventing the wheel.
+
+If you seek support or have questions you can start a thread on the issues section, or you can email us but we prefer open issues as probably more users have the same questions as you.
 
 References
 ----------
