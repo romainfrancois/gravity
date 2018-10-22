@@ -268,8 +268,12 @@ ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s00181-012-0576-2'>10.1007/
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Example for CRAN checks:</span>
 <span class='co'># Executable in &lt; 5 sec</span>
-<span class='fu'>library</span>(<span class='no'>dplyr</span>)
-<span class='fu'>data</span>(<span class='st'>"gravity_no_zeros"</span>)
+<span class='fu'>library</span>(<span class='no'>dplyr</span>)</div><div class='output co'>#&gt; <span class='message'></span>
+#&gt; <span class='message'>Attaching package: ‘dplyr’</span></div><div class='output co'>#&gt; <span class='message'>The following objects are masked from ‘package:stats’:</span>
+#&gt; <span class='message'></span>
+#&gt; <span class='message'>    filter, lag</span></div><div class='output co'>#&gt; <span class='message'>The following objects are masked from ‘package:base’:</span>
+#&gt; <span class='message'></span>
+#&gt; <span class='message'>    intersect, setdiff, setequal, union</span></div><div class='input'><span class='fu'>data</span>(<span class='st'>"gravity_no_zeros"</span>)
 
 <span class='co'># Choose 5 countries for testing</span>
 <span class='no'>countries_chosen</span> <span class='kw'>&lt;-</span> <span class='fu'>c</span>(<span class='st'>"AUS"</span>, <span class='st'>"CHN"</span>, <span class='st'>"GBR"</span>, <span class='st'>"BRA"</span>, <span class='st'>"CAN"</span>)

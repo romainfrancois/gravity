@@ -80,4 +80,10 @@ install.packages("gravity")
 devtools::install_github("pachamaltese/gravity")
 ```
 
+## Community guidelines
+
+If you want to contribute to the software, report issues or problems with the software, please fork the repo and send us a Pull Request or open an issue. We are happy to receive ideas and we would do our best to coordinate efforts and improve this package without reinventing the wheel.
+
+If you seek support or have questions you can start a thread on the issues section, or you can email us but we prefer open issues as probably more users have the same questions as you.
+
 ## References
