@@ -139,8 +139,10 @@ ek_tobit <- function(dependent_variable,
     stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
   }
 
-  stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
-
+  valid_destination <- data %>% select(code_destination) %>% distinct() %>% as_vector()
+  
+  stopifnot(is.character(code_destination), code_destination %in% colnames(data), length(code_destination) == 1)
+  
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
     filter_at(vars(!!sym(distance)), any_vars(!!sym(distance) > 0)) %>%

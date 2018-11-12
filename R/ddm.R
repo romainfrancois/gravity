@@ -126,8 +126,8 @@ ddm <- function(dependent_variable,
     stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
   }
 
-  stopifnot(is.character(code_origin) | code_origin %in% colnames(data) | length(code_origin) == 1)
-  stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
+  stopifnot(is.character(code_origin), code_origin %in% names(data), length(code_origin) == 1)
+  stopifnot(is.character(code_destination), code_destination %in% names(data), length(code_destination) == 1)
 
   # Discarding unusable observations ----------------------------------------
   d <- data %>%

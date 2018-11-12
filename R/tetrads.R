@@ -152,11 +152,14 @@ tetrads <- function(dependent_variable,
     stopifnot(is.character(additional_regressors), all(additional_regressors %in% colnames(data)))
   }
 
-  stopifnot(is.character(code_origin) | code_origin %in% colnames(data) | length(code_origin) == 1)
-  stopifnot(is.character(code_destination) | code_destination %in% colnames(data) | length(code_destination) == 1)
+  stopifnot(is.character(code_origin), code_origin %in% colnames(data), length(code_origin) == 1)
+  stopifnot(is.character(code_destination), code_destination %in% colnames(data), length(code_destination) == 1)
 
-  stopifnot(is.character(filter_origin) | filter_origin %in% data[, code_origin] | length(filter_origin) == 1)
-  stopifnot(is.character(filter_destination) | filter_destination %in% data[, code_destination] | length(filter_destination) == 1)
+  valid_origin <- data %>% select(code_origin) %>% distinct() %>% as_vector()
+  valid_destination <- data %>% select(code_destination) %>% distinct() %>% as_vector()
+  
+  stopifnot(is.character(filter_origin), filter_origin %in% valid_origin, length(filter_origin) == 1)
+  stopifnot(is.character(filter_destination), filter_destination %in% valid_destination, length(filter_destination) == 1)
 
   # Discarding unusable observations ----------------------------------------
   d <- data %>%
