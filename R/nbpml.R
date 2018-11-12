@@ -156,9 +156,15 @@ nbpml <- function(dependent_variable,
   
   form <- stats::as.formula(paste("y_nbpml", "~", vars))
 
+  # provided we are fitting a Negative Binomial we start assuming
+  # that theta = 1 which is a "neutral" measure of overdispersion with respect to the Poisson distribution
+  # otherwise glm.nb assumes theta = NULL and fits a Poisson with warning provided the data is not discrete
+  # nor we are fitting a counting model
+  
   model_nbpml <- MASS::glm.nb(form,
     data = d,
-    link = "log"
+    link = "log",
+    init.theta = 1
   )
 
   if (robust == TRUE) {
