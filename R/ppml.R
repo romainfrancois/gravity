@@ -40,7 +40,7 @@
 #' see \insertCite{Egger2003;textual}{gravity}, \insertCite{Gomez-Herrera2013;textual}{gravity} and
 #' \insertCite{Head2010;textual}{gravity} as well as the references therein.
 #'
-#' @param dependent_variable (Type: character) name of the dependent variable. This variable is logged and then used as 
+#' @param dependent_variable (Type: character) name of the dependent variable. This variable is used as 
 #' the dependent variable in the estimation.
 #'
 #' @param distance (Type: character) name of the distance variable that should be taken as the key independent variable 

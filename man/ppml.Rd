@@ -8,7 +8,7 @@ ppml(dependent_variable, distance, additional_regressors, robust = TRUE,
   data, ...)
 }
 \arguments{
-\item{dependent_variable}{(Type: character) name of the dependent variable. This variable is logged and then used as 
+\item{dependent_variable}{(Type: character) name of the dependent variable. This variable is used as 
 the dependent variable in the estimation.}
 
 \item{distance}{(Type: character) name of the distance variable that should be taken as the key independent variable 
