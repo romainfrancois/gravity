@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.1</span>
       </span>
     </div>
 
@@ -76,7 +76,7 @@
       <h1>A crash course on gravity models</h1>
                         <h4 class="author">Mauricio Vargas</h4>
             
-            <h4 class="date">2019-01-15</h4>
+            <h4 class="date">2019-01-24</h4>
       
       
       <div class="hidden name"><code>crash-course-on-gravity-models.Rmd</code></div>
@@ -156,18 +156,18 @@ P_{i}^{1-\sigma}=\sum_{j}\frac{t_{ij}^{1-\sigma}}{\Pi_{j}^{1-\sigma}}\frac{Y_{j}
 <p>One subtracts the mean value for the origin country and the mean value for the destination country and adds the overall mean value to the logged trade flows. This procedure is repeated for all dependent and independent variables. The transformed variables are then used for the estimation.</p>
 <p>DDM is easily applied, but, as shown in , its very sensitive to missing data.</p>
 <p>An example of how to apply the function ddm to an example dataset in gravity and the resulting output is shown in the following:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(gravity)</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1-3" data-line-number="3">fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/ddm.html">ddm</a></span>(</a>
-<a class="sourceLine" id="cb1-4" data-line-number="4">    <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,</a>
-<a class="sourceLine" id="cb1-5" data-line-number="5">    <span class="dt">distance =</span> <span class="st">"distw"</span>,</a>
-<a class="sourceLine" id="cb1-6" data-line-number="6">    <span class="dt">additional_regressors =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"rta"</span>, <span class="st">"comcur"</span>, <span class="st">"contig"</span>),</a>
-<a class="sourceLine" id="cb1-7" data-line-number="7">    <span class="dt">code_origin =</span> <span class="st">"iso_o"</span>,</a>
-<a class="sourceLine" id="cb1-8" data-line-number="8">    <span class="dt">code_destination =</span> <span class="st">"iso_d"</span>,</a>
-<a class="sourceLine" id="cb1-9" data-line-number="9">    <span class="dt">data =</span> gravity_no_zeros</a>
-<a class="sourceLine" id="cb1-10" data-line-number="10">  )</a>
-<a class="sourceLine" id="cb1-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(fit)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(gravity)
+
+fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/ddm.html">ddm</a></span>(
+    <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
+    <span class="dt">distance =</span> <span class="st">"distw"</span>,
+    <span class="dt">additional_regressors =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"rta"</span>, <span class="st">"comcur"</span>, <span class="st">"contig"</span>),
+    <span class="dt">code_origin =</span> <span class="st">"iso_o"</span>,
+    <span class="dt">code_destination =</span> <span class="st">"iso_d"</span>,
+    <span class="dt">data =</span> gravity_no_zeros
+  )
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(fit)</code></pre></div>
 <pre><code>## 
 ## Call:
 ## y_log_ddm ~ dist_log_ddm + rta_ddm + comcur_ddm + contig_ddm + 
@@ -190,9 +190,9 @@ P_{i}^{1-\sigma}=\sum_{j}\frac{t_{ij}^{1-\sigma}}{\Pi_{j}^{1-\sigma}}\frac{Y_{j}
 ## Multiple R-squared:  0.2541, Adjusted R-squared:  0.254 
 ## F-statistic:  1455 on 4 and 17084 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>The package returns lm or glm objects instead of summaries. Doing that allows to use our functions in conjunction with broom or other packages, for example:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(broom)</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(broom)
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit)</code></pre></div>
 <pre><code>## # A tibble: 4 x 5
 ##   term         estimate std.error statistic  p.value
 ##   &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
@@ -200,13 +200,13 @@ P_{i}^{1-\sigma}=\sum_{j}\frac{t_{ij}^{1-\sigma}}{\Pi_{j}^{1-\sigma}}\frac{Y_{j}
 ## 2 rta_ddm         0.797    0.0700     11.4  6.54e-30
 ## 3 comcur_ddm      0.174    0.146       1.19 2.34e- 1
 ## 4 contig_ddm      1.00     0.120       8.36 6.62e-17</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">glance</a></span>(fit)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">glance</a></span>(fit)</code></pre></div>
 <pre><code>## # A tibble: 1 x 11
 ##   r.squared adj.r.squared sigma statistic p.value    df  logLik    AIC
 ##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt;
 ## 1     0.254         0.254  2.32     1455.       0     4 -38611. 77232.
 ## # … with 3 more variables: BIC &lt;dbl&gt;, deviance &lt;dbl&gt;, df.residual &lt;int&gt;</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">augment</a></span>(fit)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">augment</a></span>(fit)</code></pre></div>
 <pre><code>## # A tibble: 17,088 x 12
 ##    y_log_ddm dist_log_ddm rta_ddm comcur_ddm contig_ddm  .fitted .se.fit
 ##        &lt;dbl&gt;        &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;
@@ -226,62 +226,62 @@ P_{i}^{1-\sigma}=\sum_{j}\frac{t_{ij}^{1-\sigma}}{\Pi_{j}^{1-\sigma}}\frac{Y_{j}
 <div id="bonus-vetus" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bonus-vetus" class="anchor"></a>Bonus Vetus</h2>
-<p><span class="citation">Baier and Bergstrand (2010)</span> suggest a modification of the simple OLS that is easily implemented, allows for comparative statics and yields results close to those of NLS, called Bonus vetus OLS (BVU and BVW). They estimate gravity models in their additive form.</p>
+<p><span class="citation">S. L. Baier and Bergstrand (2010)</span> suggest a modification of the simple OLS that is easily implemented, allows for comparative statics and yields results close to those of NLS, called Bonus vetus OLS (BVU and BVW). They estimate gravity models in their additive form.</p>
 <p>As unilateral income elasticities are assumed, flows are divided by the product of unilateral incomes. The dependent variable for the estimation is therefore <span class="math display">\[\log\left(\frac{y}{inc_{o} \: inc_{d}}\right).\]</span></p>
 <p>By applying a Taylor-series expansion and the assumption of symmetrical, bilateral trade costs, they develop a reduced gravity model in which multilateral and worldwide resistance enter exogenously.</p>
-<p><span class="citation">Baier and Bergstrand (2010)</span> distinguish two types of Bonus vetus estimations depending on how the Taylor-series is centered. One method, called BVU, uses simple averages while the other, called BVW, uses GDP weights. Depending on which method is used, the transaction costs are weighted differently. For advantages and disadvantages of both methods see <span class="citation">Baier and Bergstrand (2009)</span> and <span class="citation">Baier and Bergstrand (2010)</span>.</p>
+<p><span class="citation">S. L. Baier and Bergstrand (2010)</span> distinguish two types of Bonus vetus estimations depending on how the Taylor-series is centered. One method, called BVU, uses simple averages while the other, called BVW, uses GDP weights. Depending on which method is used, the transaction costs are weighted differently. For advantages and disadvantages of both methods see <span class="citation">Scott L. Baier and Bergstrand (2009)</span> and <span class="citation">S. L. Baier and Bergstrand (2010)</span>.</p>
 <p>To give an example with simple averages (BVU), distance would be transformed to Multilateral and World Resistance in the following way: <span class="math display">\[
 MWR_{ij} = \frac{1}{N}\left(\sum_{i=1}^{N}\log D_{ij} \right)+\frac{1}{N}\left(\sum_{j=1}^{N}\log D_{ij} \right)-\frac{1}{N^{2}}\left(\sum_{i=1}^{N}\sum_{j=1}^{N}\log D_{ij} \right)
 \]</span> with <span class="math inline">\(D_{ij}\)</span> denoting the bilateral distance, <span class="math inline">\(N\)</span> the number of countries and <span class="math inline">\((MWR)_{D_{ij}}\)</span> the transformed variable adjusted for multilateral resistances.</p>
 <p>When using weighted averages (BVW), the simple averages are replaced by GDP weights. The transformed variables are included as independent variables in the estimation. The resulting equation can be estimated by simple OLS.</p>
 <p>An example of how to apply the functions bvu and bvw to an example dataset in gravity and the resulting output is shown in the following:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">fit2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bvu.html">bvu</a></span>(</a>
-<a class="sourceLine" id="cb9-2" data-line-number="2">    <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,</a>
-<a class="sourceLine" id="cb9-3" data-line-number="3">    <span class="dt">distance =</span> <span class="st">"distw"</span>,</a>
-<a class="sourceLine" id="cb9-4" data-line-number="4">    <span class="dt">additional_regressors =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"rta"</span>, <span class="st">"contig"</span>, <span class="st">"comcur"</span>),</a>
-<a class="sourceLine" id="cb9-5" data-line-number="5">    <span class="dt">income_origin =</span> <span class="st">"gdp_o"</span>,</a>
-<a class="sourceLine" id="cb9-6" data-line-number="6">    <span class="dt">income_destination =</span> <span class="st">"gdp_d"</span>,</a>
-<a class="sourceLine" id="cb9-7" data-line-number="7">    <span class="dt">code_origin =</span> <span class="st">"iso_o"</span>,</a>
-<a class="sourceLine" id="cb9-8" data-line-number="8">    <span class="dt">code_destination =</span> <span class="st">"iso_d"</span>,</a>
-<a class="sourceLine" id="cb9-9" data-line-number="9">    <span class="dt">data =</span> gravity_no_zeros</a>
-<a class="sourceLine" id="cb9-10" data-line-number="10">  )</a>
-<a class="sourceLine" id="cb9-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb9-12" data-line-number="12"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit2)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bvu.html">bvu</a></span>(
+    <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
+    <span class="dt">distance =</span> <span class="st">"distw"</span>,
+    <span class="dt">additional_regressors =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"rta"</span>, <span class="st">"contig"</span>, <span class="st">"comcur"</span>),
+    <span class="dt">income_origin =</span> <span class="st">"gdp_o"</span>,
+    <span class="dt">income_destination =</span> <span class="st">"gdp_d"</span>,
+    <span class="dt">code_origin =</span> <span class="st">"iso_o"</span>,
+    <span class="dt">code_destination =</span> <span class="st">"iso_d"</span>,
+    <span class="dt">data =</span> gravity_no_zeros
+  )
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit2)</code></pre></div>
 <pre><code>## # A tibble: 5 x 5
 ##   term        estimate std.error statistic  p.value
 ##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-## 1 (Intercept)    7.47     0.0192    389.   0.      
+## 1 (Intercept)  -20.2      0.0192  -1051.   0.      
 ## 2 dist_log_mr   -1.69     0.0359    -47.0  0.      
 ## 3 rta_mr         0.582    0.0793      7.35 2.12e-13
 ## 4 contig_mr      1.00     0.131       7.62 2.75e-14
 ## 5 comcur_mr      0.191    0.167       1.14 2.53e- 1</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">glance</a></span>(fit2)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">glance</a></span>(fit2)</code></pre></div>
 <pre><code>## # A tibble: 1 x 11
 ##   r.squared adj.r.squared sigma statistic p.value    df  logLik    AIC
 ##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt;
 ## 1     0.229         0.229  2.51     1271.       0     5 -39958. 79928.
 ## # … with 3 more variables: BIC &lt;dbl&gt;, deviance &lt;dbl&gt;, df.residual &lt;int&gt;</code></pre>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1">fit3 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bvw.html">bvw</a></span>(</a>
-<a class="sourceLine" id="cb13-2" data-line-number="2">    <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,</a>
-<a class="sourceLine" id="cb13-3" data-line-number="3">    <span class="dt">distance =</span> <span class="st">"distw"</span>,</a>
-<a class="sourceLine" id="cb13-4" data-line-number="4">    <span class="dt">additional_regressors =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"rta"</span>, <span class="st">"comcur"</span>, <span class="st">"contig"</span>),</a>
-<a class="sourceLine" id="cb13-5" data-line-number="5">    <span class="dt">income_origin =</span> <span class="st">"gdp_o"</span>,</a>
-<a class="sourceLine" id="cb13-6" data-line-number="6">    <span class="dt">income_destination =</span> <span class="st">"gdp_d"</span>,</a>
-<a class="sourceLine" id="cb13-7" data-line-number="7">    <span class="dt">code_origin =</span> <span class="st">"iso_o"</span>,</a>
-<a class="sourceLine" id="cb13-8" data-line-number="8">    <span class="dt">code_destination =</span> <span class="st">"iso_d"</span>,</a>
-<a class="sourceLine" id="cb13-9" data-line-number="9">    <span class="dt">data =</span> gravity_no_zeros</a>
-<a class="sourceLine" id="cb13-10" data-line-number="10">  )</a>
-<a class="sourceLine" id="cb13-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb13-12" data-line-number="12"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit3)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit3 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bvw.html">bvw</a></span>(
+    <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
+    <span class="dt">distance =</span> <span class="st">"distw"</span>,
+    <span class="dt">additional_regressors =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"rta"</span>, <span class="st">"comcur"</span>, <span class="st">"contig"</span>),
+    <span class="dt">income_origin =</span> <span class="st">"gdp_o"</span>,
+    <span class="dt">income_destination =</span> <span class="st">"gdp_d"</span>,
+    <span class="dt">code_origin =</span> <span class="st">"iso_o"</span>,
+    <span class="dt">code_destination =</span> <span class="st">"iso_d"</span>,
+    <span class="dt">data =</span> gravity_no_zeros
+  )
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit3)</code></pre></div>
 <pre><code>## # A tibble: 5 x 5
 ##   term        estimate std.error statistic   p.value
 ##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-## 1 (Intercept)    7.26     0.0546    133.   0.       
+## 1 (Intercept)  -20.4      0.0546   -373.   0.       
 ## 2 dist_log_mr   -0.634    0.0257    -24.7  1.09e-132
 ## 3 rta_mr         1.31     0.0670     19.5  4.07e- 84
 ## 4 comcur_mr     -0.896    0.142      -6.31 2.86e- 10
 ## 5 contig_mr      1.38     0.126      10.9  1.11e- 27</code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">glance</a></span>(fit3)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">glance</a></span>(fit3)</code></pre></div>
 <pre><code>## # A tibble: 1 x 11
 ##   r.squared adj.r.squared sigma statistic p.value    df  logLik    AIC
 ##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt;
@@ -292,19 +292,19 @@ MWR_{ij} = \frac{1}{N}\left(\sum_{i=1}^{N}\log D_{ij} \right)+\frac{1}{N}\left(\
 <div id="references" class="section level1">
 <h1 class="hasAnchor">
 <a href="#references" class="anchor"></a>References</h1>
-
+<p> </p>
 <div id="refs" class="references">
-<div id="ref-Baier2009">
-<p>Baier, Scott L., and Jeffrey H. Bergstrand. 2009. “Bonus Vetus Ols: A Simple Method for Approximating International Trade-Cost Effects Using the Gravity Equation.” <em>Journal of International Economics</em> 77 (1): 77–85. <a href="https://doi.org/10.1016/j.jinteco.2008.10.004">https://doi.org/10.1016/j.jinteco.2008.10.004</a>.</p>
-</div>
 <div id="ref-Baier2010">
-<p>Baier, S. L., and J. H. Bergstrand. 2010. “The Gravity Model in International Trade: Advances and Applications.” In, edited by Peter A. G. van Bergeijk and StevenEditors Brakman. Cambridge University Press. <a href="https://doi.org/10.1017/CBO9780511762109">https://doi.org/10.1017/CBO9780511762109</a>.</p>
+<p>Baier, S. L., and J. H. Bergstrand. 2010. “The Gravity Model in International Trade: Advances and Applications.” In, edited by Peter A. G. van Bergeijk and StevenEditors Brakman. Cambridge University Press. doi:<a href="https://doi.org/10.1017/CBO9780511762109">10.1017/CBO9780511762109</a>.</p>
+</div>
+<div id="ref-Baier2009">
+<p>Baier, Scott L., and Jeffrey H. Bergstrand. 2009. “Bonus Vetus Ols: A Simple Method for Approximating International Trade-Cost Effects Using the Gravity Equation.” <em>Journal of International Economics</em> 77 (1): 77–85. doi:<a href="https://doi.org/10.1016/j.jinteco.2008.10.004">10.1016/j.jinteco.2008.10.004</a>.</p>
 </div>
 <div id="ref-Head2014">
-<p>Head, Keith, and Thierry Mayer. 2014. “Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.” In <em>Handbook of International Economics</em>, edited by Gita Gopinath, Elhanan Helpman, and Kenneth Rogoff, 4:131–95. Handbook of International Economics. Elsevier. <a href="https://doi.org/10.1016/B978-0-444-54314-1.00003-3">https://doi.org/10.1016/B978-0-444-54314-1.00003-3</a>.</p>
+<p>Head, Keith, and Thierry Mayer. 2014. “Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.” In <em>Handbook of International Economics</em>, edited by Gita Gopinath, Elhanan Helpman, and Kenneth Rogoff, 4:131–95. Handbook of International Economics. Elsevier. doi:<a href="https://doi.org/10.1016/B978-0-444-54314-1.00003-3">10.1016/B978-0-444-54314-1.00003-3</a>.</p>
 </div>
 <div id="ref-WoelwerBressleinBurgard2018">
-<p>Wölwer, Anna-Lena, Martin Breßlein, and Jan Pablo Burgard. 2018. “Gravity Models in R.” <em>Austrian Journal of Statistics</em> 47 (4): 16–35. <a href="https://doi.org/10.17713/ajs.v47i4.688">https://doi.org/10.17713/ajs.v47i4.688</a>.</p>
+<p>Wölwer, Anna-Lena, Martin Breßlein, and Jan Pablo Burgard. 2018. “Gravity Models in R.” <em>Austrian Journal of Statistics</em> 47 (4): 16–35. doi:<a href="https://doi.org/10.17713/ajs.v47i4.688">10.17713/ajs.v47i4.688</a>.</p>
 </div>
 </div>
 </div>
