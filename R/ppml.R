@@ -165,15 +165,8 @@ ppml <- function(dependent_variable,
   )
 
   if (robust == TRUE) {
-    if (exists(cluster)) {
-      model_ppml_robust <- lmtest::coeftest(model_ppml,
-        vcov = sandwich::vcovHC(model_ppml, type = "HC1", cluster = cluster)
-      )
-    } else {
-      model_ppml_robust <- lmtest::coeftest(model_ppml,
-        vcov = sandwich::vcovHC(model_ppml, type = "HC1")
-      )
-    }
+    model_ppml_robust <- lmtest::coeftest(model_ppml,
+        vcov = sandwich::vcovHC(model_ppml, type = "HC1", ...))
 
     model_ppml$coefficients <- model_ppml_robust[1:length(rownames(model_ppml_robust)), ]
   }
