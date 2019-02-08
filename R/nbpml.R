@@ -176,7 +176,7 @@ nbpml <- function(dependent_variable,
   }
 
   model_nbpml$call <- form
-  class(model_nbpml) <- c(class(model_nbpml), "nbpml")
+  class(model_nbpml) <- c(class(model_nbpml), "gravity_nbpml")
 
   return(model_nbpml)
 }

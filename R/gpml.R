@@ -179,7 +179,7 @@ gpml <- function(dependent_variable,
   }
 
   model_gpml$call <- form
-  class(model_gpml) <- c(class(model_gpml), "gpml")
+  class(model_gpml) <- c(class(model_gpml), "gravity_gpml")
 
   return(model_gpml)
 }

@@ -232,10 +232,7 @@ hm_summary <- function(model, robust = FALSE, ...) {
   }
 
   # Remove R-sq and F statistic for particular classes ----------------------
-  particular_class <- class(model) %in% c("gpml", "nbpml", "negbin", "nls")
-  if (any(particular_class) == TRUE) {
-    particular_class <- TRUE
-  }
+  particular_class <- any(class(model) %in% paste0("gravity_", c("gpml", "nbpml", "nls")))
 
   if (particular_class == TRUE) {
     ans$r.squared <- NULL

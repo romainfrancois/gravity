@@ -4,8 +4,8 @@
 \alias{nls}
 \title{Non-linear Least Squares (NLS)}
 \usage{
-nls(dependent_variable, distance, additional_regressors = NULL,
-  robust = FALSE, data, ...)
+nls(dependent_variable, distance, additional_regressors = NULL, data,
+  ...)
 }
 \arguments{
 \item{dependent_variable}{(Type: character) name of the dependent variable. This variable is logged and then used as 
@@ -19,8 +19,6 @@ variable to indicate contiguity). Unilateral metric variables such as GDPs can b
 logged first. Interaction terms can be added.
 
 Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.}
-
-\item{robust}{(Type: logical) whether robust fitting should be used. By default this is set to \code{FALSE}.}
 
 \item{data}{(Type: data.frame) the dataset to be used.}
 
@@ -95,7 +93,6 @@ fit <- nls(
   dependent_variable = "flow",
   distance = "distw",
   additional_regressors = c("rta", "lgdp_o", "lgdp_d"),
-  robust = FALSE,
   data = grav_small
 )
 
