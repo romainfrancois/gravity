@@ -229,6 +229,5 @@ bvw <- function(dependent_variable,
   }
   
   model_bvw$call <- form
-
   return(model_bvw)
 }

@@ -187,6 +187,5 @@ nls <- function(dependent_variable,
 
   model_nls$call <- form
   class(model_nls) <- c(class(model_nls), "gravity_nls")
-
   return(model_nls)
 }

@@ -200,6 +200,5 @@ ek_tobit <- function(dependent_variable,
   )
   
   model_ek_tobit$call <- form
-  
   return(model_ek_tobit)
 }

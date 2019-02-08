@@ -49,8 +49,6 @@
 #'
 #' Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.
 #'
-#' @param robust (Type: logical) whether robust fitting should be used. By default this is set to \code{FALSE}.
-#'
 #' @param data (Type: data.frame) the dataset to be used.
 #'
 #' @param ... Additional arguments to be passed to the function.
@@ -109,7 +107,6 @@
 #'   dependent_variable = "flow",
 #'   distance = "distw",
 #'   additional_regressors = c("rta", "iso_o", "iso_d"),
-#'   robust = FALSE,
 #'   data = grav_small
 #' )
 #'
@@ -125,11 +122,9 @@
 gpml <- function(dependent_variable,
                  distance,
                  additional_regressors,
-                 robust = FALSE,
                  data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.logical(robust))
 
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
 
@@ -170,16 +165,7 @@ gpml <- function(dependent_variable,
     control = list(maxit = 200, trace = FALSE)
   )
 
-  if (robust == TRUE) {
-    model_gpml_robust <- lmtest::coeftest(model_gpml,
-      vcov = sandwich::vcovHC(model_gpml, "HC1")
-    )
-
-    model_gpml$coefficients <- model_gpml_robust[seq_along(rownames(model_gpml_robust)), ]
-  }
-
   model_gpml$call <- form
   class(model_gpml) <- c(class(model_gpml), "gravity_gpml")
-
   return(model_gpml)
 }

@@ -200,6 +200,5 @@ et_tobit <- function(dependent_variable,
   )
   
   model_et_tobit$call <- form
-
   return(model_et_tobit)
 }

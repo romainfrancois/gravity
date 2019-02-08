@@ -57,11 +57,6 @@
 #'
 #' @param filter_destination (Type: character) Reference importing country.
 #'
-#' @param multiway (Type: logical) in case \code{multiway = TRUE}, the
-#' \code{\link[multiwayvcov]{cluster.vcov}} function is used for estimation following
-#' \insertCite{Cameron2011;textual}{gravity} multi-way clustering of
-#' variance-covariance matrices. The default value is set to \code{TRUE}.
-#'
 #' @param data (Type: data.frame) the dataset to be used.
 #'
 #' @param ... Additional arguments to be passed to the function.
@@ -118,7 +113,6 @@
 #'   code_destination = "iso_d",
 #'   filter_origin = countries_chosen[1],
 #'   filter_destination = countries_chosen[2],
-#'   multiway = FALSE,
 #'   data = grav_small
 #' )
 #'
@@ -127,7 +121,6 @@
 #' \code{\link[stats]{lm}}-object.
 #'
 #' @seealso \code{\link[stats]{lm}}, \code{\link[lmtest]{coeftest}},
-#' \code{\link[multiwayvcov]{cluster.vcov}}
 #'
 #' @export
 
@@ -138,11 +131,9 @@ tetrads <- function(dependent_variable,
                     code_destination,
                     filter_origin = NULL,
                     filter_destination = NULL,
-                    multiway = TRUE,
                     data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.logical(multiway))
 
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
 
@@ -280,12 +271,6 @@ tetrads <- function(dependent_variable,
   model_tetrads <- stats::lm(form, data = d2)
 
   # Return ---------------------------------------------------------------------
-  if (multiway == TRUE) {
-    model_tetrads_vcov <- multiwayvcov::cluster.vcov(model = model_tetrads, cluster = form2)
-    model_tetrads_robust <- lmtest::coeftest(x = model_tetrads, vcov = model_tetrads_vcov)
-    model_tetrads$coefficients <- model_tetrads_robust[1:length(rownames(model_tetrads_robust)), ]
-  }
-
   model_tetrads$call <- form
   return(model_tetrads)
 }

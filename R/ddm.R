@@ -215,6 +215,5 @@ ddm <- function(dependent_variable,
   }
   
   model_ddm$call <- form
-
   return(model_ddm)
 }

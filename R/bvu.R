@@ -218,6 +218,5 @@ bvu <- function(dependent_variable,
   }
   
   model_bvu$call <- form
-
   return(model_bvu)
 }
