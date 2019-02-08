@@ -119,7 +119,6 @@ nbpml <- function(dependent_variable,
                   data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
-  stopifnot(is.logical(robust))
 
   stopifnot(is.character(dependent_variable), dependent_variable %in% colnames(data), length(dependent_variable) == 1)
 
