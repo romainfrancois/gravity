@@ -57,6 +57,11 @@
 #'
 #' @param filter_destination (Type: character) Reference importing country.
 #'
+#' @param multiway (Type: logical) in case \code{multiway = TRUE}, the
+#' \code{\link[multiwayvcov]{cluster.vcov}} function is used for estimation following
+#' \insertCite{Cameron2011;textual}{gravity} multi-way clustering of
+#' variance-covariance matrices. The default value is set to \code{TRUE}.
+#' 
 #' @param data (Type: data.frame) the dataset to be used.
 #'
 #' @param ... Additional arguments to be passed to the function.
@@ -131,6 +136,7 @@ tetrads <- function(dependent_variable,
                     code_destination,
                     filter_origin = NULL,
                     filter_destination = NULL,
+                    multiway = FALSE,
                     data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
@@ -270,7 +276,20 @@ tetrads <- function(dependent_variable,
   
   model_tetrads <- stats::lm(form, data = d2)
 
+  # Multiway Variance-Covariance -----------------------------------------------
+  if (multiway == TRUE) {
+    model_tetrads_multiway <- lmtest::coeftest(
+      model_tetrads,
+      vcov = sandwich::vcovHC(model_tetrads, "HC1")
+    )
+  }
+  
   # Return ---------------------------------------------------------------------
-  model_tetrads$call <- form
-  return(model_tetrads)
+  if (multiway == FALSE) {
+    model_tetrads$call <- form
+    return(model_tetrads)
+  } else {
+    #model_tetrads_multiway$call <- form
+    return(model_tetrads_multiway)
+  }
 }

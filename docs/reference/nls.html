@@ -64,7 +64,7 @@ multiplicative form via Nonlinear Least Squares." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.4</span>
       </span>
     </div>
 
@@ -122,8 +122,8 @@ multiplicative form via Nonlinear Least Squares.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>nls</span>(<span class='no'>dependent_variable</span>, <span class='no'>distance</span>, <span class='kw'>additional_regressors</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>data</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>nls</span>(<span class='no'>dependent_variable</span>, <span class='no'>distance</span>, <span class='kw'>additional_regressors</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>data</span>,
+  <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -144,10 +144,6 @@ in the estimation. The distance is logged automatically when the function is exe
 variable to indicate contiguity). Unilateral metric variables such as GDPs can be added but those variables have to be 
 logged first. Interaction terms can be added.</p>
 <p>Write this argument as <code>c(contiguity, common currency, ...)</code>. By default this is set to <code>NULL</code>.</p></td>
-    </tr>
-    <tr>
-      <th>robust</th>
-      <td><p>(Type: logical) whether robust fitting should be used. By default this is set to <code>FALSE</code>.</p></td>
     </tr>
     <tr>
       <th>data</th>
@@ -292,7 +288,6 @@ ISSN 1435-8921, doi: <a href='http://doi.org/10.1007/s00181-012-0576-2'>10.1007/
   <span class='kw'>dependent_variable</span> <span class='kw'>=</span> <span class='st'>"flow"</span>,
   <span class='kw'>distance</span> <span class='kw'>=</span> <span class='st'>"distw"</span>,
   <span class='kw'>additional_regressors</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"rta"</span>, <span class='st'>"lgdp_o"</span>, <span class='st'>"lgdp_d"</span>),
-  <span class='kw'>robust</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>grav_small</span>
 )</div></pre>
   </div>

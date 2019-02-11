@@ -10,6 +10,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom tibble tibble
 #' @importFrom survival Surv
+#' @importFrom multiwayvcov cluster.vcov
 #' @importFrom lmtest coeftest
 #' @importFrom stats lm as.formula glm
 #' @importFrom censReg censReg

@@ -49,6 +49,8 @@
 #'
 #' Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.
 #'
+#' @param robust (Type: logical) whether robust fitting should be used. By default this is set to \code{FALSE}.
+#' 
 #' @param data (Type: data.frame) the dataset to be used.
 #'
 #' @param ... Additional arguments to be passed to the function.
@@ -116,6 +118,7 @@
 nbpml <- function(dependent_variable,
                   distance,
                   additional_regressors,
+                  robust = FALSE,
                   data, ...) {
   # Checks ------------------------------------------------------------------
   stopifnot(is.data.frame(data))
@@ -162,7 +165,19 @@ nbpml <- function(dependent_variable,
     init.theta = 1
   )
   
-  model_nbpml$call <- form
-  class(model_nbpml) <- c(class(model_nbpml), "gravity_nbpml")
-  return(model_nbpml)
+  if (robust == TRUE) {
+    model_nbpml_robust <- lmtest::coeftest(
+      model_nbpml,
+      vcov = sandwich::vcovHC(model_nbpml, type = "HC1", ...)
+    )
+  }
+  
+  if (robust == FALSE) {
+    model_nbpml$call <- form
+    class(model_nbpml) <- c(class(model_nbpml), "gravity_nbpml")
+    return(model_nbpml)
+  } else {
+    class(model_nbpml_robust) <- c(class(model_nbpml_robust), "gravity_nbpml")
+    return(model_nbpml_robust)
+  }
 }

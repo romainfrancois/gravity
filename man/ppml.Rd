@@ -4,7 +4,8 @@
 \alias{ppml}
 \title{Poisson Pseudo Maximum Likelihood (PPML)}
 \usage{
-ppml(dependent_variable, distance, additional_regressors, data, ...)
+ppml(dependent_variable, distance, additional_regressors, robust = FALSE,
+  data, ...)
 }
 \arguments{
 \item{dependent_variable}{(Type: character) name of the dependent variable. This variable is used as 
@@ -18,6 +19,8 @@ variable to indicate contiguity). Unilateral metric variables such as GDPs can b
 logged first. Interaction terms can be added.
 
 Write this argument as \code{c(contiguity, common currency, ...)}. By default this is set to \code{NULL}.}
+
+\item{robust}{(Type: logical) whether robust fitting should be used. By default this is set to \code{FALSE}.}
 
 \item{data}{(Type: data.frame) the dataset to be used.}
 

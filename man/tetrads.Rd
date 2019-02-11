@@ -6,7 +6,7 @@
 \usage{
 tetrads(dependent_variable, distance, additional_regressors, code_origin,
   code_destination, filter_origin = NULL, filter_destination = NULL,
-  data, ...)
+  multiway = FALSE, data, ...)
 }
 \arguments{
 \item{dependent_variable}{(Type: character) name of the dependent variable. This variable is logged and then used as 
@@ -30,6 +30,11 @@ grouped using this parameter.}
 \item{filter_origin}{(Type: character) Reference exporting country.}
 
 \item{filter_destination}{(Type: character) Reference importing country.}
+
+\item{multiway}{(Type: logical) in case \code{multiway = TRUE}, the
+\code{\link[multiwayvcov]{cluster.vcov}} function is used for estimation following
+\insertCite{Cameron2011;textual}{gravity} multi-way clustering of
+variance-covariance matrices. The default value is set to \code{TRUE}.}
 
 \item{data}{(Type: data.frame) the dataset to be used.}
 

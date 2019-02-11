@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gravity</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.4</span>
       </span>
     </div>
 
@@ -76,7 +76,7 @@
       <h1>A crash course on gravity models</h1>
                         <h4 class="author">Mauricio Vargas</h4>
             
-            <h4 class="date">2019-01-24</h4>
+            <h4 class="date">2019-02-11</h4>
       
       
       <div class="hidden name"><code>crash-course-on-gravity-models.Rmd</code></div>
@@ -226,15 +226,15 @@ fit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/ddm.htm
 <div id="bonus-vetus" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bonus-vetus" class="anchor"></a>Bonus Vetus</h2>
-<p><span class="citation">S. L. Baier and Bergstrand (2010)</span> suggest a modification of the simple OLS that is easily implemented, allows for comparative statics and yields results close to those of NLS, called Bonus vetus OLS (BVU and BVW). They estimate gravity models in their additive form.</p>
+<p><span class="citation">S. L. Baier and Bergstrand (2010)</span> suggests a modification of the simple OLS that is easily implemented, allows for comparative statics and yields results close to those of NLS, called Bonus vetus OLS (BVU and BVW). They estimate gravity models in their additive form.</p>
 <p>As unilateral income elasticities are assumed, flows are divided by the product of unilateral incomes. The dependent variable for the estimation is therefore <span class="math display">\[\log\left(\frac{y}{inc_{o} \: inc_{d}}\right).\]</span></p>
 <p>By applying a Taylor-series expansion and the assumption of symmetrical, bilateral trade costs, they develop a reduced gravity model in which multilateral and worldwide resistance enter exogenously.</p>
-<p><span class="citation">S. L. Baier and Bergstrand (2010)</span> distinguish two types of Bonus vetus estimations depending on how the Taylor-series is centered. One method, called BVU, uses simple averages while the other, called BVW, uses GDP weights. Depending on which method is used, the transaction costs are weighted differently. For advantages and disadvantages of both methods see <span class="citation">Scott L. Baier and Bergstrand (2009)</span> and <span class="citation">S. L. Baier and Bergstrand (2010)</span>.</p>
+<p><span class="citation">S. L. Baier and Bergstrand (2010)</span> distinguishes two types of Bonus vetus estimations depending on how the Taylor-series is centered. One method, called BVU, uses simple averages while the other, called BVW, uses GDP weights. Depending on which method is used, the transaction costs are weighted differently. For advantages and disadvantages of both methods see <span class="citation">Scott L. Baier and Bergstrand (2009)</span> and <span class="citation">S. L. Baier and Bergstrand (2010)</span>.</p>
 <p>To give an example with simple averages (BVU), distance would be transformed to Multilateral and World Resistance in the following way: <span class="math display">\[
 MWR_{ij} = \frac{1}{N}\left(\sum_{i=1}^{N}\log D_{ij} \right)+\frac{1}{N}\left(\sum_{j=1}^{N}\log D_{ij} \right)-\frac{1}{N^{2}}\left(\sum_{i=1}^{N}\sum_{j=1}^{N}\log D_{ij} \right)
 \]</span> with <span class="math inline">\(D_{ij}\)</span> denoting the bilateral distance, <span class="math inline">\(N\)</span> the number of countries and <span class="math inline">\((MWR)_{D_{ij}}\)</span> the transformed variable adjusted for multilateral resistances.</p>
 <p>When using weighted averages (BVW), the simple averages are replaced by GDP weights. The transformed variables are included as independent variables in the estimation. The resulting equation can be estimated by simple OLS.</p>
-<p>An example of how to apply the functions bvu and bvw to an example dataset in gravity and the resulting output is shown in the following:</p>
+<p>An example of how to apply the functions <code>bvu</code> and <code>bvw</code> to an example dataset in gravity and the resulting output is shown in the following:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bvu.html">bvu</a></span>(
     <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
     <span class="dt">distance =</span> <span class="st">"distw"</span>,
@@ -255,12 +255,6 @@ MWR_{ij} = \frac{1}{N}\left(\sum_{i=1}^{N}\log D_{ij} \right)+\frac{1}{N}\left(\
 ## 3 rta_mr         0.582    0.0793      7.35 2.12e-13
 ## 4 contig_mr      1.00     0.131       7.62 2.75e-14
 ## 5 comcur_mr      0.191    0.167       1.14 2.53e- 1</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">glance</a></span>(fit2)</code></pre></div>
-<pre><code>## # A tibble: 1 x 11
-##   r.squared adj.r.squared sigma statistic p.value    df  logLik    AIC
-##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt;
-## 1     0.229         0.229  2.51     1271.       0     5 -39958. 79928.
-## # … with 3 more variables: BIC &lt;dbl&gt;, deviance &lt;dbl&gt;, df.residual &lt;int&gt;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit3 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bvw.html">bvw</a></span>(
     <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
     <span class="dt">distance =</span> <span class="st">"distw"</span>,
@@ -281,12 +275,138 @@ MWR_{ij} = \frac{1}{N}\left(\sum_{i=1}^{N}\log D_{ij} \right)+\frac{1}{N}\left(\
 ## 3 rta_mr         1.31     0.0670     19.5  4.07e- 84
 ## 4 comcur_mr     -0.896    0.142      -6.31 2.86e- 10
 ## 5 contig_mr      1.38     0.126      10.9  1.11e- 27</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">glance</a></span>(fit3)</code></pre></div>
-<pre><code>## # A tibble: 1 x 11
-##   r.squared adj.r.squared sigma statistic p.value    df  logLik    AIC
-##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt;
-## 1     0.118         0.118  2.68      574.       0     5 -41106. 82225.
-## # … with 3 more variables: BIC &lt;dbl&gt;, deviance &lt;dbl&gt;, df.residual &lt;int&gt;</code></pre>
+</div>
+<div id="poisson-pseudo-maximum-likelihood-ppml" class="section level2">
+<h2 class="hasAnchor">
+<a href="#poisson-pseudo-maximum-likelihood-ppml" class="anchor"></a>Poisson Pseudo Maximum Likelihood (PPML)</h2>
+<p><span class="citation">Silva and Tenreyro (2006)</span> argue that estimating gravity equations in their additive form by OLS leads to inconsistency in the presence of heteroscedasticity and advice to estimate gravity models in their multiplicative form.</p>
+<p>An example of how to apply the function <code>ppml</code> to an example dataset in gravity and the resulting output is shown in the following:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit4 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/ppml.html">ppml</a></span>(
+    <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
+    <span class="dt">distance =</span> <span class="st">"distw"</span>,
+    <span class="dt">additional_regressors =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"rta"</span>, <span class="st">"comcur"</span>, <span class="st">"contig"</span>),
+    <span class="dt">data =</span> gravity_no_zeros
+  )
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit4)</code></pre></div>
+<pre><code>## # A tibble: 5 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   5.76      0.772      7.47  8.54e-14
+## 2 dist_log      0.0243    0.0873     0.278 7.81e- 1
+## 3 rta           1.27      0.170      7.46  9.20e-14
+## 4 comcur        1.11      0.180      6.15  7.89e-10
+## 5 contig        1.76      0.181      9.69  3.71e-22</code></pre>
+<p>In order to obtain robust standard errors (i.e. in a similar way to <code>vce(robust)</code> in <em>Stata</em>) you can include <code>robust = T</code> to the arguments:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit4 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/ppml.html">ppml</a></span>(
+    <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
+    <span class="dt">distance =</span> <span class="st">"distw"</span>,
+    <span class="dt">additional_regressors =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"rta"</span>, <span class="st">"comcur"</span>, <span class="st">"contig"</span>),
+    <span class="dt">robust =</span> <span class="ot">TRUE</span>,
+    <span class="dt">data =</span> gravity_no_zeros
+  )
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit4)</code></pre></div>
+<pre><code>## # A tibble: 5 x 5
+##   term        estimate std.error statistic       p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;
+## 1 (Intercept)   5.76       1.16      4.95  0.000000733  
+## 2 dist_log      0.0243     0.131     0.185 0.853        
+## 3 rta           1.27       0.228     5.55  0.0000000284 
+## 4 comcur        1.11       0.188     5.87  0.00000000435
+## 5 contig        1.76       0.323     5.44  0.0000000522</code></pre>
+</div>
+<div id="gamma-pseudo-maximum-likelihood-gpml" class="section level2">
+<h2 class="hasAnchor">
+<a href="#gamma-pseudo-maximum-likelihood-gpml" class="anchor"></a>Gamma Pseudo Maximum Likelihood (GPML)</h2>
+<p>The estimation method is similar to PPML, but utilizes the gamma instead of the poisson distribution, thereby implies different assumptions to the data structure and does not allow for zero trade values.</p>
+<p><span class="citation">Silva and Tenreyro (2006)</span> argue in favor of PPML instead of GPML, especially in case of heteroscedasticity, <span class="citation">Head and Mayer (2014)</span> highlight that depending on data structure there exist cases where GPML is preferable to PPML.</p>
+<p>An example of how to apply the function <code>gpml</code> to an example dataset in gravity and the resulting output is shown in the following:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit5 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gpml.html">gpml</a></span>(
+  <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
+  <span class="dt">distance =</span> <span class="st">"distw"</span>,
+  <span class="dt">additional_regressors =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"rta"</span>, <span class="st">"comcur"</span>, <span class="st">"contig"</span>),
+  <span class="dt">robust =</span> <span class="ot">TRUE</span>,
+  <span class="dt">data =</span> gravity_no_zeros
+)
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit5)</code></pre></div>
+<pre><code>## # A tibble: 5 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)    7.40      1.03       7.20 5.81e-13
+## 2 dist_log      -0.161     0.118     -1.36 1.73e- 1
+## 3 rta            1.03      0.160      6.42 1.32e-10
+## 4 comcur         0.783     0.183      4.28 1.88e- 5
+## 5 contig         1.71      0.297      5.74 9.49e- 9</code></pre>
+</div>
+<div id="negative-binomial-pseudo-maximum-likelihood-nbpml" class="section level2">
+<h2 class="hasAnchor">
+<a href="#negative-binomial-pseudo-maximum-likelihood-nbpml" class="anchor"></a>Negative Binomial Pseudo Maximum Likelihood (NBPML)</h2>
+<p>The estimation method is similar to PPML, but utilizes the negative binomial instead of the poisson distribution, thereby implies different assumptions to the data structure and does not allow for zero trade values.</p>
+<p>An example of how to apply the function <code>nbpml</code> to an example dataset in gravity and the resulting output is shown in the following:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit6 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/nbpml.html">nbpml</a></span>(
+  <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
+  <span class="dt">distance =</span> <span class="st">"distw"</span>,
+  <span class="dt">additional_regressors =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"rta"</span>, <span class="st">"comcur"</span>, <span class="st">"contig"</span>),
+  <span class="dt">robust =</span> <span class="ot">TRUE</span>,
+  <span class="dt">data =</span> gravity_no_zeros
+)
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit6)</code></pre></div>
+<pre><code>## # A tibble: 5 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)    7.40      1.03       7.20 5.81e-13
+## 2 dist_log      -0.161     0.118     -1.36 1.73e- 1
+## 3 rta            1.03      0.160      6.43 1.32e-10
+## 4 comcur         0.783     0.183      4.28 1.89e- 5
+## 5 contig         1.71      0.297      5.74 9.51e- 9</code></pre>
+</div>
+<div id="tetrads" class="section level2">
+<h2 class="hasAnchor">
+<a href="#tetrads" class="anchor"></a>Tetrads</h2>
+<p>In order to use the fixed effects method with panel data, a huge number of dummy variables has to be included into the estimation. Thus, estimating these models can lead to significant computational difficulties.</p>
+<p><span class="citation">Head, Mayer, and Ries (2010)</span> present Tetrads as an estimation method circumventing this problem. They exploit the multiplicative form of the gravity equation to form the ratio of ratios. In doing so, both MR terms drop out of the equation.</p>
+<p>An example of how to apply the function <code>tetrads</code> to an example dataset in gravity and the resulting output is shown in the following:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit8 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/tetrads.html">tetrads</a></span>(
+  <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
+  <span class="dt">distance =</span> <span class="st">"distw"</span>,
+  <span class="dt">additional_regressors =</span> <span class="st">"rta"</span>,
+  <span class="dt">code_origin =</span> <span class="st">"iso_o"</span>,
+  <span class="dt">code_destination =</span> <span class="st">"iso_d"</span>,
+  <span class="dt">filter_origin =</span> <span class="st">"CHN"</span>,
+  <span class="dt">filter_destination =</span> <span class="st">"USA"</span>,
+  <span class="dt">data =</span> gravity_no_zeros
+)
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit8)</code></pre></div>
+<pre><code>## # A tibble: 3 x 5
+##   term         estimate std.error statistic  p.value
+##   &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)    -0.400    0.0216     -18.5 1.47e-75
+## 2 dist_log_rat   -1.32     0.0231     -57.4 0.      
+## 3 rta_rat         0.883    0.0557      15.9 2.80e-56</code></pre>
+<p>In addition to robust standard errors as in the previous examples, in the case of <code>tetrads</code> you can also be interested in computing multiway variance-covariance, an it can be done by adding <code>multiway = T</code> to the arguments:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit8 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/tetrads.html">tetrads</a></span>(
+  <span class="dt">dependent_variable =</span> <span class="st">"flow"</span>,
+  <span class="dt">distance =</span> <span class="st">"distw"</span>,
+  <span class="dt">additional_regressors =</span> <span class="st">"rta"</span>,
+  <span class="dt">code_origin =</span> <span class="st">"iso_o"</span>,
+  <span class="dt">code_destination =</span> <span class="st">"iso_d"</span>,
+  <span class="dt">filter_origin =</span> <span class="st">"CHN"</span>,
+  <span class="dt">filter_destination =</span> <span class="st">"USA"</span>,
+  <span class="dt">multiway =</span> <span class="ot">TRUE</span>,
+  <span class="dt">data =</span> gravity_no_zeros
+)
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/broom/topics/reexports">tidy</a></span>(fit8)</code></pre></div>
+<pre><code>## # A tibble: 3 x 5
+##   term         estimate std.error statistic  p.value
+##   &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)    -0.400    0.0215     -18.6 3.05e-76
+## 2 dist_log_rat   -1.32     0.0247     -53.7 0.      
+## 3 rta_rat         0.883    0.0487      18.1 1.11e-72</code></pre>
 </div>
 </div>
 <div id="references" class="section level1">
@@ -302,6 +422,12 @@ MWR_{ij} = \frac{1}{N}\left(\sum_{i=1}^{N}\log D_{ij} \right)+\frac{1}{N}\left(\
 </div>
 <div id="ref-Head2014">
 <p>Head, Keith, and Thierry Mayer. 2014. “Chapter 3 - Gravity Equations: Workhorse,Toolkit, and Cookbook.” In <em>Handbook of International Economics</em>, edited by Gita Gopinath, Elhanan Helpman, and Kenneth Rogoff, 4:131–95. Handbook of International Economics. Elsevier. doi:<a href="https://doi.org/10.1016/B978-0-444-54314-1.00003-3">10.1016/B978-0-444-54314-1.00003-3</a>.</p>
+</div>
+<div id="ref-Head2010">
+<p>Head, Keith, Thierry Mayer, and John Ries. 2010. “The Erosion of Colonial Trade Linkages After Independence.” <em>Journal of International Economics</em> 81 (1): 1–14. doi:<a href="https://doi.org/10.1016/j.jinteco.2010.01.002">10.1016/j.jinteco.2010.01.002</a>.</p>
+</div>
+<div id="ref-Santos2006">
+<p>Silva, J. M. C. Santos, and Silvana Tenreyro. 2006. “The Log of Gravity.” <em>The Review of Economics and Statistics</em> 88 (4): 641–58. doi:<a href="https://doi.org/10.1162/rest.88.4.641">10.1162/rest.88.4.641</a>.</p>
 </div>
 <div id="ref-WoelwerBressleinBurgard2018">
 <p>Wölwer, Anna-Lena, Martin Breßlein, and Jan Pablo Burgard. 2018. “Gravity Models in R.” <em>Austrian Journal of Statistics</em> 47 (4): 16–35. doi:<a href="https://doi.org/10.17713/ajs.v47i4.688">10.17713/ajs.v47i4.688</a>.</p>
@@ -322,6 +448,10 @@ MWR_{ij} = \frac{1}{N}\left(\sum_{i=1}^{N}\log D_{ij} \right)+\frac{1}{N}\left(\
 <a href="#examples">Examples</a><ul class="nav nav-pills nav-stacked">
 <li><a href="#double-demeaning">Double Demeaning</a></li>
       <li><a href="#bonus-vetus">Bonus Vetus</a></li>
+      <li><a href="#poisson-pseudo-maximum-likelihood-ppml">Poisson Pseudo Maximum Likelihood (PPML)</a></li>
+      <li><a href="#gamma-pseudo-maximum-likelihood-gpml">Gamma Pseudo Maximum Likelihood (GPML)</a></li>
+      <li><a href="#negative-binomial-pseudo-maximum-likelihood-nbpml">Negative Binomial Pseudo Maximum Likelihood (NBPML)</a></li>
+      <li><a href="#tetrads">Tetrads</a></li>
       </ul>
 </li>
       <li><a href="#references">References</a></li>
